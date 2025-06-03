@@ -4,16 +4,27 @@ import { getAuth } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
-  // Replace with your Firebase config
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  databaseURL: "your-database-url",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
+  // Replace with your actual Firebase config from Firebase Console
+  apiKey: "demo-api-key",
+  authDomain: "demo-project.firebaseapp.com",
+  databaseURL: "https://demo-project-default-rtdb.firebaseio.com/",
+  projectId: "demo-project",
+  storageBucket: "demo-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef123456"
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const database = getDatabase(app);
+let app;
+let auth;
+let database;
+
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  database = getDatabase(app);
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+  console.log('Please replace the Firebase config with your actual project credentials from Firebase Console');
+}
+
+export { auth, database };

@@ -14,6 +14,7 @@ export const UserDataForm = ({ onSubmit }) => {
     placeOfBirth: '',
     mobileNumber: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -22,10 +23,24 @@ export const UserDataForm = ({ onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (isSubmitting) {
+      console.log('Form already submitting, ignoring...');
+      return;
+    }
+
     console.log('Submitting form data:', formData);
-    onSubmit(formData);
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isFormValid = formData.fullName && formData.dateOfBirth && formData.timeOfBirth && formData.placeOfBirth && formData.mobileNumber;
@@ -56,6 +71,7 @@ export const UserDataForm = ({ onSubmit }) => {
                 placeholder="Enter your complete name"
                 className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -71,6 +87,7 @@ export const UserDataForm = ({ onSubmit }) => {
                 onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                 className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -86,6 +103,7 @@ export const UserDataForm = ({ onSubmit }) => {
                 onChange={(e) => handleInputChange('timeOfBirth', e.target.value)}
                 className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -102,6 +120,7 @@ export const UserDataForm = ({ onSubmit }) => {
                 placeholder="City, State, Country"
                 className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -118,16 +137,17 @@ export const UserDataForm = ({ onSubmit }) => {
                 placeholder="+91 XXXXX XXXXX"
                 className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
                 required
+                disabled={isSubmitting}
               />
             </div>
           </div>
 
           <Button 
             type="submit" 
-            className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 text-lg font-light tracking-wide"
-            disabled={!isFormValid}
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 text-lg font-light tracking-wide disabled:opacity-50"
+            disabled={!isFormValid || isSubmitting}
           >
-            Calculate Sacred Grid
+            {isSubmitting ? 'Calculating...' : 'Calculate Sacred Grid'}
           </Button>
         </form>
       </CardContent>

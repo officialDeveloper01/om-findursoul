@@ -13,31 +13,50 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [gridData, setGridData] = useState(null);
   const [currentView, setCurrentView] = useState('form');
+  const [isLoading, setIsLoading] = useState(false);
   const { user, logout } = useAuth();
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data) => {
     console.log('Form submitted:', data);
+    setIsLoading(true);
     
     try {
-      // Calculate grid
+      // Calculate grid first
       const calculatedGrid = calculateLoshoGrid(data.dateOfBirth);
+      console.log('Grid calculated:', calculatedGrid);
       
       // Prepare data for Firebase
       const tableData = {
-        ...data,
+        fullName: data.fullName,
+        dateOfBirth: data.dateOfBirth,
+        timeOfBirth: data.timeOfBirth,
+        placeOfBirth: data.placeOfBirth,
+        mobileNumber: data.mobileNumber,
         gridData: calculatedGrid.frequencies,
         createdAt: new Date().toISOString()
       };
       
+      // Wait for user to be available
+      if (!user?.uid) {
+        console.error('User not authenticated');
+        throw new Error('User not authenticated');
+      }
+
       // Save to Firebase under user's UID
-      const userRef = ref(database, `users/${user?.uid}`);
-      await push(userRef, tableData);
+      const userRef = ref(database, `users/${user.uid}`);
+      const result = await push(userRef, tableData);
+      console.log('Data saved to Firebase with key:', result.key);
       
+      // Update UI state
       setUserData(data);
       setGridData(calculatedGrid);
       setCurrentView('grid');
+      
     } catch (error) {
       console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +106,12 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 pb-12">
+        {isLoading && (
+          <div className="text-center mb-8">
+            <div className="text-amber-600 text-lg">Calculating your sacred grid...</div>
+          </div>
+        )}
+
         {currentView === 'form' && (
           <div className="space-y-8">
             <div className="text-center mb-8">

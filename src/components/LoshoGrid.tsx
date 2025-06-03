@@ -8,23 +8,27 @@ export const LoshoGrid = ({ gridData, userData }) => {
     </div>
   );
 
-  const renderGridCell = (value, position) => {
-    const isCenter = position === 4; // Center position (0-indexed)
-    const isEmpty = !value || value === 0;
+  // Losho Grid layout: 4|9|2 / 3|5|7 / 8|1|6
+  const gridLayout = [4, 9, 2, 3, 5, 7, 8, 1, 6];
+
+  const renderGridCell = (digit, position) => {
+    const isCenter = position === 4; // Center position (5 in the grid)
+    const frequency = gridData.frequencies[digit] || 0;
+    const displayValue = frequency > 0 ? String(digit).repeat(frequency) : '';
     
     return (
       <div 
         key={position}
         className={`
-          w-16 h-16 flex items-center justify-center border-2 transition-all duration-200
+          w-20 h-20 flex items-center justify-center border-2 transition-all duration-200 text-lg font-semibold
           ${isCenter 
             ? 'bg-amber-50 border-amber-400 shadow-md' 
             : 'bg-white border-gray-300 hover:bg-gray-50'
           }
-          ${isEmpty ? 'text-gray-400' : 'text-gray-800 font-semibold'}
+          ${frequency === 0 ? 'text-gray-300' : 'text-gray-800'}
         `}
       >
-        {isEmpty ? '-' : value}
+        {frequency === 0 ? '-' : displayValue.split('').join(' ')}
       </div>
     );
   };
@@ -58,34 +62,35 @@ export const LoshoGrid = ({ gridData, userData }) => {
               {renderCornerSymbol()}
             </div>
 
-            {/* Main Grid */}
+            {/* Main 3x3 Losho Grid */}
             <div className="grid grid-cols-3 gap-1 p-8">
-              {gridData.grid.map((value, index) => renderGridCell(value, index))}
+              {gridLayout.map((digit, index) => renderGridCell(digit, index))}
             </div>
 
-            {/* Grid Legend */}
+            {/* Grid Information */}
             <div className="mt-8 text-center space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 max-w-md mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 max-w-md mx-auto">
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Number Frequencies</h4>
-                  <div className="space-y-1">
-                    {Object.entries(gridData.frequencies).map(([num, count]) => (
+                  <h4 className="font-medium text-gray-700 mb-3">Digit Frequencies</h4>
+                  <div className="space-y-2">
+                    {[1,2,3,4,5,6,7,8,9].map(num => (
                       <div key={num} className="flex justify-between">
                         <span>Number {num}:</span>
-                        <span className="font-medium">{String(count)}</span>
+                        <span className="font-medium">{String(gridData.frequencies[num] || 0)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Grid Positions</h4>
-                  <div className="grid grid-cols-3 gap-1 text-xs">
-                    {[1,2,3,4,5,6,7,8,9].map(num => (
-                      <div key={num} className="w-8 h-8 border border-gray-300 flex items-center justify-center">
+                  <h4 className="font-medium text-gray-700 mb-3">Grid Layout</h4>
+                  <div className="grid grid-cols-3 gap-1 text-xs max-w-24 mx-auto">
+                    {gridLayout.map(num => (
+                      <div key={num} className="w-6 h-6 border border-gray-300 flex items-center justify-center bg-gray-50">
                         {num}
                       </div>
                     ))}
                   </div>
+                  <p className="text-xs mt-2 text-gray-500">Traditional Losho Layout</p>
                 </div>
               </div>
             </div>

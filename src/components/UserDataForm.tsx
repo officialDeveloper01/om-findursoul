@@ -62,7 +62,7 @@ export const UserDataForm = ({ onSubmit }) => {
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth" className="flex items-center gap-2 text-gray-700">
                 <Calendar size={16} />
-                Date of Birth
+                Date of Birth (DD-MM-YYYY)
               </Label>
               <Input
                 id="dateOfBirth"

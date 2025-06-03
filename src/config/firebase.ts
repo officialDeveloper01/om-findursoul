@@ -4,14 +4,13 @@ import { getAuth } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
-  // Replace with your actual Firebase config from Firebase Console
-  apiKey: "demo-api-key",
-  authDomain: "demo-project.firebaseapp.com",
-  databaseURL: "https://demo-project-default-rtdb.firebaseio.com/",
-  projectId: "demo-project",
-  storageBucket: "demo-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyDt0CTq2JvJPBSx0JzGLdCWbjYOCDidURg",
+  authDomain: "project-om-c0c6e.firebaseapp.com",
+  projectId: "project-om-c0c6e",
+  storageBucket: "project-om-c0c6e.firebasestorage.app",
+  messagingSenderId: "250167357713",
+  appId: "1:250167357713:web:dee22e46f08f9598b0dcb0",
+  measurementId: "G-HVZ590S9VH"
 };
 
 let app;

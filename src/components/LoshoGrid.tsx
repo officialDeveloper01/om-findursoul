@@ -72,7 +72,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
                     {Object.entries(gridData.frequencies).map(([num, count]) => (
                       <div key={num} className="flex justify-between">
                         <span>Number {num}:</span>
-                        <span className="font-medium">{count}</span>
+                        <span className="font-medium">{String(count)}</span>
                       </div>
                     ))}
                   </div>

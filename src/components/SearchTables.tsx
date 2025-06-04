@@ -7,17 +7,22 @@ import { Label } from '@/components/ui/label';
 import { ref, get } from 'firebase/database';
 import { database } from '@/config/firebase';
 import { Phone, Calendar, MapPin, Clock } from 'lucide-react';
+import { LoshoGrid } from './LoshoGrid';
 
 export const SearchTables = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [selectedGrid, setSelectedGrid] = useState(null);
+  const [selectedUserData, setSelectedUserData] = useState(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSearched(true);
+    setSelectedGrid(null);
+    setSelectedUserData(null);
     
     try {
       // Search across all users for tables with matching mobile number
@@ -49,6 +54,53 @@ export const SearchTables = () => {
       setLoading(false);
     }
   };
+
+  const handleShowGrid = (result: any) => {
+    console.log('Showing grid for result:', result);
+    
+    // Prepare grid data from stored frequencies
+    const gridData = {
+      frequencies: result.gridData || {},
+      grid: [],
+      originalDate: result.dateOfBirth,
+      digits: []
+    };
+    
+    // Prepare user data
+    const userData = {
+      fullName: result.fullName,
+      dateOfBirth: result.dateOfBirth,
+      timeOfBirth: result.timeOfBirth,
+      placeOfBirth: result.placeOfBirth,
+      mobileNumber: result.mobileNumber
+    };
+    
+    setSelectedGrid(gridData);
+    setSelectedUserData(userData);
+  };
+
+  const handleBackToSearch = () => {
+    setSelectedGrid(null);
+    setSelectedUserData(null);
+  };
+
+  // If showing a grid, display it
+  if (selectedGrid && selectedUserData) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center">
+          <Button 
+            onClick={handleBackToSearch}
+            variant="outline"
+            className="mb-6"
+          >
+            ← Back to Search Results
+          </Button>
+        </div>
+        <LoshoGrid gridData={selectedGrid} userData={selectedUserData} />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -96,7 +148,7 @@ export const SearchTables = () => {
           {searchResults.length === 0 ? (
             <Card className="text-center py-8">
               <CardContent>
-                <p className="text-gray-500">No tables found for this mobile number.</p>
+                <p className="text-gray-500">No records found for this number.</p>
               </CardContent>
             </Card>
           ) : (
@@ -122,10 +174,10 @@ export const SearchTables = () => {
                       </div>
                       <div className="flex items-center justify-end">
                         <Button 
-                          onClick={() => window.open(`/grid/${result.userId}/${result.id}`, '_blank')}
+                          onClick={() => handleShowGrid(result)}
                           className="bg-amber-600 hover:bg-amber-700 text-white"
                         >
-                          View Grid
+                          Show Grid
                         </Button>
                       </div>
                     </div>

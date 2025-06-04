@@ -51,7 +51,7 @@ export const UserDataForm = ({ onSubmit }) => {
         <CardTitle className="text-2xl font-light text-gray-700">
           Birth Details
         </CardTitle>
-        <p className="text-gray-500 mt-2">
+        <p className="text-gray-500 mt-2 font-large">
           Please provide your accurate birth information for precise calculations
         </p>
       </CardHeader>
@@ -59,7 +59,7 @@ export const UserDataForm = ({ onSubmit }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="flex items-center gap-2 text-gray-700">
+              <Label htmlFor="fullName" className="flex items-center gap-2 text-gray-700 fontsize-25">
                 <User size={16} />
                 Full Name
               </Label>
@@ -76,7 +76,7 @@ export const UserDataForm = ({ onSubmit }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dateOfBirth" className="flex items-center gap-2 text-gray-700">
+              <Label htmlFor="dateOfBirth" className="flex items-center gap-2 text-gray-700 fontsize-25">
                 <Calendar size={16} />
                 Date of Birth (DD-MM-YYYY)
               </Label>
@@ -92,7 +92,7 @@ export const UserDataForm = ({ onSubmit }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="timeOfBirth" className="flex items-center gap-2 text-gray-700">
+              <Label htmlFor="timeOfBirth" className="flex items-center gap-2 text-gray-700 fontsize-25">
                 <Clock size={16} />
                 Time of Birth
               </Label>
@@ -108,7 +108,7 @@ export const UserDataForm = ({ onSubmit }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="placeOfBirth" className="flex items-center gap-2 text-gray-700">
+              <Label htmlFor="placeOfBirth" className="flex items-center gap-2 text-gray-700 fontsize-25">
                 <MapPin size={16} />
                 Place of Birth
               </Label>

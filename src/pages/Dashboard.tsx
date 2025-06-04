@@ -4,14 +4,17 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { UserDataForm } from '@/components/UserDataForm';
 import { LoshoGrid } from '@/components/LoshoGrid';
+import { NumerologyDisplay } from '@/components/NumerologyDisplay';
 import { SearchTables } from '@/components/SearchTables';
 import { calculateLoshoGrid } from '@/utils/gridCalculator';
+import { calculateAllNumerology } from '@/utils/numerologyCalculator';
 import { ref, push } from 'firebase/database';
 import { database } from '@/config/firebase';
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [gridData, setGridData] = useState(null);
+  const [numerologyData, setNumerologyData] = useState(null);
   const [currentView, setCurrentView] = useState('form');
   const [isLoading, setIsLoading] = useState(false);
   const { user, logout } = useAuth();
@@ -21,9 +24,12 @@ const Dashboard = () => {
     setIsLoading(true);
     
     try {
-      // Calculate grid first
+      // Calculate grid and numerology
       const calculatedGrid = calculateLoshoGrid(data.dateOfBirth);
+      const calculatedNumerology = calculateAllNumerology(data.dateOfBirth);
+      
       console.log('Grid calculated:', calculatedGrid);
+      console.log('Numerology calculated:', calculatedNumerology);
       
       // Prepare data for Firebase
       const tableData = {
@@ -33,6 +39,7 @@ const Dashboard = () => {
         placeOfBirth: data.placeOfBirth,
         mobileNumber: data.mobileNumber,
         gridData: calculatedGrid.frequencies,
+        numerologyData: calculatedNumerology,
         createdAt: new Date().toISOString()
       };
       
@@ -50,7 +57,8 @@ const Dashboard = () => {
       // Update UI state
       setUserData(data);
       setGridData(calculatedGrid);
-      setCurrentView('grid');
+      setNumerologyData(calculatedNumerology);
+      setCurrentView('results');
       
     } catch (error) {
       console.error('Error saving data:', error);
@@ -63,6 +71,7 @@ const Dashboard = () => {
   const handleNewEntry = () => {
     setUserData(null);
     setGridData(null);
+    setNumerologyData(null);
     setCurrentView('form');
   };
 
@@ -92,14 +101,14 @@ const Dashboard = () => {
             variant={currentView === 'form' ? 'default' : 'outline'}
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
-            New Table
+            New Analysis
           </Button>
           <Button 
             onClick={() => setCurrentView('search')}
             variant={currentView === 'search' ? 'default' : 'outline'}
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
-            Search Tables
+            Search Records
           </Button>
         </div>
       </nav>
@@ -108,7 +117,7 @@ const Dashboard = () => {
       <main className="max-w-4xl mx-auto px-4 pb-12">
         {isLoading && (
           <div className="text-center mb-8">
-            <div className="text-amber-600 text-lg">Calculating your sacred grid...</div>
+            <div className="text-amber-600 text-lg">Calculating your sacred numbers...</div>
           </div>
         )}
 
@@ -116,21 +125,21 @@ const Dashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-light text-gray-700 mb-4">
-                Create Your Sacred Losho Grid
+                Numerology & Losho Grid Analysis
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Enter your birth details to calculate your personal numerology grid based on ancient Indian traditions.
+                Enter your birth details to calculate your personal numerology and sacred grid.
               </p>
             </div>
             <UserDataForm onSubmit={handleFormSubmit} />
           </div>
         )}
 
-        {currentView === 'grid' && userData && gridData && (
+        {currentView === 'results' && userData && (gridData || numerologyData) && (
           <div className="space-y-8">
             <div className="text-center">
               <h2 className="text-3xl font-light text-gray-700 mb-2">
-                Your Sacred Losho Grid
+                Your Analysis Results
               </h2>
               <p className="text-gray-600 mb-6">
                 For {userData.fullName}
@@ -140,10 +149,20 @@ const Dashboard = () => {
                 variant="outline"
                 className="mb-8"
               >
-                Create New Grid
+                Create New Analysis
               </Button>
             </div>
-            <LoshoGrid gridData={gridData} userData={userData} />
+            
+            {numerologyData && (
+              <NumerologyDisplay 
+                numerologyData={numerologyData} 
+                userData={userData} 
+              />
+            )}
+            
+            {gridData && (
+              <LoshoGrid gridData={gridData} userData={userData} />
+            )}
           </div>
         )}
 
@@ -151,10 +170,10 @@ const Dashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-light text-gray-700 mb-4">
-                Search Existing Tables
+                Search Existing Records
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Search for previously created Losho Grids by mobile number.
+                Search for previously created analyses by mobile number.
               </p>
             </div>
             <SearchTables />

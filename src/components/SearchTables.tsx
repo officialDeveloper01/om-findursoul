@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { ref, get } from 'firebase/database';
 import { database } from '@/config/firebase';
 import { Phone, Calendar, MapPin, Clock } from 'lucide-react';
 import { LoshoGrid } from './LoshoGrid';
+import { NumerologyDisplay } from './NumerologyDisplay';
 
 export const SearchTables = () => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -15,6 +15,7 @@ export const SearchTables = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [selectedGrid, setSelectedGrid] = useState(null);
+  const [selectedNumerology, setSelectedNumerology] = useState(null);
   const [selectedUserData, setSelectedUserData] = useState(null);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -22,6 +23,7 @@ export const SearchTables = () => {
     setLoading(true);
     setSearched(true);
     setSelectedGrid(null);
+    setSelectedNumerology(null);
     setSelectedUserData(null);
     
     try {
@@ -55,8 +57,8 @@ export const SearchTables = () => {
     }
   };
 
-  const handleShowGrid = (result: any) => {
-    console.log('Showing grid for result:', result);
+  const handleShowResults = (result: any) => {
+    console.log('Showing results for:', result);
     
     // Prepare grid data from stored frequencies
     const gridData = {
@@ -76,16 +78,18 @@ export const SearchTables = () => {
     };
     
     setSelectedGrid(gridData);
+    setSelectedNumerology(result.numerologyData || null);
     setSelectedUserData(userData);
   };
 
   const handleBackToSearch = () => {
     setSelectedGrid(null);
+    setSelectedNumerology(null);
     setSelectedUserData(null);
   };
 
-  // If showing a grid, display it
-  if (selectedGrid && selectedUserData) {
+  // If showing results, display them
+  if ((selectedGrid || selectedNumerology) && selectedUserData) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="text-center">
@@ -97,7 +101,17 @@ export const SearchTables = () => {
             ← Back to Search Results
           </Button>
         </div>
-        <LoshoGrid gridData={selectedGrid} userData={selectedUserData} />
+        
+        {selectedNumerology && (
+          <NumerologyDisplay 
+            numerologyData={selectedNumerology} 
+            userData={selectedUserData} 
+          />
+        )}
+        
+        {selectedGrid && (
+          <LoshoGrid gridData={selectedGrid} userData={selectedUserData} />
+        )}
       </div>
     );
   }
@@ -132,7 +146,7 @@ export const SearchTables = () => {
               className="w-full bg-amber-600 hover:bg-amber-700 text-white"
               disabled={loading}
             >
-              {loading ? 'Searching...' : 'Search Tables'}
+              {loading ? 'Searching...' : 'Search Records'}
             </Button>
           </form>
         </CardContent>
@@ -171,13 +185,18 @@ export const SearchTables = () => {
                           <MapPin size={14} />
                           <span>{result.placeOfBirth}</span>
                         </div>
+                        {result.numerologyData && (
+                          <div className="text-sm text-amber-600 font-medium">
+                            Life Path: {result.numerologyData.lifePath}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center justify-end">
                         <Button 
-                          onClick={() => handleShowGrid(result)}
+                          onClick={() => handleShowResults(result)}
                           className="bg-amber-600 hover:bg-amber-700 text-white"
                         >
-                          Show Grid
+                          Show Analysis
                         </Button>
                       </div>
                     </div>

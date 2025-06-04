@@ -68,7 +68,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
             </div>
 
             {/* Grid Information */}
-            <div className="mt-8 text-center space-y-4">
+            {/* <div className="mt-8 text-center space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 max-w-md mx-auto">
                 <div>
                   <h4 className="font-medium text-gray-700 mb-3">Digit Frequencies</h4>
@@ -93,7 +93,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
                   <p className="text-xs mt-2 text-gray-500">Traditional Losho Layout</p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>

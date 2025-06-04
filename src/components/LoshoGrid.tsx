@@ -1,10 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const renderCornerSymbol = () => (
-    <div className="text-amber-600 text-2xl font-bold select-none">
-      卍
+    <div className="text-black text-3xl font-bold select-none">
+      卐
     </div>
   );
 
@@ -20,55 +19,56 @@ export const LoshoGrid = ({ gridData, userData }) => {
       <div 
         key={position}
         className={`
-          w-20 h-20 flex items-center justify-center border-2 transition-all duration-200 text-lg font-semibold
-          ${isCenter 
-            ? 'bg-amber-50 border-amber-400 shadow-md' 
-            : 'bg-white border-gray-300 hover:bg-gray-50'
-          }
-          ${frequency === 0 ? 'text-gray-300' : 'text-gray-800'}
+          w-20 h-20 flex items-center justify-center border-2 border-black bg-white text-lg font-bold
+          ${isCenter ? 'bg-gray-50' : ''}
         `}
       >
-        {frequency === 0 ? '-' : displayValue.split('').join(' ')}
+        {frequency === 0 ? '' : displayValue.split('').join(' ')}
       </div>
     );
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+    <div className="max-w-4xl mx-auto">
+      <Card className="shadow-xl border-0 bg-white">
         <CardHeader className="text-center pb-6">
-          <CardTitle className="text-2xl font-light text-gray-700">
+          <CardTitle className="text-3xl font-light text-gray-800">
             Sacred Losho Grid
           </CardTitle>
           <div className="space-y-1 text-gray-600">
-            <p className="font-medium">{userData.fullName}</p>
+            <p className="font-medium text-lg">{userData.fullName}</p>
             <p className="text-sm">Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}</p>
             <p className="text-sm">{userData.placeOfBirth}</p>
           </div>
         </CardHeader>
         <CardContent className="flex justify-center">
           <div className="relative">
-            {/* Corner Symbols */}
-            <div className="absolute -top-8 -left-8">
+            {/* Corner Swastika Symbols */}
+            <div className="absolute -top-12 -left-12">
               {renderCornerSymbol()}
             </div>
-            <div className="absolute -top-8 -right-8">
+            <div className="absolute -top-12 -right-12">
               {renderCornerSymbol()}
             </div>
-            <div className="absolute -bottom-8 -left-8">
+            <div className="absolute -bottom-12 -left-12">
               {renderCornerSymbol()}
             </div>
-            <div className="absolute -bottom-8 -right-8">
+            <div className="absolute -bottom-12 -right-12">
               {renderCornerSymbol()}
             </div>
 
-            {/* Main 3x3 Losho Grid */}
-            <div className="grid grid-cols-3 gap-1 p-8">
-              {gridLayout.map((digit, index) => renderGridCell(digit, index))}
+            {/* Diamond/Rotated Square Container */}
+            <div className="transform rotate-45 border-4 border-black bg-white p-2">
+              {/* Main 3x3 Losho Grid - Counter-rotate to keep numbers upright */}
+              <div className="transform -rotate-45">
+                <div className="grid grid-cols-3 gap-0">
+                  {gridLayout.map((digit, index) => renderGridCell(digit, index))}
+                </div>
+              </div>
             </div>
 
             {/* Grid Information */}
-            {/* <div className="mt-8 text-center space-y-4">
+            <div className="mt-16 text-center space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 max-w-md mx-auto">
                 <div>
                   <h4 className="font-medium text-gray-700 mb-3">Digit Frequencies</h4>
@@ -93,7 +93,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
                   <p className="text-xs mt-2 text-gray-500">Traditional Losho Layout</p>
                 </div>
               </div>
-            </div> */}
+            </div>
           </div>
         </CardContent>
       </Card>

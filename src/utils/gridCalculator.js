@@ -1,4 +1,3 @@
-
 export const calculateLoshoGrid = (dateOfBirth) => {
   console.log('Calculating Losho Grid for date:', dateOfBirth);
   

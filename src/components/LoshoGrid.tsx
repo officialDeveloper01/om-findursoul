@@ -2,25 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const renderCornerSymbol = () => (
-    <div className="text-black text-3xl font-bold select-none">
+    <div className="text-black text-3xl md:text-4xl font-bold select-none">
       卐
     </div>
   );
 
-  // Losho Grid layout: 4|9|2 / 3|5|7 / 8|1|6
   const gridLayout = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 
-  const renderGridCell = (digit, position) => {
-    const isCenter = position === 4; // Center position (5 in the grid)
+  const renderGridCell = (digit: number, position: number) => {
+    const isCenter = position === 4;
     const frequency = gridData.frequencies[digit] || 0;
     const displayValue = frequency > 0 ? String(digit).repeat(frequency) : '';
-    
+
     return (
-      <div 
+      <div
         key={position}
         className={`
-          w-20 h-20 flex items-center justify-center border-2 border-black bg-white text-lg font-bold
-          ${isCenter ? 'bg-gray-50' : ''}
+          w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28
+          flex items-center justify-center border-2 border-black bg-white 
+          text-lg md:text-xl font-bold text-center
+          ${isCenter ? 'bg-gray-100' : ''}
         `}
       >
         {frequency === 0 ? '' : displayValue.split('').join(' ')}
@@ -29,69 +30,41 @@ export const LoshoGrid = ({ gridData, userData }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card className="shadow-xl border-0 bg-white">
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      <Card className="shadow-xl border border-gray-200 bg-white rounded-xl relative overflow-visible">
         <CardHeader className="text-center pb-6">
-          <CardTitle className="text-3xl font-light text-gray-800">
+          <CardTitle className="text-3xl md:text-4xl font-light text-gray-800">
             Sacred Losho Grid
           </CardTitle>
-          <div className="space-y-1 text-gray-600">
-            <p className="font-medium text-lg">{userData.fullName}</p>
-            <p className="text-sm">Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}</p>
-            <p className="text-sm">{userData.placeOfBirth}</p>
+          <div className="space-y-1 text-gray-600 mt-2">
+            <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>
+            <p className="text-sm md:text-base">
+              Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}
+            </p>
+            <p className="text-sm md:text-base">{userData.placeOfBirth}</p>
           </div>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <div className="relative">
-            {/* Corner Swastika Symbols */}
-            <div className="absolute -top-12 -left-12">
-              {renderCornerSymbol()}
-            </div>
-            <div className="absolute -top-12 -right-12">
-              {renderCornerSymbol()}
-            </div>
-            <div className="absolute -bottom-12 -left-12">
-              {renderCornerSymbol()}
-            </div>
-            <div className="absolute -bottom-12 -right-12">
-              {renderCornerSymbol()}
-            </div>
 
-            {/* Diamond/Rotated Square Container */}
-            <div className="transform rotate-45 border-4 border-black bg-white p-2">
-              {/* Main 3x3 Losho Grid - Counter-rotate to keep numbers upright */}
-              <div className="transform -rotate-45">
-                <div className="grid grid-cols-3 gap-0">
-                  {gridLayout.map((digit, index) => renderGridCell(digit, index))}
-                </div>
-              </div>
-            </div>
+        <CardContent className="flex justify-center items-center relative py-16">
+          {/* Swastik Corner Symbols */}
+          <div className="absolute top-0 left-0 p-10">
+            {renderCornerSymbol()}
+          </div>
+          <div className="absolute top-0 right-0 p-10">
+            {renderCornerSymbol()}
+          </div>
+          <div className="absolute bottom-0 left-0 p-10">
+            {renderCornerSymbol()}
+          </div>
+          <div className="absolute bottom-0 right-0 p-10">
+            {renderCornerSymbol()}
+          </div>
 
-            {/* Grid Information */}
-            <div className="mt-16 text-center space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 max-w-md mx-auto">
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-3">Digit Frequencies</h4>
-                  <div className="space-y-2">
-                    {[1,2,3,4,5,6,7,8,9].map(num => (
-                      <div key={num} className="flex justify-between">
-                        <span>Number {num}:</span>
-                        <span className="font-medium">{String(gridData.frequencies[num] || 0)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-3">Grid Layout</h4>
-                  <div className="grid grid-cols-3 gap-1 text-xs max-w-24 mx-auto">
-                    {gridLayout.map(num => (
-                      <div key={num} className="w-6 h-6 border border-gray-300 flex items-center justify-center bg-gray-50">
-                        {num}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs mt-2 text-gray-500">Traditional Losho Layout</p>
-                </div>
+          {/* Losho Grid */}
+          <div className="transform rotate-45 border-4 border-black bg-white p-4 md:p-6">
+            <div className="transform -rotate-45">
+              <div className="grid grid-cols-3 gap-0">
+                {gridLayout.map((digit, index) => renderGridCell(digit, index))}
               </div>
             </div>
           </div>

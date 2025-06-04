@@ -62,7 +62,7 @@ export const SearchTables = () => {
     
     // Prepare grid data from stored frequencies
     const gridData = {
-      frequencies: result.gridData || {},
+      frequencies: result.gridData || result.numerologyData?.loshuGrid || {},
       grid: [],
       originalDate: result.dateOfBirth,
       digits: []

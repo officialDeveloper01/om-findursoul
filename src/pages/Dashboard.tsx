@@ -24,21 +24,21 @@ const Dashboard = () => {
     setIsLoading(true);
     
     try {
-      // Calculate grid and numerology
+      // Calculate grid and numerology using Indian system
       const calculatedGrid = calculateLoshoGrid(data.dateOfBirth);
       const calculatedNumerology = calculateAllNumerology(data.dateOfBirth);
       
       console.log('Grid calculated:', calculatedGrid);
       console.log('Numerology calculated:', calculatedNumerology);
       
-      // Prepare data for Firebase
+      // Prepare data for Firebase with Indian numerology structure
       const tableData = {
         fullName: data.fullName,
         dateOfBirth: data.dateOfBirth,
         timeOfBirth: data.timeOfBirth,
         placeOfBirth: data.placeOfBirth,
         mobileNumber: data.mobileNumber,
-        gridData: calculatedGrid.frequencies,
+        gridData: calculatedNumerology.loshuGrid, // Use the loshu grid from numerology
         numerologyData: calculatedNumerology,
         createdAt: new Date().toISOString()
       };
@@ -54,9 +54,16 @@ const Dashboard = () => {
       const result = await push(userRef, tableData);
       console.log('Data saved to Firebase with key:', result.key);
       
-      // Update UI state
+      // Update UI state - prepare grid data in expected format
+      const gridDataForDisplay = {
+        frequencies: calculatedNumerology.loshuGrid,
+        grid: [],
+        originalDate: data.dateOfBirth,
+        digits: []
+      };
+      
       setUserData(data);
-      setGridData(calculatedGrid);
+      setGridData(gridDataForDisplay);
       setNumerologyData(calculatedNumerology);
       setCurrentView('results');
       

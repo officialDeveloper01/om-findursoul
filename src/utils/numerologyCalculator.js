@@ -2,8 +2,8 @@
 export const calculateLifePath = (dateOfBirth) => {
   console.log('Calculating Life Path for date:', dateOfBirth);
   
-  // Extract digits from date (DD-MM-YYYY format)
-  const dateString = dateOfBirth.replace(/-/g, '');
+  // Extract digits from date (DD-MM-YYYY or DD/MM/YYYY format)
+  const dateString = dateOfBirth.replace(/[-/]/g, '');
   const digits = dateString.split('').map(Number);
   
   console.log('Extracted digits for Life Path:', digits);
@@ -22,7 +22,7 @@ export const calculateLifePath = (dateOfBirth) => {
 };
 
 export const calculateConductor = (lifePath) => {
-  // For now, Conductor Number is same as Life Path Number
+  // Conductor Number is same as Life Path Number
   return lifePath;
 };
 
@@ -34,11 +34,10 @@ export const calculateConductorSeries = (conductorBase) => {
   console.log('Calculating Conductor Series for base:', conductorBase);
   
   const series = [];
-  let current = conductorBase;
   
   // First, go down by subtracting 9 until we hit negative
   const downwardNumbers = [];
-  let temp = current - 9;
+  let temp = conductorBase - 9;
   while (temp >= 0) {
     downwardNumbers.unshift(temp);
     temp -= 9;
@@ -48,10 +47,10 @@ export const calculateConductorSeries = (conductorBase) => {
   series.push(...downwardNumbers);
   
   // Add the base number
-  series.push(current);
+  series.push(conductorBase);
   
   // Then go up by adding 9 until we have 11 total numbers
-  temp = current + 9;
+  temp = conductorBase + 9;
   while (series.length < 11) {
     series.push(temp);
     temp += 9;
@@ -61,17 +60,38 @@ export const calculateConductorSeries = (conductorBase) => {
   return series.slice(0, 11); // Ensure exactly 11 numbers
 };
 
+export const calculateLoshuGrid = (dateOfBirth) => {
+  console.log('Calculating Loshu Grid for date:', dateOfBirth);
+  
+  // Extract all non-zero digits from DOB
+  const dateString = dateOfBirth.replace(/[-/]/g, '');
+  const digits = dateString.split('').map(Number).filter(digit => digit !== 0);
+  
+  console.log('Non-zero digits for Loshu Grid:', digits);
+  
+  // Count frequency of each digit 1-9
+  const frequencies = {};
+  for (let i = 1; i <= 9; i++) {
+    frequencies[i] = digits.filter(digit => digit === i).length;
+  }
+  
+  console.log('Digit frequencies:', frequencies);
+  return frequencies;
+};
+
 export const calculateAllNumerology = (dateOfBirth) => {
   const lifePath = calculateLifePath(dateOfBirth);
   const conductor = calculateConductor(lifePath);
   const conductorBase = calculateConductorBase(conductor);
   const conductorSeries = calculateConductorSeries(conductorBase);
+  const loshuGrid = calculateLoshuGrid(dateOfBirth);
   
   return {
     dob: dateOfBirth,
     lifePath,
     conductor,
     conductorBase,
-    conductorSeries
+    conductorSeries,
+    loshuGrid
   };
 };

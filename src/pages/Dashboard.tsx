@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,10 +24,8 @@ const Dashboard = () => {
     
     try {
       // Calculate grid and numerology using Indian system
-      const calculatedGrid = calculateLoshoGrid(data.dateOfBirth);
       const calculatedNumerology = calculateAllNumerology(data.dateOfBirth);
       
-      console.log('Grid calculated:', calculatedGrid);
       console.log('Numerology calculated:', calculatedNumerology);
       
       // Prepare data for Firebase with Indian numerology structure
@@ -132,7 +129,7 @@ const Dashboard = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-light text-gray-700 mb-4">
-                Numerology & Losho Grid Analysis
+                Numerology & Lo Shu Grid Analysis
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 Enter your birth details to calculate your personal numerology and sacred grid.
@@ -160,15 +157,17 @@ const Dashboard = () => {
               </Button>
             </div>
             
+            {/* Show Lo Shu Grid FIRST */}
+            {gridData && (
+              <LoshoGrid gridData={gridData} userData={userData} />
+            )}
+            
+            {/* Then show Numerology Data */}
             {numerologyData && (
               <NumerologyDisplay 
                 numerologyData={numerologyData} 
                 userData={userData} 
               />
-            )}
-            
-            {gridData && (
-              <LoshoGrid gridData={gridData} userData={userData} />
             )}
           </div>
         )}

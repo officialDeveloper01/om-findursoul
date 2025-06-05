@@ -42,6 +42,8 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
           {/* Conductor Series with Bottom Values */}
           <div className="space-y-4">
             <h4 className="text-lg font-medium text-gray-700 text-center">Conductor Series</h4>
+            
+            {/* Top row - Conductor numbers */}
             <div className="grid grid-cols-6 md:grid-cols-11 gap-2">
               {numerologyData.conductorSeries.map((number, index) => (
                 <div 
@@ -55,16 +57,26 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
                   `}
                 >
                   <div className="text-lg">{number}</div>
-                  {numerologyData.bottomValues && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      /{numerologyData.bottomValues[index]}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
+            
+            {/* Bottom row - Bottom values */}
+            {numerologyData.bottomValues && (
+              <div className="grid grid-cols-6 md:grid-cols-11 gap-2">
+                {numerologyData.bottomValues.map((bottomValue, index) => (
+                  <div 
+                    key={index}
+                    className="p-2 text-center rounded-md border bg-gray-50 border-gray-300 text-gray-600 shadow-sm"
+                  >
+                    <div className="text-sm font-medium">{bottomValue}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
             <p className="text-sm text-gray-500 text-center">
-              Base number ({numerologyData.conductorBase}) is highlighted. Format: Series/Bottom
+              Base number ({numerologyData.conductorBase}) is highlighted. Bottom values shown below each conductor number.
             </p>
           </div>
         </CardContent>

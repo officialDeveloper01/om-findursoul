@@ -69,21 +69,31 @@ export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
   const month = parts[1];
   const year = parts[2];
   
-  // Calculate base values
-  const dayMonthSum = (day + month).split('').map(Number).reduce((acc, digit) => acc + digit, 0);
-  const dayMonthReduced = dayMonthSum > 9 ? dayMonthSum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : dayMonthSum;
+  // Helper function to reduce sum to single digit
+  const reduceToSingle = (sum) => {
+    while (sum > 9) {
+      sum = sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
+    }
+    return sum;
+  };
   
-  const daySum = day.split('').map(Number).reduce((acc, digit) => acc + digit, 0);
-  const dayReduced = daySum > 9 ? daySum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : daySum;
+  // Calculate base values
+  const dayMonthDigits = (day + month).split('').map(Number);
+  const dayMonthSum = dayMonthDigits.reduce((acc, digit) => acc + digit, 0);
+  const dayMonthReduced = reduceToSingle(dayMonthSum); // Index 0-3: 2
+  
+  const dayDigits = day.split('').map(Number);
+  const daySum = dayDigits.reduce((acc, digit) => acc + digit, 0);
+  const dayReduced = reduceToSingle(daySum); // Index 4: 8
   
   const monthYearDigits = (month + year).split('').map(Number);
   const monthYearSum = monthYearDigits.reduce((acc, digit) => acc + digit, 0);
-  const monthYearReduced = monthYearSum > 9 ? monthYearSum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : monthYearSum;
+  const monthYearReduced = reduceToSingle(monthYearSum); // Index 6-10: 3
   
   console.log('Base calculations:', {
-    dayMonthReduced,
-    dayReduced,
-    monthYearReduced
+    dayMonthReduced, // 2
+    dayReduced, // 8
+    monthYearReduced // 3
   });
   
   const bottomValues = [];
@@ -91,19 +101,18 @@ export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
   conductorSeries.forEach((number, index) => {
     let bottomValue;
     
-    if (index < conductorSeries.length - 6) {
-      // Before & Base positions: Sum of day + month digits
+    if (index <= 3) {
+      // Index 0-3: Day + Month digits
       bottomValue = dayMonthReduced;
-    } else if (index === conductorSeries.length - 6) {
-      // Just After position: Sum of day digits only
+    } else if (index === 4) {
+      // Index 4: Day only
       bottomValue = dayReduced;
-    } else if (index === conductorSeries.length - 5) {
-      // Next Number: Sum of previous two bottom values
-      const prevValue = bottomValues[index - 1] || dayMonthReduced;
-      const sum = prevValue + dayReduced;
-      bottomValue = sum > 9 ? sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : sum;
+    } else if (index === 5) {
+      // Index 5: Sum of index 3 and 4
+      const sum = dayMonthReduced + dayReduced;
+      bottomValue = reduceToSingle(sum);
     } else {
-      // Remaining positions: Sum of month + year digits
+      // Index 6-10: Month + Year digits
       bottomValue = monthYearReduced;
     }
     

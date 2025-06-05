@@ -1,3 +1,4 @@
+
 // Normalize a date string to DDMMYYYY (removes separators)
 export const normalizeDate = (dateStr) => {
   if (!dateStr) return '';
@@ -44,8 +45,8 @@ export const calculateLoshoGrid = (dateOfBirth) => {
   };
 };
 
-// Life Path Number (from DD only)
-export const calculateLifePath = (dateOfBirth) => {
+// Driver Number (from DD only)
+export const calculateDriver = (dateOfBirth) => {
   const normalized = normalizeDate(dateOfBirth);
   const day = normalized.slice(0, 2); // Get DD
   const digits = day.split('').map(Number);
@@ -56,14 +57,81 @@ export const calculateLifePath = (dateOfBirth) => {
     sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
   }
 
-  return sum;
+  return sum || 0; // Fallback to 0 if undefined
 };
 
-// Conductor Number (sum of all digits)
+// Conductor Number (sum of all digits in full DOB)
 export const calculateConductor = (dateOfBirth) => {
   const normalized = normalizeDate(dateOfBirth);
   const digits = normalized.split('').map(Number);
-  return digits.reduce((sum, d) => sum + d, 0);
+  let sum = digits.reduce((sum, d) => sum + d, 0);
+
+  // Reduce to single digit (unless master numbers 11, 22, 33)
+  while (sum > 9 && ![11, 22, 33].includes(sum)) {
+    sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
+  }
+
+  return sum || 0; // Fallback to 0 if undefined
+};
+
+// Calculate Conductor Base
+export const calculateConductorBase = (conductor) => {
+  return Math.max(1, 36 - conductor); // Ensure it's never 0 or negative
+};
+
+// Calculate Conductor Series (11 numbers)
+export const calculateConductorSeries = (conductorBase) => {
+  const series = [];
+  
+  // Generate 11 numbers centered around base with ±9 increments
+  for (let i = -5; i <= 5; i++) {
+    let value = conductorBase + (i * 9);
+    
+    // Ensure no zeros in the series
+    while (value <= 0) {
+      value += 9;
+    }
+    
+    series.push(value);
+  }
+  
+  return series;
+};
+
+// Calculate Bottom Values for Conductor Series
+export const calculateBottomValues = (dateOfBirth) => {
+  const normalized = normalizeDate(dateOfBirth);
+  
+  // Extract day, month, year digits
+  const dayDigits = normalized.slice(0, 2).split('').map(Number);
+  const monthDigits = normalized.slice(2, 4).split('').map(Number);
+  const yearDigits = normalized.slice(4, 8).split('').map(Number);
+  
+  // Calculate component sums
+  const daySum = dayDigits.reduce((sum, d) => sum + d, 0);
+  const monthSum = monthDigits.reduce((sum, d) => sum + d, 0);
+  const yearSum = yearDigits.reduce((sum, d) => sum + d, 0);
+  
+  // Reduce to single digits
+  const reduceSingleDigit = (num) => {
+    while (num > 9) {
+      num = num.toString().split('').map(Number).reduce((a, b) => a + b, 0);
+    }
+    return num || 0;
+  };
+  
+  // Calculate bottom values according to the logic
+  const dayMonthSum = reduceSingleDigit(daySum + monthSum);  // For indices 0-3
+  const dayOnly = reduceSingleDigit(daySum);                // For index 4
+  const combined = reduceSingleDigit(dayMonthSum + dayOnly); // For index 5
+  const monthYearSum = reduceSingleDigit(monthSum + yearSum); // For indices 6-10
+  
+  return [
+    dayMonthSum, dayMonthSum, dayMonthSum, dayMonthSum, // indices 0-3
+    dayOnly,                                             // index 4
+    combined,                                            // index 5
+    monthYearSum, monthYearSum, monthYearSum, monthYearSum, monthYearSum // indices 6-10
+  ];
 };
 
 // Format date to DD/MM/YYYY
@@ -77,10 +145,21 @@ export const formatDateToIndian = (date) => {
 
 // Combined calculator
 export const calculateAllNumerology = (dateOfBirth) => {
+  const loshuGrid = calculateLoshoGrid(dateOfBirth);
+  const driver = calculateDriver(dateOfBirth);
+  const conductor = calculateConductor(dateOfBirth);
+  const conductorBase = calculateConductorBase(conductor);
+  const conductorSeries = calculateConductorSeries(conductorBase);
+  const bottomValues = calculateBottomValues(dateOfBirth);
+  
   return {
-    losho: calculateLoshoGrid(dateOfBirth),
-    lifePath: calculateLifePath(dateOfBirth),
-    conductor: calculateConductor(dateOfBirth),
-    formattedDate: formatDateToIndian(dateOfBirth)
+    loshuGrid: loshuGrid.frequencies,
+    driver: driver,
+    conductor: conductor,
+    conductorBase: conductorBase,
+    conductorSeries: conductorSeries,
+    bottomValues: bottomValues,
+    formattedDate: formatDateToIndian(dateOfBirth),
+    dob: dateOfBirth
   };
 };

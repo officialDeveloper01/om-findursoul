@@ -20,22 +20,22 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Life Path Number */}
+          {/* Driver Number */}
           <div className="text-center p-6 bg-amber-50 rounded-lg border border-amber-200">
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Life Path Number</h3>
-            <div className="text-4xl font-bold text-amber-600">{numerologyData.lifePath}</div>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Driver Number</h3>
+            <div className="text-4xl font-bold text-amber-600">{numerologyData.driver || 0}</div>
           </div>
 
           {/* Conductor Details */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <h4 className="text-md font-medium text-gray-700 mb-2">Conductor Number</h4>
-              <div className="text-2xl font-bold text-gray-800">{numerologyData.conductor}</div>
+              <div className="text-2xl font-bold text-gray-800">{numerologyData.conductor || 0}</div>
             </div>
             
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <h4 className="text-md font-medium text-gray-700 mb-2">Conductor Base</h4>
-              <div className="text-2xl font-bold text-gray-800">{numerologyData.conductorBase}</div>
+              <div className="text-2xl font-bold text-gray-800">{numerologyData.conductorBase || 0}</div>
             </div>
           </div>
 
@@ -45,7 +45,7 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
             
             {/* Top row - Conductor numbers */}
             <div className="grid grid-cols-6 md:grid-cols-11 gap-2">
-              {numerologyData.conductorSeries.map((number, index) => (
+              {(numerologyData.conductorSeries || []).map((number, index) => (
                 <div 
                   key={index}
                   className={`
@@ -56,7 +56,7 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
                     }
                   `}
                 >
-                  <div className="text-lg">{number}</div>
+                  <div className="text-lg">{number || 0}</div>
                 </div>
               ))}
             </div>
@@ -69,14 +69,14 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
                     key={index}
                     className="p-2 text-center rounded-md border bg-gray-50 border-gray-300 text-gray-600 shadow-sm"
                   >
-                    <div className="text-sm font-medium">{bottomValue}</div>
+                    <div className="text-sm font-medium">{bottomValue || 0}</div>
                   </div>
                 ))}
               </div>
             )}
             
             <p className="text-sm text-gray-500 text-center">
-              Base number ({numerologyData.conductorBase}) is highlighted. Bottom values shown below each conductor number.
+              Base number ({numerologyData.conductorBase || 0}) is highlighted. Bottom values shown below each conductor number.
             </p>
           </div>
         </CardContent>

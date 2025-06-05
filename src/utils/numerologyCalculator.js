@@ -1,55 +1,72 @@
+// Utility: Normalize any input date string to DD/MM/YYYY
+const normalizeDateDDMMYYYY = (dateStr) => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    // ISO format YYYY-MM-DD -> DD/MM/YYYY
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  }
+  // Assume already DD/MM/YYYY or similar with slashes or dashes
+  // Replace dashes with slashes for uniformity
+  if (dateStr.includes('-')) {
+    return dateStr.replace(/-/g, '/');
+  }
+  return dateStr;
+};
 
+// Reduce any number to a single digit unless it's master number 11, 22, or 33
+const reduceToSingle = (num) => {
+  while (num > 9 && num !== 11 && num !== 22 && num !== 33) {
+    num = num
+      .toString()
+      .split('')
+      .map(Number)
+      .reduce((a, b) => a + b, 0);
+  }
+  return num;
+};
+
+// Calculate Life Path Number
 export const calculateLifePath = (dateOfBirth) => {
   console.log('Calculating Life Path for date:', dateOfBirth);
   
-  // Extract digits from date (DD-MM-YYYY or DD/MM/YYYY format)
-  const dateString = dateOfBirth.replace(/[-/]/g, '');
-  const digits = dateString.split('').map(Number);
+  const normalizedDOB = normalizeDateDDMMYYYY(dateOfBirth);
+  const digits = normalizedDOB.replace(/\D/g, '').split('').map(Number);
   
   console.log('Extracted digits for Life Path:', digits);
   
-  // Sum all digits
   let sum = digits.reduce((acc, digit) => acc + digit, 0);
   console.log('Initial sum:', sum);
   
-  // Reduce to single digit (unless 11, 22, 33 - master numbers)
-  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-    sum = sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
-    console.log('Reduced sum:', sum);
-  }
+  sum = reduceToSingle(sum);
+  console.log('Final Life Path Number:', sum);
   
   return sum;
 };
 
-export const calculateConductor = (lifePath) => {
-  // Conductor Number is same as Life Path Number
-  return lifePath;
-};
+// Conductor number is same as Life Path
+export const calculateConductor = (lifePath) => lifePath;
 
-export const calculateConductorBase = (conductor) => {
-  return 36 - conductor;
-};
+// Calculate conductor base number = 36 - conductor
+export const calculateConductorBase = (conductor) => 36 - conductor;
 
+// Generate conductor series: 11 numbers around conductor base stepping by 9
 export const calculateConductorSeries = (conductorBase) => {
   console.log('Calculating Conductor Series for base:', conductorBase);
   
   const series = [];
   
-  // First, go down by subtracting 9 until we hit negative or 0
-  const downwardNumbers = [];
+  // Downward numbers by subtracting 9 until > 0
   let temp = conductorBase - 9;
-  while (temp > 0) {  // Exclude 0 completely
+  const downwardNumbers = [];
+  while (temp > 0) {
     downwardNumbers.unshift(temp);
     temp -= 9;
   }
   
-  // Add downward numbers to series
   series.push(...downwardNumbers);
-  
-  // Add the base number
   series.push(conductorBase);
   
-  // Then go up by adding 9 until we have 11 total numbers
+  // Upward numbers by adding 9 until length 11
   temp = conductorBase + 9;
   while (series.length < 11) {
     series.push(temp);
@@ -57,91 +74,87 @@ export const calculateConductorSeries = (conductorBase) => {
   }
   
   console.log('Generated Conductor Series:', series);
-  return series.slice(0, 11); // Ensure exactly 11 numbers
+  return series.slice(0, 11);
 };
 
+// Calculate Bottom Values Array (length 11)
 export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
-  console.log('Calculating bottom values for:', dateOfBirth, conductorSeries);
+  console.log('Original date input:', dateOfBirth);
   
-  // Parse DOB to extract day, month, year
-  const parts = dateOfBirth.split(/[-/]/);
-  const day = parts[0];
-  const month = parts[1];
-  const year = parts[2];
+  const normalizedDOB = normalizeDateDDMMYYYY(dateOfBirth);
+  console.log('Normalized date:', normalizedDOB);
   
-  // Helper function to reduce sum to single digit
-  const reduceToSingle = (sum) => {
-    while (sum > 9) {
-      sum = sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
+  const [day, month, year] = normalizedDOB.split('/');
+  
+  // Helper to reduce a number to a single digit
+  const reduceSimple = (num) => {
+    while (num > 9) {
+      num = num
+        .toString()
+        .split('')
+        .map(Number)
+        .reduce((a, b) => a + b, 0);
     }
-    return sum;
+    return num;
   };
   
-  // Calculate base values
-  const dayMonthDigits = (day + month).split('').map(Number);
-  const dayMonthSum = dayMonthDigits.reduce((acc, digit) => acc + digit, 0);
-  const dayMonthReduced = reduceToSingle(dayMonthSum); // Index 0-3: 2
+  // day+month reduced value (used for indexes 0-3)
+  const dayMonthSum = (day + month)
+    .split('')
+    .map(Number)
+    .reduce((a, b) => a + b, 0);
+  const dayMonthReduced = reduceSimple(dayMonthSum);
   
-  const dayDigits = day.split('').map(Number);
-  const daySum = dayDigits.reduce((acc, digit) => acc + digit, 0);
-  const dayReduced = reduceToSingle(daySum); // Index 4: 8
+  // day reduced value (index 4)
+  const daySum = day
+    .split('')
+    .map(Number)
+    .reduce((a, b) => a + b, 0);
+  const dayReduced = reduceSimple(daySum);
   
-  const monthYearDigits = (month + year).split('').map(Number);
-  const monthYearSum = monthYearDigits.reduce((acc, digit) => acc + digit, 0);
-  const monthYearReduced = reduceToSingle(monthYearSum); // Index 6-10: 3
+  // month+year reduced value (indexes 6-10)
+  const monthYearSum = (month + year)
+    .split('')
+    .map(Number)
+    .reduce((a, b) => a + b, 0);
+  const monthYearReduced = reduceSimple(monthYearSum);
   
-  console.log('Base calculations:', {
-    dayMonthReduced, // 2
-    dayReduced, // 8
-    monthYearReduced // 3
-  });
+  // index 5 is sum of dayMonthReduced + dayReduced reduced
+  const fifthValue = reduceSimple(dayMonthReduced + dayReduced);
   
-  const bottomValues = [];
-  
-  conductorSeries.forEach((number, index) => {
-    let bottomValue;
-    
-    if (index <= 3) {
-      // Index 0-3: Day + Month digits
-      bottomValue = dayMonthReduced;
-    } else if (index === 4) {
-      // Index 4: Day only
-      bottomValue = dayReduced;
-    } else if (index === 5) {
-      // Index 5: Sum of index 3 and 4
-      const sum = dayMonthReduced + dayReduced;
-      bottomValue = reduceToSingle(sum);
-    } else {
-      // Index 6-10: Month + Year digits
-      bottomValue = monthYearReduced;
-    }
-    
-    bottomValues.push(bottomValue);
-  });
+  // Build bottom values array with 11 values
+  // conductorSeries parameter can be used if needed, currently not used here
+  const bottomValues = [
+    dayMonthReduced, dayMonthReduced, dayMonthReduced, dayMonthReduced, // 0-3
+    dayReduced,                                                      // 4
+    fifthValue,                                                     // 5
+    monthYearReduced, monthYearReduced, monthYearReduced, monthYearReduced, monthYearReduced // 6-10
+  ];
   
   console.log('Calculated bottom values:', bottomValues);
   return bottomValues;
 };
 
+// Calculate Loshu Grid frequencies for digits 1-9
 export const calculateLoshuGrid = (dateOfBirth) => {
   console.log('Calculating Loshu Grid for date:', dateOfBirth);
   
-  // Extract all non-zero digits from DOB
-  const dateString = dateOfBirth.replace(/[-/]/g, '');
-  const digits = dateString.split('').map(Number).filter(digit => digit !== 0);
+  const normalizedDOB = normalizeDateDDMMYYYY(dateOfBirth);
+  // Remove non-digits, then split digits, filter out zeros
+  const digits = normalizedDOB.replace(/\D/g, '').split('').map(Number).filter(d => d !== 0);
   
   console.log('Non-zero digits for Loshu Grid:', digits);
   
-  // Count frequency of each digit 1-9
   const frequencies = {};
   for (let i = 1; i <= 9; i++) {
-    frequencies[i] = digits.filter(digit => digit === i).length;
+    frequencies[i] = digits.filter(d => d === i).length;
   }
   
   console.log('Digit frequencies:', frequencies);
   return frequencies;
 };
 
+// Main function to calculate all numerology values at once
 export const calculateAllNumerology = (dateOfBirth) => {
   const lifePath = calculateLifePath(dateOfBirth);
   const conductor = calculateConductor(lifePath);

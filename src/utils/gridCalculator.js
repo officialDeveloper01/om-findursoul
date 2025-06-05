@@ -1,36 +1,51 @@
 export const calculateLoshoGrid = (dateOfBirth) => {
   console.log('Calculating Losho Grid for date:', dateOfBirth);
   
-  // Extract digits from date (DD-MM-YYYY format)
-  const dateString = dateOfBirth.replace(/-/g, '');
-  const digits = dateString.split('').map(Number);
-  
+  // Normalize input date string:
+  // Converts YYYY-MM-DD to DDMMYYYY,
+  // Removes separators from DD/MM/YYYY or DD-MM-YYYY,
+  // Else strips non-digit characters
+  const normalizeDate = (dateStr) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [year, month, day] = dateStr.split('-');
+      return day + month + year;  // DDMMYYYY as string without separator
+    } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      return dateStr.split('/').join('');
+    } else if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      return dateStr.split('-').join('');
+    } else {
+      return dateStr.replace(/\D/g, '');
+    }
+  };
+
+  const normalizedDateString = normalizeDate(dateOfBirth);
+  console.log('Normalized date string:', normalizedDateString);
+
+  const digits = normalizedDateString.split('').map(Number);
   console.log('Extracted digits:', digits);
-  
-  // Count frequency of each digit (1-9)
+
+  // Count frequency of digits 1-9
   const frequencies = {};
   for (let i = 1; i <= 9; i++) {
     frequencies[i] = 0;
   }
-  
   digits.forEach(digit => {
     if (digit >= 1 && digit <= 9) {
       frequencies[digit]++;
     }
   });
-  
+
   console.log('Digit frequencies:', frequencies);
-  
-  // Create 3x3 grid based on traditional Losho arrangement
-  // Traditional arrangement: 1-2-3 / 4-5-6 / 7-8-9
+
+  // Build grid in traditional Losho order (1 to 9)
   const grid = [
-    frequencies[1] || 0, frequencies[2] || 0, frequencies[3] || 0,
-    frequencies[4] || 0, frequencies[5] || 0, frequencies[6] || 0,
-    frequencies[7] || 0, frequencies[8] || 0, frequencies[9] || 0
+    frequencies[1], frequencies[2], frequencies[3],
+    frequencies[4], frequencies[5], frequencies[6],
+    frequencies[7], frequencies[8], frequencies[9]
   ];
-  
+
   console.log('Generated grid:', grid);
-  
+
   return {
     grid,
     frequencies,
@@ -39,7 +54,7 @@ export const calculateLoshoGrid = (dateOfBirth) => {
   };
 };
 
-// Additional utility functions for future use
+// Utility function: format date to Indian DD/MM/YYYY
 export const formatDateToIndian = (date) => {
   return new Date(date).toLocaleDateString('en-IN', {
     day: '2-digit',
@@ -48,11 +63,28 @@ export const formatDateToIndian = (date) => {
   });
 };
 
+// Life Path calculation with master number check (11,22,33)
 export const calculateLifePath = (dateOfBirth) => {
-  const digits = dateOfBirth.replace(/-/g, '').split('').map(Number);
+  // Normalize date input similar to Losho grid for consistency
+  const normalizeDate = (dateStr) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [year, month, day] = dateStr.split('-');
+      return day + month + year;
+    } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      return dateStr.split('/').join('');
+    } else if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      return dateStr.split('-').join('');
+    } else {
+      return dateStr.replace(/\D/g, '');
+    }
+  };
+
+  const normalizedDateString = normalizeDate(dateOfBirth);
+  const digits = normalizedDateString.split('').map(Number);
+  
   let sum = digits.reduce((acc, digit) => acc + digit, 0);
   
-  // Reduce to single digit (unless 11, 22, 33 - master numbers)
+  // Reduce to single digit unless master numbers (11, 22, 33)
   while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
     sum = sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
   }

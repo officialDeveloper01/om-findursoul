@@ -67,27 +67,6 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
               Base number ({numerologyData.conductorBase}) is highlighted. Format: Series/Bottom
             </p>
           </div>
-
-          {/* 13-Element Numerology Profile */}
-          {numerologyData.numerologyProfile && (
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-gray-700 text-center">13-Element Numerology Profile</h4>
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <div className="grid grid-cols-13 gap-1 text-center text-sm">
-                  {numerologyData.numerologyProfile.map((value, index) => (
-                    <div key={index} className="bg-white p-2 rounded border">
-                      <div className="text-xs text-gray-500">[{index}]</div>
-                      <div className="font-bold text-blue-800">{value}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 text-xs text-gray-600 space-y-1">
-                  <p><strong>[0]</strong> Day Number (Driver) | <strong>[1]</strong> Destiny Number (Conductor)</p>
-                  <p><strong>[2-10]</strong> Frequency of digits 1-9 | <strong>[11]</strong> Non-zero digit count | <strong>[12]</strong> Total sum</p>
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

@@ -114,46 +114,6 @@ export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
   return bottomValues;
 };
 
-export const calculateNumerologyProfile = (dateOfBirth) => {
-  console.log('Calculating 13-element Numerology Profile for:', dateOfBirth);
-  
-  // Extract digits from date (DD-MM-YYYY or DD/MM/YYYY format)
-  const dateString = dateOfBirth.replace(/[-/]/g, '');
-  const digits = dateString.split('').map(Number);
-  
-  console.log('DOB digits:', digits);
-  
-  // Initialize the 13-element profile array
-  const profile = new Array(13).fill(0);
-  
-  // Index [0] → Day number (Driver)
-  const dayPart = dateOfBirth.split(/[-/]/)[0];
-  const daySum = dayPart.split('').map(Number).reduce((acc, digit) => acc + digit, 0);
-  profile[0] = daySum > 9 ? daySum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : daySum;
-  
-  // Index [1] → Destiny number (Conductor) - sum of all digits reduced
-  let totalSum = digits.reduce((acc, digit) => acc + digit, 0);
-  let conductor = totalSum;
-  while (conductor > 9 && conductor !== 11 && conductor !== 22 && conductor !== 33) {
-    conductor = conductor.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
-  }
-  profile[1] = conductor;
-  
-  // Index [2] to [10] → Frequency of digits 1–9
-  for (let digit = 1; digit <= 9; digit++) {
-    profile[digit + 1] = digits.filter(d => d === digit).length;
-  }
-  
-  // Index [11] → Count of non-zero digits
-  profile[11] = digits.filter(digit => digit !== 0).length;
-  
-  // Index [12] → Sum of all digits (no reduction)
-  profile[12] = totalSum;
-  
-  console.log('Generated Numerology Profile:', profile);
-  return profile;
-};
-
 export const calculateLoshuGrid = (dateOfBirth) => {
   console.log('Calculating Loshu Grid for date:', dateOfBirth);
   
@@ -180,7 +140,6 @@ export const calculateAllNumerology = (dateOfBirth) => {
   const conductorSeries = calculateConductorSeries(conductorBase);
   const bottomValues = calculateBottomValues(dateOfBirth, conductorSeries);
   const loshuGrid = calculateLoshuGrid(dateOfBirth);
-  const numerologyProfile = calculateNumerologyProfile(dateOfBirth);
   
   return {
     dob: dateOfBirth,
@@ -189,7 +148,6 @@ export const calculateAllNumerology = (dateOfBirth) => {
     conductorBase,
     conductorSeries,
     bottomValues,
-    loshuGrid,
-    numerologyProfile
+    loshuGrid
   };
 };

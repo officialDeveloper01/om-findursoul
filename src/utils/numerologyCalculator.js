@@ -35,10 +35,10 @@ export const calculateConductorSeries = (conductorBase) => {
   
   const series = [];
   
-  // First, go down by subtracting 9 until we hit negative
+  // First, go down by subtracting 9 until we hit negative or 0
   const downwardNumbers = [];
   let temp = conductorBase - 9;
-  while (temp >= 0) {
+  while (temp > 0) {  // Exclude 0 completely
     downwardNumbers.unshift(temp);
     temp -= 9;
   }
@@ -58,6 +58,60 @@ export const calculateConductorSeries = (conductorBase) => {
   
   console.log('Generated Conductor Series:', series);
   return series.slice(0, 11); // Ensure exactly 11 numbers
+};
+
+export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
+  console.log('Calculating bottom values for:', dateOfBirth, conductorSeries);
+  
+  // Parse DOB to extract day, month, year
+  const parts = dateOfBirth.split(/[-/]/);
+  const day = parts[0];
+  const month = parts[1];
+  const year = parts[2];
+  
+  // Calculate base values
+  const dayMonthSum = (day + month).split('').map(Number).reduce((acc, digit) => acc + digit, 0);
+  const dayMonthReduced = dayMonthSum > 9 ? dayMonthSum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : dayMonthSum;
+  
+  const daySum = day.split('').map(Number).reduce((acc, digit) => acc + digit, 0);
+  const dayReduced = daySum > 9 ? daySum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : daySum;
+  
+  const monthYearDigits = (month + year).split('').map(Number);
+  const monthYearSum = monthYearDigits.reduce((acc, digit) => acc + digit, 0);
+  const monthYearReduced = monthYearSum > 9 ? monthYearSum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : monthYearSum;
+  
+  console.log('Base calculations:', {
+    dayMonthReduced,
+    dayReduced,
+    monthYearReduced
+  });
+  
+  const bottomValues = [];
+  
+  conductorSeries.forEach((number, index) => {
+    let bottomValue;
+    
+    if (index < conductorSeries.length - 6) {
+      // Before & Base positions: Sum of day + month digits
+      bottomValue = dayMonthReduced;
+    } else if (index === conductorSeries.length - 6) {
+      // Just After position: Sum of day digits only
+      bottomValue = dayReduced;
+    } else if (index === conductorSeries.length - 5) {
+      // Next Number: Sum of previous two bottom values
+      const prevValue = bottomValues[index - 1] || dayMonthReduced;
+      const sum = prevValue + dayReduced;
+      bottomValue = sum > 9 ? sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0) : sum;
+    } else {
+      // Remaining positions: Sum of month + year digits
+      bottomValue = monthYearReduced;
+    }
+    
+    bottomValues.push(bottomValue);
+  });
+  
+  console.log('Calculated bottom values:', bottomValues);
+  return bottomValues;
 };
 
 export const calculateLoshuGrid = (dateOfBirth) => {
@@ -84,6 +138,7 @@ export const calculateAllNumerology = (dateOfBirth) => {
   const conductor = calculateConductor(lifePath);
   const conductorBase = calculateConductorBase(conductor);
   const conductorSeries = calculateConductorSeries(conductorBase);
+  const bottomValues = calculateBottomValues(dateOfBirth, conductorSeries);
   const loshuGrid = calculateLoshuGrid(dateOfBirth);
   
   return {
@@ -92,6 +147,7 @@ export const calculateAllNumerology = (dateOfBirth) => {
     conductor,
     conductorBase,
     conductorSeries,
+    bottomValues,
     loshuGrid
   };
 };

@@ -39,7 +39,7 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
             </div>
           </div>
 
-          {/* Conductor Series */}
+          {/* Conductor Series with Bottom Values */}
           <div className="space-y-4">
             <h4 className="text-lg font-medium text-gray-700 text-center">Conductor Series</h4>
             <div className="grid grid-cols-6 md:grid-cols-11 gap-2">
@@ -54,12 +54,17 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
                     }
                   `}
                 >
-                  {number}
+                  <div className="text-lg">{number}</div>
+                  {numerologyData.bottomValues && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      /{numerologyData.bottomValues[index]}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
             <p className="text-sm text-gray-500 text-center">
-              Base number ({numerologyData.conductorBase}) is highlighted
+              Base number ({numerologyData.conductorBase}) is highlighted. Format: Series/Bottom
             </p>
           </div>
         </CardContent>

@@ -3,23 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const renderCornerSymbol = () => (
-    <div className="text-blue-800 text-3xl md:text-4xl font-bold select-none">
+    <div className="text-blue-800 text-2xl md:text-3xl font-bold select-none">
       卐
     </div>
   );
 
-  const renderGridCell = (digit: number, hasFrequency: boolean) => {
+  const renderGridCell = (digit: number) => {
     const frequency = gridData.frequencies[digit] || 0;
-    const displayValue = frequency > 0 ? String(digit).repeat(frequency) : '';
+    
+    // If frequency is 0, render empty cell
+    if (frequency === 0) {
+      return (
+        <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center"></div>
+        </div>
+      );
+    }
 
+    // If frequency > 0, show the digit repeated
+    const displayValue = String(digit).repeat(frequency);
     return (
-      <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
-        <div className={`
-          w-full h-full flex items-center justify-center
-          text-red-600 text-2xl md:text-3xl font-bold
-          ${hasFrequency ? '' : 'opacity-30'}
-        `}>
-          {frequency === 0 ? digit : displayValue.split('').join(' ')}
+      <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center text-red-600 text-xl md:text-2xl font-bold">
+          {displayValue.split('').join(' ')}
         </div>
       </div>
     );
@@ -42,7 +48,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
         </CardHeader>
 
         <CardContent className="flex justify-center items-center relative py-16">
-          {/* Swastik Corner Symbols */}
+          {/* Corner Swastik Symbols */}
           <div className="absolute top-4 left-4">
             {renderCornerSymbol()}
           </div>
@@ -56,78 +62,113 @@ export const LoshoGrid = ({ gridData, userData }) => {
             {renderCornerSymbol()}
           </div>
 
-          {/* Lo Shu Grid in Diamond Layout */}
-          <div className="relative">
-            {/* Outer diamond border */}
-            <div className="w-64 h-64 md:w-80 md:h-80 border-2 border-gray-400 transform rotate-45 bg-gray-50"></div>
-            
-            {/* Inner diamond border */}
-            <div className="absolute top-1/2 left-1/2 w-32 h-32 md:w-40 md:h-40 border-2 border-gray-800 transform -translate-x-1/2 -translate-y-1/2 rotate-45 bg-white"></div>
-
-            {/* SVG Overlay for Diagonal Lines */}
+          {/* Main Grid Container */}
+          <div className="relative w-80 h-80 md:w-96 md:h-96">
+            {/* SVG Background for geometric layout */}
             <svg 
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-              width="320" 
-              height="320" 
-              viewBox="0 0 320 320"
+              className="absolute inset-0 w-full h-full" 
+              viewBox="0 0 400 400"
+              xmlns="http://www.w3.org/2000/svg"
             >
+              {/* Outer diamond border */}
+              <polygon 
+                points="200,20 380,200 200,380 20,200" 
+                fill="none" 
+                stroke="#6B7280" 
+                strokeWidth="2"
+              />
+              
+              {/* Inner diamond border */}
+              <polygon 
+                points="200,80 320,200 200,320 80,200" 
+                fill="none" 
+                stroke="#374151" 
+                strokeWidth="2"
+              />
+              
+              {/* Cross lines connecting outer positions */}
+              <line x1="200" y1="20" x2="200" y2="80" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="200" y1="320" x2="200" y2="380" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="20" y1="200" x2="80" y2="200" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="320" y1="200" x2="380" y2="200" stroke="#6B7280" strokeWidth="1"/>
+              
+              {/* Diagonal lines for X pattern */}
+              <line x1="110" y1="110" x2="80" y2="200" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="290" y1="110" x2="320" y2="200" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="290" y1="290" x2="320" y2="200" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="110" y1="290" x2="80" y2="200" stroke="#6B7280" strokeWidth="1"/>
+              
+              {/* Additional connecting lines */}
+              <line x1="110" y1="110" x2="200" y2="80" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="290" y1="110" x2="200" y2="80" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="290" y1="290" x2="200" y2="320" stroke="#6B7280" strokeWidth="1"/>
+              <line x1="110" y1="290" x2="200" y2="320" stroke="#6B7280" strokeWidth="1"/>
+
               {/* Spiritual Line (1-5-9) */}
               <line 
-                x1="160" y1="280" 
-                x2="160" y2="40" 
+                x1="200" y1="350" 
+                x2="200" y2="50" 
                 stroke="#8B5CF6" 
                 strokeWidth="2" 
                 strokeDasharray="5,5"
-                opacity="0.7"
+                opacity="0.6"
               />
               
               {/* Creative Line (3-5-7) */}
               <line 
-                x1="40" y1="160" 
-                x2="280" y2="160" 
+                x1="50" y1="200" 
+                x2="350" y2="200" 
                 stroke="#06B6D4" 
                 strokeWidth="2" 
                 strokeDasharray="5,5"
-                opacity="0.7"
+                opacity="0.6"
               />
             </svg>
 
-            {/* Grid Numbers positioned as per image */}
-            {/* Top: 9 */}
-            <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
-              {renderGridCell(9, gridData.frequencies[9] > 0)}
+            {/* Number positions matching the geometric layout */}
+            {/* Position 4 - Top Left */}
+            <div className="absolute" style={{ top: '15%', left: '15%' }}>
+              {renderGridCell(4)}
             </div>
 
-            {/* Top row: 4, 2 */}
-            <div className="absolute top-16 left-8">
-              {renderGridCell(4, gridData.frequencies[4] > 0)}
-            </div>
-            <div className="absolute top-16 right-8">
-              {renderGridCell(2, gridData.frequencies[2] > 0)}
+            {/* Position 9 - Top Center */}
+            <div className="absolute" style={{ top: '5%', left: '50%', transform: 'translateX(-50%)' }}>
+              {renderGridCell(9)}
             </div>
 
-            {/* Middle row: 3, 5, 7 */}
-            <div className="absolute top-1/2 left-0 transform -translate-y-1/2">
-              {renderGridCell(3, gridData.frequencies[3] > 0)}
-            </div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              {renderGridCell(5, gridData.frequencies[5] > 0)}
-            </div>
-            <div className="absolute top-1/2 right-0 transform -translate-y-1/2">
-              {renderGridCell(7, gridData.frequencies[7] > 0)}
+            {/* Position 2 - Top Right */}
+            <div className="absolute" style={{ top: '15%', right: '15%' }}>
+              {renderGridCell(2)}
             </div>
 
-            {/* Bottom row: 8, 6 */}
-            <div className="absolute bottom-16 left-8">
-              {renderGridCell(8, gridData.frequencies[8] > 0)}
-            </div>
-            <div className="absolute bottom-16 right-8">
-              {renderGridCell(6, gridData.frequencies[6] > 0)}
+            {/* Position 3 - Middle Left */}
+            <div className="absolute" style={{ top: '50%', left: '5%', transform: 'translateY(-50%)' }}>
+              {renderGridCell(3)}
             </div>
 
-            {/* Bottom: 1 */}
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-              {renderGridCell(1, gridData.frequencies[1] > 0)}
+            {/* Position 5 - Center */}
+            <div className="absolute" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+              {renderGridCell(5)}
+            </div>
+
+            {/* Position 7 - Middle Right */}
+            <div className="absolute" style={{ top: '50%', right: '5%', transform: 'translateY(-50%)' }}>
+              {renderGridCell(7)}
+            </div>
+
+            {/* Position 8 - Bottom Left */}
+            <div className="absolute" style={{ bottom: '15%', left: '15%' }}>
+              {renderGridCell(8)}
+            </div>
+
+            {/* Position 1 - Bottom Center */}
+            <div className="absolute" style={{ bottom: '5%', left: '50%', transform: 'translateX(-50%)' }}>
+              {renderGridCell(1)}
+            </div>
+
+            {/* Position 6 - Bottom Right */}
+            <div className="absolute" style={{ bottom: '15%', right: '15%' }}>
+              {renderGridCell(6)}
             </div>
           </div>
         </CardContent>
@@ -136,14 +177,14 @@ export const LoshoGrid = ({ gridData, userData }) => {
         <div className="px-6 pb-6">
           <div className="text-center text-sm text-gray-600 space-y-2">
             <p>Numbers appear based on your birth date digits</p>
-            <p>Repeated digits are shown multiple times</p>
+            <p>Empty cells indicate numbers not present in your birth date</p>
             <div className="flex justify-center gap-6 mt-4">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-0.5 bg-purple-500 opacity-70" style={{borderTop: '2px dashed'}}></div>
+                <div className="w-4 h-0.5 bg-purple-500 opacity-60" style={{borderTop: '2px dashed'}}></div>
                 <span className="text-xs">Spiritual Line (1-5-9)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-0.5 bg-cyan-500 opacity-70" style={{borderTop: '2px dashed'}}></div>
+                <div className="w-4 h-0.5 bg-cyan-500 opacity-60" style={{borderTop: '2px dashed'}}></div>
                 <span className="text-xs">Creative Line (3-5-7)</span>
               </div>
             </div>

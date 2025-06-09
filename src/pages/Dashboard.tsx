@@ -149,10 +149,10 @@ const Dashboard = () => {
             {currentView === 'form' && (
               <div className="space-y-8">
                 <div className="text-center mb-12 fade-in">
-                  <h2 className="text-4xl font-light text-slate-700 mb-6">
+                  <h2 className="text-4xl font-bold text-amber-600 mb-6">
                     Begin Your Sacred Journey
                   </h2>
-                  <p className="text-slate-600 max-w-2xl mx-auto text-lg leading-relaxed">
+                  <p className="text-amber-400 max-w-2xl mx-auto text-lg leading-relaxed">
                     Enter your birth details to calculate your personal numerology and discover 
                     the cosmic patterns that influence your life path.
                   </p>

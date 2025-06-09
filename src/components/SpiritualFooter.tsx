@@ -56,15 +56,6 @@ export const SpiritualFooter = () => {
             <p className="text-slate-300 text-sm mb-4">
               Receive spiritual insights and numerology wisdom
             </p>
-            <div className="flex gap-2 max-w-sm mx-auto md:ml-auto">
-              <Input 
-                placeholder="Enter your email" 
-                className="bg-white/10 border-amber-400/30 text-white placeholder-slate-400"
-              />
-              <Button className="sacred-button text-white px-6">
-                Join
-              </Button>
-            </div>
           </div>
         </div>
 

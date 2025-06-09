@@ -64,6 +64,34 @@ export const LoshoGrid = ({ gridData, userData }) => {
             {/* Inner diamond border */}
             <div className="absolute top-1/2 left-1/2 w-32 h-32 md:w-40 md:h-40 border-2 border-gray-800 transform -translate-x-1/2 -translate-y-1/2 rotate-45 bg-white"></div>
 
+            {/* SVG Overlay for Diagonal Lines */}
+            <svg 
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              width="320" 
+              height="320" 
+              viewBox="0 0 320 320"
+            >
+              {/* Spiritual Line (1-5-9) */}
+              <line 
+                x1="160" y1="280" 
+                x2="160" y2="40" 
+                stroke="#8B5CF6" 
+                strokeWidth="2" 
+                strokeDasharray="5,5"
+                opacity="0.7"
+              />
+              
+              {/* Creative Line (3-5-7) */}
+              <line 
+                x1="40" y1="160" 
+                x2="280" y2="160" 
+                stroke="#06B6D4" 
+                strokeWidth="2" 
+                strokeDasharray="5,5"
+                opacity="0.7"
+              />
+            </svg>
+
             {/* Grid Numbers positioned as per image */}
             {/* Top: 9 */}
             <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
@@ -106,9 +134,19 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
         {/* Grid Legend */}
         <div className="px-6 pb-6">
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-600 space-y-2">
             <p>Numbers appear based on your birth date digits</p>
             <p>Repeated digits are shown multiple times</p>
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-0.5 bg-purple-500 opacity-70" style={{borderTop: '2px dashed'}}></div>
+                <span className="text-xs">Spiritual Line (1-5-9)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-0.5 bg-cyan-500 opacity-70" style={{borderTop: '2px dashed'}}></div>
+                <span className="text-xs">Creative Line (3-5-7)</span>
+              </div>
+            </div>
           </div>
         </div>
       </Card>

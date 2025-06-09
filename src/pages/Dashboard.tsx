@@ -23,12 +23,12 @@ const Dashboard = () => {
     setIsLoading(true);
     
     try {
-      // Calculate grid and numerology using Indian system
-      const calculatedNumerology = calculateAllNumerology(data.dateOfBirth);
+      // Calculate grid and numerology using Indian system with Chaldean numbers
+      const calculatedNumerology = calculateAllNumerology(data.dateOfBirth, data.fullName);
       
       console.log('Numerology calculated:', calculatedNumerology);
       
-      // Prepare data for Firebase with Indian numerology structure
+      // Prepare data for Firebase with Indian numerology structure and Chaldean numbers
       const tableData = {
         fullName: data.fullName,
         dateOfBirth: data.dateOfBirth,

@@ -161,14 +161,18 @@ export const formatDateToIndian = (date) => {
   });
 };
 
-// Combined calculator
-export const calculateAllNumerology = (dateOfBirth) => {
+// Import Chaldean calculator
+import { calculateChaldeanNumbers } from './chaldeanCalculator';
+
+// Combined calculator with Chaldean numbers
+export const calculateAllNumerology = (dateOfBirth, fullName = '') => {
   const loshuGrid = calculateLoshoGrid(dateOfBirth);
   const driver = calculateDriver(dateOfBirth);
   const conductor = calculateConductor(dateOfBirth);
   const conductorBase = calculateConductorBase(conductor);
   const conductorSeries = calculateConductorSeries(conductorBase);
   const bottomValues = calculateBottomValues(dateOfBirth, conductorSeries);
+  const chaldeanNumbers = calculateChaldeanNumbers(fullName);
 
   return {
     loshuGrid: loshuGrid.frequencies,
@@ -177,6 +181,7 @@ export const calculateAllNumerology = (dateOfBirth) => {
     conductorBase,
     conductorSeries,
     bottomValues,
+    chaldeanNumbers,
     formattedDate: formatDateToIndian(dateOfBirth),
     dob: dateOfBirth
   };

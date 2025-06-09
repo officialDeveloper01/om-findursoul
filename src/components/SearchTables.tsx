@@ -101,16 +101,17 @@ export const SearchTables = () => {
             ← Back to Search Results
           </Button>
         </div>
+        {/* Show Loshu Grid First */}
+        {selectedGrid && (
+          <LoshoGrid gridData={selectedGrid} userData={selectedUserData} />
+        )}
         
+        {/* Show Numerology Display */}
         {selectedNumerology && (
           <NumerologyDisplay 
             numerologyData={selectedNumerology} 
             userData={selectedUserData} 
           />
-        )}
-        
-        {selectedGrid && (
-          <LoshoGrid gridData={selectedGrid} userData={selectedUserData} />
         )}
       </div>
     );

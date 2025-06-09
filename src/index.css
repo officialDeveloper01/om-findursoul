@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -43,6 +45,13 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Spiritual color palette */
+    --celestial-gold: 43 74% 66%;
+    --deep-purple: 262 52% 47%;
+    --midnight-blue: 230 35% 15%;
+    --mystic-white: 0 0% 98%;
+    --sacred-amber: 45 100% 51%;
   }
 
   .dark {
@@ -91,33 +100,176 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-family: 'Lora', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', serif;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Lora', serif;
+    font-weight: 500;
   }
 }
 
-/* Custom spiritual styling */
+/* Celestial backgrounds and gradients */
 @layer components {
+  .celestial-bg {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #2d1b69 75%, #1a1a2e 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .celestial-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, #ffd700, transparent),
+      radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+      radial-gradient(1px 1px at 90px 40px, #ffd700, transparent),
+      radial-gradient(1px 1px at 130px 80px, #ffffff, transparent),
+      radial-gradient(2px 2px at 160px 30px, #ffd700, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: twinkle 4s ease-in-out infinite alternate;
+    opacity: 0.6;
+  }
+
   .spiritual-gradient {
-    background: linear-gradient(135deg, #fefefe 0%, #f9fafb 50%, #f3f4f6 100%);
+    background: linear-gradient(135deg, 
+      hsl(var(--mystic-white)) 0%, 
+      #f8fafc 25%, 
+      #e2e8f0 50%, 
+      #cbd5e1 75%, 
+      #94a3b8 100%);
   }
-  
-  .sacred-shadow {
-    box-shadow: 0 4px 20px rgba(217, 119, 6, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .sacred-card {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.95) 0%, 
+      rgba(248, 250, 252, 0.9) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 
+      0 4px 20px rgba(255, 215, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
-  
-  .om-text {
-    text-shadow: 0 2px 4px rgba(217, 119, 6, 0.1);
+
+  .golden-glow {
+    color: hsl(var(--celestial-gold));
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+
+  .mystic-text {
+    background: linear-gradient(135deg, 
+      hsl(var(--celestial-gold)) 0%, 
+      hsl(var(--sacred-amber)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sacred-button {
+    background: linear-gradient(135deg, 
+      hsl(var(--celestial-gold)) 0%, 
+      hsl(var(--sacred-amber)) 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sacred-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.2), 
+      transparent);
+    transition: left 0.5s;
+  }
+
+  .sacred-button:hover::before {
+    left: 100%;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* Sacred geometry patterns */
+  .sacred-pattern {
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+  }
+}
+
+/* Keyframe animations */
+@keyframes twinkle {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes floating {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
   }
 }
 
 /* Smooth transitions for spiritual feel */
 * {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -125,10 +277,15 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d97706;
-  border-radius: 3px;
+  background: linear-gradient(135deg, hsl(var(--celestial-gold)), hsl(var(--sacred-amber)));
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b45309;
+  background: linear-gradient(135deg, hsl(var(--sacred-amber)), hsl(var(--celestial-gold)));
+}
+
+/* Responsive typography */
+@screen md {
+  body { font-size: 18px; }
 }

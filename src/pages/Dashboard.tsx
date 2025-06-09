@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { UserDataForm } from '@/components/UserDataForm';
 import { LoshoGrid } from '@/components/LoshoGrid';
 import { NumerologyDisplay } from '@/components/NumerologyDisplay';
 import { SearchTables } from '@/components/SearchTables';
-import { calculateLoshoGrid } from '@/utils/gridCalculator';
+import { CelestialHeader } from '@/components/CelestialHeader';
+import { SpiritualFooter } from '@/components/SpiritualFooter';
+import { CelestialLoader } from '@/components/CelestialLoader';
 import { calculateAllNumerology } from '@/utils/numerologyCalculator';
 import { ref, push } from 'firebase/database';
 import { database } from '@/config/firebase';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Sparkles, Users, BarChart3, BookOpen } from 'lucide-react';
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -16,7 +20,7 @@ const Dashboard = () => {
   const [numerologyData, setNumerologyData] = useState(null);
   const [currentView, setCurrentView] = useState('form');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const handleFormSubmit = async (data) => {
     console.log('Form submitted:', data);
@@ -80,112 +84,144 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 tracking-wider">OM</h1>
-            <p className="text-lg text-amber-600 font-light tracking-widest">HEAL YOUR SOUL</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-600">Welcome, {user?.email}</span>
-            <Button onClick={logout} variant="outline" size="sm">
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen celestial-bg">
+      {/* Celestial Header */}
+      <CelestialHeader currentView={currentView} setCurrentView={setCurrentView} />
 
-      {/* Navigation */}
-      <nav className="max-w-6xl mx-auto px-4 py-6">
-        <div className="flex gap-4 justify-center">
-          <Button 
-            onClick={() => setCurrentView('form')}
-            variant={currentView === 'form' ? 'default' : 'outline'}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
-          >
-            New Analysis
-          </Button>
-          <Button 
-            onClick={() => setCurrentView('search')}
-            variant={currentView === 'search' ? 'default' : 'outline'}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
-          >
-            Search Records
-          </Button>
-        </div>
-      </nav>
+      {/* Hero Section - Only show when on form view */}
+      {currentView === 'form' && !userData && (
+        <section className="pt-24 pb-16 px-4 text-center text-white">
+          <div className="max-w-4xl mx-auto">
+            <div className="slide-up">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 mystic-text">
+                Discover Your Sacred Numbers
+              </h1>
+              <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Unlock the ancient wisdom hidden in your birth details through 
+                <span className="golden-glow"> Vedic Numerology </span> 
+                and the mystical 
+                <span className="golden-glow"> Lo Shu Grid</span>
+              </p>
+              
+              {/* Feature Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                <Card className="sacred-card">
+                  <CardContent className="p-6 text-center">
+                    <Sparkles className="w-12 h-12 text-amber-500 mx-auto mb-4 floating" />
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Numerology Analysis</h3>
+                    <p className="text-slate-600 text-sm">Driver, Conductor & Chaldean calculations</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="sacred-card">
+                  <CardContent className="p-6 text-center">
+                    <BarChart3 className="w-12 h-12 text-purple-500 mx-auto mb-4 floating" />
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Lo Shu Grid</h3>
+                    <p className="text-slate-600 text-sm">Sacred geometry patterns from your birth date</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="sacred-card">
+                  <CardContent className="p-6 text-center">
+                    <BookOpen className="w-12 h-12 text-emerald-500 mx-auto mb-4 floating" />
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Spiritual Insights</h3>
+                    <p className="text-slate-600 text-sm">Ancient wisdom for modern life guidance</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 pb-12">
-        {isLoading && (
-          <div className="text-center mb-8">
-            <div className="text-amber-600 text-lg">Calculating your sacred numbers...</div>
-          </div>
-        )}
-
-        {currentView === 'form' && (
-          <div className="space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-light text-gray-700 mb-4">
-                Numerology & Lo Shu Grid Analysis
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Enter your birth details to calculate your personal numerology and sacred grid.
-              </p>
-            </div>
-            <UserDataForm onSubmit={handleFormSubmit} />
-          </div>
-        )}
-
-        {currentView === 'results' && userData && (gridData || numerologyData) && (
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-light text-gray-700 mb-2">
-                Your Analysis Results
-              </h2>
-              <p className="text-gray-600 mb-6">
-                For {userData.fullName}
-              </p>
-              <Button 
-                onClick={handleNewEntry}
-                variant="outline"
-                className="mb-8"
-              >
-                Create New Analysis
-              </Button>
-            </div>
+      <main className="relative">
+        {/* Background for content sections */}
+        <div className="bg-gradient-to-b from-transparent via-white/95 to-white min-h-screen">
+          <div className="max-w-4xl mx-auto px-4 py-12">
             
-            {/* Show Lo Shu Grid FIRST */}
-            {gridData && (
-              <LoshoGrid gridData={gridData} userData={userData} />
+            {isLoading && (
+              <div className="text-center mb-8">
+                <CelestialLoader />
+              </div>
             )}
-            
-            {/* Then show Numerology Data */}
-            {numerologyData && (
-              <NumerologyDisplay 
-                numerologyData={numerologyData} 
-                userData={userData} 
-              />
-            )}
-          </div>
-        )}
 
-        {currentView === 'search' && (
-          <div className="space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-light text-gray-700 mb-4">
-                Search Existing Records
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Search for previously created analyses by mobile number.
-              </p>
-            </div>
-            <SearchTables />
+            {currentView === 'form' && (
+              <div className="space-y-8">
+                <div className="text-center mb-12 fade-in">
+                  <h2 className="text-4xl font-light text-slate-700 mb-6">
+                    Begin Your Sacred Journey
+                  </h2>
+                  <p className="text-slate-600 max-w-2xl mx-auto text-lg leading-relaxed">
+                    Enter your birth details to calculate your personal numerology and discover 
+                    the cosmic patterns that influence your life path.
+                  </p>
+                  <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-6"></div>
+                </div>
+                
+                <div className="slide-up">
+                  <UserDataForm onSubmit={handleFormSubmit} />
+                </div>
+              </div>
+            )}
+
+            {currentView === 'results' && userData && (gridData || numerologyData) && (
+              <div className="space-y-8 pt-16">
+                <div className="text-center fade-in">
+                  <h2 className="text-4xl font-light text-slate-700 mb-2">
+                    Your Sacred Analysis
+                  </h2>
+                  <p className="text-slate-600 mb-6 text-lg">
+                    For <span className="golden-glow font-semibold">{userData.fullName}</span>
+                  </p>
+                  <Button 
+                    onClick={handleNewEntry}
+                    variant="outline"
+                    className="mb-8 border-amber-300 text-amber-700 hover:bg-amber-50"
+                  >
+                    Create New Analysis
+                  </Button>
+                </div>
+                
+                {/* Keep existing Loshu Grid and Numerology Display unchanged */}
+                <div className="slide-up">
+                  {gridData && (
+                    <LoshoGrid gridData={gridData} userData={userData} />
+                  )}
+                  
+                  {numerologyData && (
+                    <NumerologyDisplay 
+                      numerologyData={numerologyData} 
+                      userData={userData} 
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {currentView === 'search' && (
+              <div className="space-y-8 pt-16">
+                <div className="text-center mb-12 fade-in">
+                  <h2 className="text-4xl font-light text-slate-700 mb-6">
+                    Search Sacred Records
+                  </h2>
+                  <p className="text-slate-600 max-w-2xl mx-auto text-lg leading-relaxed">
+                    Find previously created numerological analyses by searching with mobile numbers.
+                  </p>
+                  <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent mx-auto mt-6"></div>
+                </div>
+                
+                <div className="slide-up">
+                  <SearchTables />
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </main>
+
+      {/* Spiritual Footer */}
+      <SpiritualFooter />
     </div>
   );
 };

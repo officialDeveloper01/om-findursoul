@@ -168,10 +168,10 @@ const Dashboard = () => {
             {currentView === 'results' && userData && (gridData || numerologyData) && (
               <div className="space-y-8 pt-16">
                 <div className="text-center fade-in">
-                  <h2 className="text-4xl font-light text-slate-700 mb-2">
+                  <h2 className="text-4xl font-light text-amber-700 mb-2">
                     Your Sacred Analysis
                   </h2>
-                  <p className="text-slate-600 mb-6 text-lg">
+                  <p className="text-amber-400 mb-6 text-lg">
                     For <span className="golden-glow font-semibold">{userData.fullName}</span>
                   </p>
                   <Button 
@@ -202,10 +202,10 @@ const Dashboard = () => {
             {currentView === 'search' && (
               <div className="space-y-8 pt-16">
                 <div className="text-center mb-12 fade-in">
-                  <h2 className="text-4xl font-light text-slate-700 mb-6">
+                  <h2 className="text-4xl font-light text-amber-700 mb-6">
                     Search Sacred Records
                   </h2>
-                  <p className="text-slate-600 max-w-2xl mx-auto text-lg leading-relaxed">
+                  <p className="text-amber-400  max-w-2xl mx-auto text-lg leading-relaxed">
                     Find previously created numerological analyses by searching with mobile numbers.
                   </p>
                   <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent mx-auto mt-6"></div>

@@ -178,8 +178,21 @@ export const calculateAllNumerology = (dateOfBirth, fullName = '') => {
   const bottomValues = calculateBottomValues(dateOfBirth, conductorSeries);
   const chaldeanNumbers = calculateChaldeanNumbers(fullName);
 
+  // Create updated frequencies that include driver and conductor
+  const updatedFrequencies = { ...loshuGrid.frequencies };
+  
+  // Add driver number to frequencies (+1)
+  if (driver >= 1 && driver <= 9) {
+    updatedFrequencies[driver] = (updatedFrequencies[driver] || 0) + 1;
+  }
+  
+  // Add conductor number to frequencies (+1)
+  if (conductor >= 1 && conductor <= 9) {
+    updatedFrequencies[conductor] = (updatedFrequencies[conductor] || 0) + 1;
+  }
+
   return {
-    loshuGrid: loshuGrid.frequencies,
+    loshuGrid: updatedFrequencies, // Use updated frequencies instead of original
     driver,
     conductor,
     conductorBase,

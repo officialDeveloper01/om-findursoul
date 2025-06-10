@@ -43,8 +43,8 @@ export const LoshoGrid = ({ gridData, userData }) => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
         <CardHeader className="text-center pb-6">
-          <CardTitle className="text-3xl md:text-4xl font-light text-gray-800">
-            Lo Shu Grid
+          <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
+            Heal Your Soul
           </CardTitle>
           <div className="space-y-1 text-gray-600 mt-2">
             <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>

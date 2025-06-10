@@ -1,47 +1,42 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const LoshoGrid = ({ gridData, userData }) => {
-  // Calculate frequencies including driver and conductor
+  // Compute frequencies including driver and conductor additions
   const calculateFrequencies = () => {
     const frequencies = { ...gridData.frequencies };
-    
-    // Add driver and conductor numbers one extra time
-    if (userData?.numerologyData?.driver) {
-      const driver = userData.numerologyData.driver;
-      frequencies[driver] = (frequencies[driver] || 0) + 1;
-    }
-    
-    if (userData?.numerologyData?.conductor) {
-      const conductor = userData.numerologyData.conductor;
-      frequencies[conductor] = (frequencies[conductor] || 0) + 1;
-    }
-    
+
+    const driver = userData?.numerologyData?.driver;
+    const conductor = userData?.numerologyData?.conductor;
+
+    if (driver) frequencies[driver] = (frequencies[driver] || 0) + 1;
+    if (conductor) frequencies[conductor] = (frequencies[conductor] || 0) + 1;
+
     return frequencies;
   };
 
   const frequencies = calculateFrequencies();
 
-  const renderGridCell = (digit: number) => {
-    const frequency = frequencies[digit] || 0;
-    
+  const renderGridCell = (digit) => {
+    const count = frequencies[digit] || 0;
+
     return (
-      <div className="aspect-square bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col items-center justify-center p-4">
-        <div className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-          {digit}
-        </div>
-        <div className="text-lg md:text-xl text-gray-600">
-          {frequency > 0 ? `${frequency}×` : '0×'}
-        </div>
+      <div className="aspect-square bg-white border border-gray-300 rounded-lg flex items-center justify-center text-center p-2">
+        {count > 0 && (
+          <div className="text-lg md:text-xl font-semibold text-gray-800 space-x-1">
+            {[...Array(count)].map((_, idx) => (
+              <span key={idx}>{digit}</span>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
 
-  // 3x3 grid layout (positions 4,9,2 / 3,5,7 / 8,1,6)
+  // Lo Shu grid layout: 4 9 2 / 3 5 7 / 8 1 6
   const gridNumbers = [
     [4, 9, 2],
-    [3, 5, 7], 
-    [8, 1, 6]
+    [3, 5, 7],
+    [8, 1, 6],
   ];
 
   return (
@@ -61,22 +56,15 @@ export const LoshoGrid = ({ gridData, userData }) => {
         </CardHeader>
 
         <CardContent className="flex justify-center items-center py-8">
-          {/* 3x3 Grid Layout */}
           <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
-            {gridNumbers.flat().map((number, index) => (
-              <div key={index}>
-                {renderGridCell(number)}
-              </div>
+            {gridNumbers.flat().map((digit, index) => (
+              <div key={index}>{renderGridCell(digit)}</div>
             ))}
           </div>
         </CardContent>
 
-        {/* Grid Legend */}
-        <div className="px-6 pb-6">
-          <div className="text-center text-sm text-gray-600 space-y-2">
-            <p>Numbers appear based on your birth date digits plus Driver & Conductor</p>
-            <p>Frequencies include: Original birth date + Driver ({userData?.numerologyData?.driver || 'N/A'}) + Conductor ({userData?.numerologyData?.conductor || 'N/A'})</p>
-          </div>
+        <div className="px-6 pb-6 text-center text-sm text-gray-600 space-y-2">
+          {/* <p>Grid includes birth date numbers + Driver ({userData?.numerologyData?.driver || 'N/A'}) + Conductor ({userData?.numerologyData?.conductor || 'N/A'})</p> */}
         </div>
       </Card>
     </div>

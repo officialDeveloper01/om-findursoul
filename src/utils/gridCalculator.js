@@ -1,27 +1,24 @@
-// Chaldean alphabet-to-number mapping remains the same...
-
 export const calculateLoshoGrid = (dateOfBirth) => {
   console.log('Calculating Losho Grid for date:', dateOfBirth);
   
   // Normalize input date string:
+  // Converts YYYY-MM-DD to DDMMYYYY,
+  // Removes separators from DD/MM/YYYY or DD-MM-YYYY,
+  // Else strips non-digit characters
   const normalizeDate = (dateStr) => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const [year, month, day] = dateStr.split('-');
-      return { date: day + month + year, day };
+      return day + month + year;  // DDMMYYYY as string without separator
     } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-      const [day, month, year] = dateStr.split('/');
-      return { date: day + month + year, day };
+      return dateStr.split('/').join('');
     } else if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
-      const [day, month, year] = dateStr.split('-');
-      return { date: day + month + year, day };
+      return dateStr.split('-').join('');
     } else {
-      const digitsOnly = dateStr.replace(/\D/g, '');
-      const day = digitsOnly.slice(0, 2);
-      return { date: digitsOnly, day };
+      return dateStr.replace(/\D/g, '');
     }
   };
 
-  const { date: normalizedDateString, day } = normalizeDate(dateOfBirth);
+  const normalizedDateString = normalizeDate(dateOfBirth);
   console.log('Normalized date string:', normalizedDateString);
 
   const digits = normalizedDateString.split('').map(Number);
@@ -47,28 +44,17 @@ export const calculateLoshoGrid = (dateOfBirth) => {
     frequencies[7], frequencies[8], frequencies[9]
   ];
 
-  // Driver number = reduced day of birth
-  const reduce = (num) => {
-    while (num > 9) {
-      num = num.toString().split('').map(Number).reduce((a, b) => a + b, 0);
-    }
-    return num;
-  };
-
-  const driverNumber = reduce(parseInt(day));
-
-  console.log('Driver Number:', driverNumber);
+  console.log('Generated grid:', grid);
 
   return {
     grid,
     frequencies,
-    driverNumber,
     originalDate: dateOfBirth,
     digits
   };
 };
 
-// Format date in Indian style
+// Utility function: format date to Indian DD/MM/YYYY
 export const formatDateToIndian = (date) => {
   return new Date(date).toLocaleDateString('en-IN', {
     day: '2-digit',
@@ -79,6 +65,7 @@ export const formatDateToIndian = (date) => {
 
 // Life Path calculation with master number check (11,22,33)
 export const calculateLifePath = (dateOfBirth) => {
+  // Normalize date input similar to Losho grid for consistency
   const normalizeDate = (dateStr) => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const [year, month, day] = dateStr.split('-');
@@ -97,6 +84,7 @@ export const calculateLifePath = (dateOfBirth) => {
   
   let sum = digits.reduce((acc, digit) => acc + digit, 0);
   
+  // Reduce to single digit unless master numbers (11, 22, 33)
   while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
     sum = sum.toString().split('').map(Number).reduce((acc, digit) => acc + digit, 0);
   }

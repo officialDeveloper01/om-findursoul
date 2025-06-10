@@ -136,14 +136,17 @@ export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
     return num;
   };
 
-  const dayMonthReduced = reduceToSingle((day + month).split('').map(Number).reduce((a, b) => a + b, 0));
-  const dayReduced = reduceToSingle(day.split('').map(Number).reduce((a, b) => a + b, 0));
-  const monthYearReduced = reduceToSingle((month + year).split('').map(Number).reduce((a, b) => a + b, 0));
-  const fifthValue = reduceToSingle(dayMonthReduced + dayReduced);
+  const sumDigits = (str) => str.split('').map(Number).reduce((a, b) => a + b, 0);
+
+  const dayMonthReduced = reduceToSingle(sumDigits(day + month));
+  const dayReduced = reduceToSingle(sumDigits(day));
+  const monthYearReduced = reduceToSingle(sumDigits(month + year));
+  const dayYearReduced = reduceToSingle(sumDigits(day + year)); // ✅ NEW LINE
+  const fifthValue = reduceToSingle(dayMonthReduced + dayYearReduced); // ✅ correct formula
 
   const bottomValues = [
     dayMonthReduced, dayMonthReduced, dayMonthReduced, dayMonthReduced,
-    dayReduced,
+    dayYearReduced, // ✅ CHANGED THIS LINE
     fifthValue,
     monthYearReduced, monthYearReduced, monthYearReduced, monthYearReduced, monthYearReduced
   ];
@@ -151,6 +154,7 @@ export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
   console.log('Bottom values calculated:', bottomValues);
   return bottomValues;
 };
+
 
 // Format date to DD/MM/YYYY
 export const formatDateToIndian = (date) => {

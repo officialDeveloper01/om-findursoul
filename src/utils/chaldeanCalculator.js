@@ -19,9 +19,9 @@ export const normalizeName = (name) => {
   return name.toUpperCase().replace(/[^A-Z]/g, '');
 };
 
-// Reduce number to single digit or keep master numbers
+// Always reduce number to a single digit
 export const reduceToSingleDigit = (num) => {
-  while (num > 9 && num !== 11 && num !== 22 && num !== 33) {
+  while (num > 9) {
     num = num.toString().split('').map(Number).reduce((a, b) => a + b, 0);
   }
   return num;
@@ -75,7 +75,7 @@ export const calculateChaldeanNumbers = (fullName) => {
   const soulUrgeTotal = calculateChaldeanValue(vowelString);
   const personalityTotal = calculateChaldeanValue(consonantString);
   
-  // Reduce to single digits or keep master numbers
+  // Always reduce to single digit (no master number handling)
   const nameNumber = reduceToSingleDigit(nameTotal);
   const soulUrgeNumber = reduceToSingleDigit(soulUrgeTotal);
   const personalityNumber = reduceToSingleDigit(personalityTotal);

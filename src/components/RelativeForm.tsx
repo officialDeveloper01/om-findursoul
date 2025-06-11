@@ -18,8 +18,23 @@ const RELATION_OPTIONS = [
   { value: 'GRANDMOTHER', label: 'Grandmother' }
 ];
 
-export const RelativeForm = ({ onUpdate, onRemove, index, initialData = {} }) => {
-  const [formData, setFormData] = useState({
+interface RelativeData {
+  fullName: string;
+  dateOfBirth: string;
+  timeOfBirth: string;
+  placeOfBirth: string;
+  relation: string;
+}
+
+interface RelativeFormProps {
+  onUpdate: (data: RelativeData, index: number) => void;
+  onRemove: (index: number) => void;
+  index: number;
+  initialData?: Partial<RelativeData>;
+}
+
+export const RelativeForm = ({ onUpdate, onRemove, index, initialData = {} }: RelativeFormProps) => {
+  const [formData, setFormData] = useState<RelativeData>({
     fullName: initialData.fullName || '',
     dateOfBirth: initialData.dateOfBirth || '',
     timeOfBirth: initialData.timeOfBirth || '',
@@ -27,7 +42,7 @@ export const RelativeForm = ({ onUpdate, onRemove, index, initialData = {} }) =>
     relation: initialData.relation || ''
   });
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof RelativeData, value: string) => {
     const updatedData = {
       ...formData,
       [field]: value

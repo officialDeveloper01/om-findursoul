@@ -27,7 +27,13 @@ export const UserDataForm = ({ onSubmit }) => {
   };
 
   const addRelative = () => {
-    setRelatives(prev => [...prev, {}]);
+    setRelatives(prev => [...prev, {
+      fullName: '',
+      dateOfBirth: '',
+      timeOfBirth: '',
+      placeOfBirth: '',
+      relation: ''
+    }]);
   };
 
   const removeRelative = (index) => {
@@ -46,16 +52,27 @@ export const UserDataForm = ({ onSubmit }) => {
       return;
     }
 
+    // Filter out incomplete relatives
+    const completeRelatives = relatives.filter(rel => 
+      rel.fullName && 
+      rel.dateOfBirth && 
+      rel.timeOfBirth && 
+      rel.placeOfBirth && 
+      rel.relation
+    );
+
     // Prepare entries array with main user first
     const entries = [
       {
         ...mainFormData,
         relation: 'SELF'
       },
-      ...relatives.filter(rel => rel.fullName && rel.dateOfBirth && rel.timeOfBirth && rel.placeOfBirth && rel.relation)
+      ...completeRelatives
     ];
 
     console.log('Submitting entries:', entries);
+    console.log('Complete relatives found:', completeRelatives.length);
+    
     setIsSubmitting(true);
     
     try {
@@ -175,50 +192,55 @@ export const UserDataForm = ({ onSubmit }) => {
         </CardContent>
       </Card>
 
-      {/* Add Family Member Button */}
-      <div className="text-center">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={addRelative}
-          className="border-amber-300 text-amber-700 hover:bg-amber-50"
-          disabled={isSubmitting}
-        >
-          <Plus size={16} className="mr-2" />
-          Add Family Member
-        </Button>
-      </div>
+      {/* Add Family Member Button - Only show if main form is valid */}
+      {isMainFormValid && (
+        <div className="text-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addRelative}
+            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+            disabled={isSubmitting}
+          >
+            <Plus size={16} className="mr-2" />
+            Add Family Member
+          </Button>
+        </div>
+      )}
 
       {/* Relatives Forms */}
       {relatives.map((relative, index) => (
         <div key={index} className="max-w-2xl mx-auto">
           <RelativeForm
-            onSubmit={updateRelative}
+            onUpdate={updateRelative}
             onRemove={removeRelative}
             index={index}
+            initialData={relative}
           />
         </div>
       ))}
 
       {/* Submit Button */}
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <Button 
-              onClick={handleSubmit}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 text-lg font-light tracking-wide disabled:opacity-50"
-              disabled={!isMainFormValid || isSubmitting}
-            >
-              {isSubmitting ? 'Calculating...' : `Calculate Sacred Grid${validRelativesCount > 0 ? ` (${validRelativesCount + 1} people)` : ''}`}
-            </Button>
-            {validRelativesCount > 0 && (
-              <p className="text-center text-sm text-gray-600 mt-2">
-                Including {validRelativesCount} family member{validRelativesCount > 1 ? 's' : ''}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {isMainFormValid && (
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <CardContent className="pt-6">
+              <Button 
+                onClick={handleSubmit}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 text-lg font-light tracking-wide disabled:opacity-50"
+                disabled={!isMainFormValid || isSubmitting}
+              >
+                {isSubmitting ? 'Calculating...' : `Calculate Sacred Grid${validRelativesCount > 0 ? ` (${validRelativesCount + 1} people)` : ''}`}
+              </Button>
+              {validRelativesCount > 0 && (
+                <p className="text-center text-sm text-gray-600 mt-2">
+                  Including {validRelativesCount} family member{validRelativesCount > 1 ? 's' : ''}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

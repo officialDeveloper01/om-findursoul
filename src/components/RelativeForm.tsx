@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,26 +18,34 @@ const RELATION_OPTIONS = [
   { value: 'GRANDMOTHER', label: 'Grandmother' }
 ];
 
-export const RelativeForm = ({ onSubmit, onRemove, index }) => {
+export const RelativeForm = ({ onUpdate, onRemove, index, initialData = {} }) => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    dateOfBirth: '',
-    timeOfBirth: '',
-    placeOfBirth: '',
-    relation: ''
+    fullName: initialData.fullName || '',
+    dateOfBirth: initialData.dateOfBirth || '',
+    timeOfBirth: initialData.timeOfBirth || '',
+    placeOfBirth: initialData.placeOfBirth || '',
+    relation: initialData.relation || ''
   });
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       [field]: value
-    }));
+    };
+    setFormData(updatedData);
+    
+    // Immediately update parent component
+    if (onUpdate) {
+      onUpdate(updatedData, index);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData, index);
-  };
+  // Update parent whenever formData changes
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate(formData, index);
+    }
+  }, [formData, onUpdate, index]);
 
   const isFormValid = formData.fullName && formData.dateOfBirth && formData.timeOfBirth && formData.placeOfBirth && formData.relation;
 
@@ -56,11 +64,14 @@ export const RelativeForm = ({ onSubmit, onRemove, index }) => {
       <CardHeader className="pb-4">
         <CardTitle className="text-lg font-light text-amber-700">
           Family Member #{index + 1}
+          {isFormValid && (
+            <span className="ml-2 text-sm text-green-600">✓ Complete</span>
+          )}
         </CardTitle>
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor={`fullName-${index}`} className="flex items-center gap-2 text-gray-700">
@@ -142,7 +153,7 @@ export const RelativeForm = ({ onSubmit, onRemove, index }) => {
               />
             </div>
           </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );

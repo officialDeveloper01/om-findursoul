@@ -15,7 +15,10 @@ const RELATION_OPTIONS = [
   { value: 'UNCLE', label: 'Uncle' },
   { value: 'AUNT', label: 'Aunt' },
   { value: 'GRANDFATHER', label: 'Grandfather' },
-  { value: 'GRANDMOTHER', label: 'Grandmother' }
+  { value: 'GRANDMOTHER', label: 'Grandmother' },
+  { value: 'SPOUSE', label: 'Spouse' },
+  { value: 'SON', label: 'Son' },
+  { value: 'DAUGHTER', label: 'Daughter' }
 ];
 
 export const RelativeForm = ({ onSubmit, onRemove, index }) => {

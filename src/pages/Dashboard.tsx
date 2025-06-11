@@ -20,29 +20,35 @@ const Dashboard = () => {
   const [numerologyData, setNumerologyData] = useState(null);
   const [currentView, setCurrentView] = useState('form');
   const [isLoading, setIsLoading] = useState(false);
+  const [allResults, setAllResults] = useState([]);
   const { user } = useAuth();
 
   const handleFormSubmit = async (data) => {
-    console.log('Form submitted:', data);
+    console.log('Form submitted with entries:', data);
     setIsLoading(true);
     
     try {
-      // Calculate grid and numerology using Indian system with Chaldean numbers
-      const calculatedNumerology = calculateAllNumerology(data.dateOfBirth, data.fullName);
+      const results = [];
       
-      console.log('Numerology calculated:', calculatedNumerology);
-      
-      // Prepare data for Firebase with Indian numerology structure and Chaldean numbers
-      const tableData = {
-        fullName: data.fullName,
-        dateOfBirth: data.dateOfBirth,
-        timeOfBirth: data.timeOfBirth,
-        placeOfBirth: data.placeOfBirth,
-        mobileNumber: data.mobileNumber,
-        gridData: calculatedNumerology.loshuGrid, // Use the loshu grid from numerology
-        numerologyData: calculatedNumerology,
-        createdAt: new Date().toISOString()
-      };
+      // Process each entry (main user + relatives)
+      for (const entry of data.entries) {
+        const calculatedNumerology = calculateAllNumerology(entry.dateOfBirth, entry.fullName);
+        
+        console.log(`Numerology calculated for ${entry.fullName}:`, calculatedNumerology);
+        
+        const entryData = {
+          fullName: entry.fullName,
+          dateOfBirth: entry.dateOfBirth,
+          timeOfBirth: entry.timeOfBirth,
+          placeOfBirth: entry.placeOfBirth,
+          relation: entry.relation,
+          gridData: calculatedNumerology.loshuGrid,
+          numerologyData: calculatedNumerology,
+          createdAt: new Date().toISOString()
+        };
+        
+        results.push(entryData);
+      }
       
       // Wait for user to be available
       if (!user?.uid) {
@@ -50,22 +56,22 @@ const Dashboard = () => {
         throw new Error('User not authenticated');
       }
 
-      // Save to Firebase under user's UID
-      const userRef = ref(database, `users/${user.uid}`);
-      const result = await push(userRef, tableData);
-      console.log('Data saved to Firebase with key:', result.key);
+      // Save to Firebase using phone number as key
+      const phoneRef = ref(database, `users/${data.phoneNumber}`);
+      const entryRef = ref(database, `users/${data.phoneNumber}/entries`);
       
-      // Update UI state - prepare grid data in expected format
-      const gridDataForDisplay = {
-        frequencies: calculatedNumerology.loshuGrid,
-        grid: [],
-        originalDate: data.dateOfBirth,
-        digits: []
-      };
+      // Save entries array
+      const saveResult = await push(entryRef, {
+        entries: results,
+        phoneNumber: data.phoneNumber,
+        createdAt: new Date().toISOString(),
+        userId: user.uid
+      });
       
-      setUserData(data);
-      setGridData(gridDataForDisplay);
-      setNumerologyData(calculatedNumerology);
+      console.log('Data saved to Firebase with key:', saveResult.key);
+      
+      // Set results for display
+      setAllResults(results);
       setCurrentView('results');
       
     } catch (error) {
@@ -80,6 +86,7 @@ const Dashboard = () => {
     setUserData(null);
     setGridData(null);
     setNumerologyData(null);
+    setAllResults([]);
     setCurrentView('form');
   };
 
@@ -89,7 +96,7 @@ const Dashboard = () => {
       <CelestialHeader currentView={currentView} setCurrentView={setCurrentView} />
 
       {/* Hero Section - Only show when on form view */}
-      {currentView === 'form' && !userData && (
+      {currentView === 'form' && allResults.length === 0 && (
         <section className="pt-24 pb-16 px-4 text-center text-white">
           <div className="max-w-4xl mx-auto">
             <div className="slide-up">
@@ -153,8 +160,8 @@ const Dashboard = () => {
                     Begin Your Sacred Journey
                   </h2>
                   <p className="text-amber-400 max-w-2xl mx-auto text-lg leading-relaxed">
-                    Enter your birth details to calculate your personal numerology and discover 
-                    the cosmic patterns that influence your life path.
+                    Enter your birth details and optionally add family members to calculate 
+                    personal numerology and discover the cosmic patterns that influence your lives.
                   </p>
                   <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-6"></div>
                 </div>
@@ -165,14 +172,14 @@ const Dashboard = () => {
               </div>
             )}
 
-            {currentView === 'results' && userData && (gridData || numerologyData) && (
+            {currentView === 'results' && allResults.length > 0 && (
               <div className="space-y-8 pt-16">
                 <div className="text-center fade-in">
                   <h2 className="text-4xl font-light text-amber-700 mb-2">
                     Your Sacred Analysis
                   </h2>
                   <p className="text-amber-400 mb-6 text-lg">
-                    For <span className="golden-glow font-semibold">{userData.fullName}</span>
+                    Family Reading ({allResults.length} member{allResults.length > 1 ? 's' : ''})
                   </p>
                   <Button 
                     onClick={handleNewEntry}
@@ -183,18 +190,49 @@ const Dashboard = () => {
                   </Button>
                 </div>
                 
-                {/* Keep existing Loshu Grid and Numerology Display unchanged */}
-                <div className="slide-up">
-                  {gridData && (
-                    <LoshoGrid gridData={gridData} userData={userData} />
-                  )}
-                  
-                  {numerologyData && (
-                    <NumerologyDisplay 
-                      numerologyData={numerologyData} 
-                      userData={userData} 
-                    />
-                  )}
+                {/* Display results for each family member */}
+                <div className="space-y-12">
+                  {allResults.map((result, index) => (
+                    <div key={index} className="slide-up">
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-light text-amber-600 mb-2">
+                          {result.fullName}
+                        </h3>
+                        <div className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+                          {result.relation}
+                        </div>
+                      </div>
+                      
+                      {/* Create grid data format for LoshoGrid component */}
+                      <LoshoGrid 
+                        gridData={{
+                          frequencies: result.gridData,
+                          grid: [],
+                          originalDate: result.dateOfBirth,
+                          digits: []
+                        }} 
+                        userData={{
+                          fullName: result.fullName,
+                          dateOfBirth: result.dateOfBirth,
+                          timeOfBirth: result.timeOfBirth,
+                          placeOfBirth: result.placeOfBirth,
+                          numerologyData: result.numerologyData
+                        }}
+                      />
+                      
+                      <div className="mt-6">
+                        <NumerologyDisplay 
+                          numerologyData={result.numerologyData} 
+                          userData={{
+                            fullName: result.fullName,
+                            dateOfBirth: result.dateOfBirth,
+                            timeOfBirth: result.timeOfBirth,
+                            placeOfBirth: result.placeOfBirth
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

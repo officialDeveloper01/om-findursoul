@@ -14,39 +14,49 @@ export const SearchTables = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [selectedGrid, setSelectedGrid] = useState(null);
-  const [selectedNumerology, setSelectedNumerology] = useState(null);
-  const [selectedUserData, setSelectedUserData] = useState(null);
+  const [selectedResults, setSelectedResults] = useState([]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSearched(true);
-    setSelectedGrid(null);
-    setSelectedNumerology(null);
-    setSelectedUserData(null);
+    setSelectedResults([]);
     
     try {
-      // Search across all users for tables with matching mobile number
-      const usersRef = ref(database, 'users');
-      const snapshot = await get(usersRef);
+      // Search by phone number directly
+      const phoneRef = ref(database, `users/${mobileNumber}`);
+      const snapshot = await get(phoneRef);
       const results: any[] = [];
       
       if (snapshot.exists()) {
-        const users = snapshot.val();
-        Object.keys(users).forEach(userId => {
-          const userTables = users[userId];
-          Object.keys(userTables).forEach(tableId => {
-            const table = userTables[tableId];
-            if (table.mobileNumber === mobileNumber) {
+        const phoneData = snapshot.val();
+        if (phoneData.entries) {
+          // Handle new structure with entries
+          Object.keys(phoneData.entries).forEach(entryId => {
+            const entryGroup = phoneData.entries[entryId];
+            if (entryGroup.entries && Array.isArray(entryGroup.entries)) {
+              entryGroup.entries.forEach((entry: any, index: number) => {
+                results.push({
+                  id: `${entryId}-${index}`,
+                  groupId: entryId,
+                  ...entry,
+                  createdAt: entryGroup.createdAt
+                });
+              });
+            }
+          });
+        } else {
+          // Handle old structure (fallback)
+          Object.keys(phoneData).forEach(tableId => {
+            const table = phoneData[tableId];
+            if (table.fullName) {
               results.push({
                 id: tableId,
-                userId,
                 ...table
               });
             }
           });
-        });
+        }
       }
       
       setSearchResults(results);
@@ -57,39 +67,31 @@ export const SearchTables = () => {
     }
   };
 
-  const handleShowResults = (result: any) => {
-    console.log('Showing results for:', result);
+  const handleShowResults = (groupId: string) => {
+    console.log('Showing results for group:', groupId);
     
-    // Prepare grid data from stored frequencies
-    const gridData = {
-      frequencies: result.gridData || result.numerologyData?.loshuGrid || {},
-      grid: [],
-      originalDate: result.dateOfBirth,
-      digits: []
-    };
+    // Get all entries from the same group
+    const groupResults = searchResults.filter(result => result.groupId === groupId);
     
-    // Prepare user data
-    const userData = {
+    const formattedResults = groupResults.map(result => ({
       fullName: result.fullName,
       dateOfBirth: result.dateOfBirth,
       timeOfBirth: result.timeOfBirth,
       placeOfBirth: result.placeOfBirth,
-      mobileNumber: result.mobileNumber
-    };
+      relation: result.relation,
+      gridData: result.gridData,
+      numerologyData: result.numerologyData
+    }));
     
-    setSelectedGrid(gridData);
-    setSelectedNumerology(result.numerologyData || null);
-    setSelectedUserData(userData);
+    setSelectedResults(formattedResults);
   };
 
   const handleBackToSearch = () => {
-    setSelectedGrid(null);
-    setSelectedNumerology(null);
-    setSelectedUserData(null);
+    setSelectedResults([]);
   };
 
   // If showing results, display them
-  if ((selectedGrid || selectedNumerology) && selectedUserData) {
+  if (selectedResults.length > 0) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="text-center">
@@ -101,21 +103,72 @@ export const SearchTables = () => {
             ← Back to Search Results
           </Button>
         </div>
-        {/* Show Loshu Grid First */}
-        {selectedGrid && (
-          <LoshoGrid gridData={selectedGrid} userData={selectedUserData} />
-        )}
         
-        {/* Show Numerology Display */}
-        {selectedNumerology && (
-          <NumerologyDisplay 
-            numerologyData={selectedNumerology} 
-            userData={selectedUserData} 
-          />
-        )}
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-light text-amber-600 mb-2">
+            Family Reading Results
+          </h3>
+          <p className="text-amber-400">
+            {selectedResults.length} member{selectedResults.length > 1 ? 's' : ''} found
+          </p>
+        </div>
+
+        {/* Display results for each family member */}
+        <div className="space-y-12">
+          {selectedResults.map((result, index) => (
+            <div key={index}>
+              <div className="text-center mb-6">
+                <h4 className="text-xl font-light text-amber-600 mb-2">
+                  {result.fullName}
+                </h4>
+                <div className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+                  {result.relation}
+                </div>
+              </div>
+              
+              <LoshoGrid 
+                gridData={{
+                  frequencies: result.gridData,
+                  grid: [],
+                  originalDate: result.dateOfBirth,
+                  digits: []
+                }} 
+                userData={{
+                  fullName: result.fullName,
+                  dateOfBirth: result.dateOfBirth,
+                  timeOfBirth: result.timeOfBirth,
+                  placeOfBirth: result.placeOfBirth,
+                  numerologyData: result.numerologyData
+                }}
+              />
+              
+              <div className="mt-6">
+                <NumerologyDisplay 
+                  numerologyData={result.numerologyData} 
+                  userData={{
+                    fullName: result.fullName,
+                    dateOfBirth: result.dateOfBirth,
+                    timeOfBirth: result.timeOfBirth,
+                    placeOfBirth: result.placeOfBirth
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
+
+  // Group results by groupId for display
+  const groupedResults = searchResults.reduce((groups, result) => {
+    const groupId = result.groupId || result.id;
+    if (!groups[groupId]) {
+      groups[groupId] = [];
+    }
+    groups[groupId].push(result);
+    return groups;
+  }, {});
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -160,7 +213,7 @@ export const SearchTables = () => {
             Search Results for {mobileNumber}
           </h3>
           
-          {searchResults.length === 0 ? (
+          {Object.keys(groupedResults).length === 0 ? (
             <Card className="text-center py-8">
               <CardContent>
                 <p className="text-gray-500">No records found for this number.</p>
@@ -168,41 +221,47 @@ export const SearchTables = () => {
             </Card>
           ) : (
             <div className="space-y-4">
-              {searchResults.map((result: any, index) => (
-                <Card key={result.id} className="shadow-md">
+              {Object.entries(groupedResults).map(([groupId, groupResults]: [string, any[]]) => (
+                <Card key={groupId} className="shadow-md">
                   <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800">{result.fullName}</h4>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar size={14} />
-                          <span>{result.dateOfBirth}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock size={14} />
-                          <span>{result.timeOfBirth}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <MapPin size={14} />
-                          <span>{result.placeOfBirth}</span>
-                        </div>
-                        {result.numerologyData && (
-                          <div className="text-sm text-amber-600 font-medium">
-                            Life Path: {result.numerologyData.lifePath}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-gray-800 text-center">
+                        Family Reading ({groupResults.length} member{groupResults.length > 1 ? 's' : ''})
+                      </h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {groupResults.slice(0, 2).map((result: any, index) => (
+                          <div key={index} className="space-y-2">
+                            <div className="font-medium text-gray-800">{result.fullName}</div>
+                            <div className="inline-block px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">
+                              {result.relation}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Calendar size={14} />
+                              <span>{result.dateOfBirth}</span>
+                            </div>
                           </div>
-                        )}
+                        ))}
                       </div>
-                      <div className="flex items-center justify-end">
+                      
+                      {groupResults.length > 2 && (
+                        <div className="text-sm text-gray-500 text-center">
+                          +{groupResults.length - 2} more member{groupResults.length - 2 > 1 ? 's' : ''}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-center">
                         <Button 
-                          onClick={() => handleShowResults(result)}
+                          onClick={() => handleShowResults(groupId)}
                           className="bg-amber-600 hover:bg-amber-700 text-white"
                         >
-                          Show Analysis
+                          Show Family Analysis
                         </Button>
                       </div>
                     </div>
-                    <div className="mt-4 text-xs text-gray-500">
-                      Created: {new Date(result.createdAt).toLocaleDateString()}
+                    
+                    <div className="mt-4 text-xs text-gray-500 text-center">
+                      Created: {new Date(groupResults[0].createdAt).toLocaleDateString()}
                     </div>
                   </CardContent>
                 </Card>

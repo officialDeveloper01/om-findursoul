@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,11 +31,13 @@ export const SearchTables = () => {
       
       if (snapshot.exists()) {
         const phoneData = snapshot.val();
+        
         if (phoneData.entries) {
           // Handle new structure with entries
           Object.keys(phoneData.entries).forEach(entryId => {
             const entryGroup = phoneData.entries[entryId];
             if (entryGroup.entries && Array.isArray(entryGroup.entries)) {
+              // Each entryGroup contains multiple family members
               entryGroup.entries.forEach((entry: any, index: number) => {
                 results.push({
                   id: `${entryId}-${index}`,
@@ -45,20 +48,10 @@ export const SearchTables = () => {
               });
             }
           });
-        } else {
-          // Handle old structure (fallback)
-          Object.keys(phoneData).forEach(tableId => {
-            const table = phoneData[tableId];
-            if (table.fullName) {
-              results.push({
-                id: tableId,
-                ...table
-              });
-            }
-          });
         }
       }
       
+      console.log('Search results:', results);
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching tables:', error);

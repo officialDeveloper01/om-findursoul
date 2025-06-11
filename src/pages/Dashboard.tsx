@@ -8,7 +8,7 @@ import { CelestialHeader } from '@/components/CelestialHeader';
 import { SpiritualFooter } from '@/components/SpiritualFooter';
 import { CelestialLoader } from '@/components/CelestialLoader';
 import { calculateAllNumerology } from '@/utils/numerologyCalculator';
-import { ref, push } from 'firebase/database';
+import { ref, set } from 'firebase/database';
 import { database } from '@/config/firebase';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,19 +56,21 @@ const Dashboard = () => {
         throw new Error('User not authenticated');
       }
 
-      // Save to Firebase using phone number as key
-      const phoneRef = ref(database, `users/${data.phoneNumber}`);
-      const entryRef = ref(database, `users/${data.phoneNumber}/entries`);
+      // Create unique timestamp-based key for this submission
+      const timestamp = Date.now();
       
-      // Save entries array
-      const saveResult = await push(entryRef, {
+      // Save to Firebase using phone number as key with proper structure
+      const entriesRef = ref(database, `users/${data.phoneNumber}/entries/${timestamp}`);
+      
+      // Save all entries under one timestamp key
+      await set(entriesRef, {
         entries: results,
         phoneNumber: data.phoneNumber,
         createdAt: new Date().toISOString(),
         userId: user.uid
       });
       
-      console.log('Data saved to Firebase with key:', saveResult.key);
+      console.log('Data saved to Firebase with timestamp:', timestamp);
       
       // Set results for display
       setAllResults(results);

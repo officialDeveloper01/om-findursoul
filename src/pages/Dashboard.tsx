@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserDataForm } from '@/components/UserDataForm';
@@ -7,6 +8,7 @@ import { SearchTables } from '@/components/SearchTables';
 import { CelestialHeader } from '@/components/CelestialHeader';
 import { SpiritualFooter } from '@/components/SpiritualFooter';
 import { CelestialLoader } from '@/components/CelestialLoader';
+import { Badge } from '@/components/ui/badge';
 import { calculateAllNumerology } from '@/utils/numerologyCalculator';
 import { ref, set } from 'firebase/database';
 import { database } from '@/config/firebase';
@@ -147,7 +149,7 @@ const Dashboard = () => {
       <main className="relative">
         {/* Background for content sections */}
         <div className="bg-gradient-to-b from-transparent via-white/95 to-white min-h-screen">
-          <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="max-w-6xl mx-auto px-4 py-12">
             
             {isLoading && (
               <div className="text-center mb-8">
@@ -192,47 +194,64 @@ const Dashboard = () => {
                   </Button>
                 </div>
                 
-                {/* Display results for each family member */}
-                <div className="space-y-12">
+                {/* Responsive Grid Display for All Family Members */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {allResults.map((result, index) => (
                     <div key={index} className="slide-up">
-                      <div className="text-center mb-6">
-                        <h3 className="text-2xl font-light text-amber-600 mb-2">
-                          {result.fullName}
-                        </h3>
-                        <div className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-                          {result.relation}
+                      <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
+                        <div className="p-6">
+                          {/* Header with Name and Relation Badge */}
+                          <div className="text-center mb-6">
+                            <h3 className="text-xl font-semibold text-blue-800 mb-3">
+                              {result.fullName}
+                            </h3>
+                            <Badge 
+                              variant="outline" 
+                              className={`
+                                px-3 py-1 text-sm font-medium rounded-full
+                                ${result.relation === 'SELF' 
+                                  ? 'bg-amber-100 text-amber-700 border-amber-300' 
+                                  : 'bg-blue-100 text-blue-700 border-blue-300'
+                                }
+                              `}
+                            >
+                              {result.relation === 'SELF' ? 'Main' : result.relation}
+                            </Badge>
+                          </div>
+                          
+                          {/* Lo Shu Grid */}
+                          <div className="mb-6">
+                            <LoshoGrid 
+                              gridData={{
+                                frequencies: result.gridData,
+                                grid: [],
+                                originalDate: result.dateOfBirth,
+                                digits: []
+                              }} 
+                              userData={{
+                                fullName: result.fullName,
+                                dateOfBirth: result.dateOfBirth,
+                                timeOfBirth: result.timeOfBirth,
+                                placeOfBirth: result.placeOfBirth,
+                                numerologyData: result.numerologyData
+                              }}
+                            />
+                          </div>
+                          
+                          {/* Numerology Display */}
+                          <div>
+                            <NumerologyDisplay 
+                              numerologyData={result.numerologyData} 
+                              userData={{
+                                fullName: result.fullName,
+                                dateOfBirth: result.dateOfBirth,
+                                timeOfBirth: result.timeOfBirth,
+                                placeOfBirth: result.placeOfBirth
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Create grid data format for LoshoGrid component */}
-                      <LoshoGrid 
-                        gridData={{
-                          frequencies: result.gridData,
-                          grid: [],
-                          originalDate: result.dateOfBirth,
-                          digits: []
-                        }} 
-                        userData={{
-                          fullName: result.fullName,
-                          dateOfBirth: result.dateOfBirth,
-                          timeOfBirth: result.timeOfBirth,
-                          placeOfBirth: result.placeOfBirth,
-                          numerologyData: result.numerologyData
-                        }}
-                      />
-                      
-                      <div className="mt-6">
-                        <NumerologyDisplay 
-                          numerologyData={result.numerologyData} 
-                          userData={{
-                            fullName: result.fullName,
-                            dateOfBirth: result.dateOfBirth,
-                            timeOfBirth: result.timeOfBirth,
-                            placeOfBirth: result.placeOfBirth
-                          }}
-                        />
-                      </div>
+                      </Card>
                     </div>
                   ))}
                 </div>

@@ -2,102 +2,82 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const hiddenMap = {
-    11: 2, 22: 3, 33: 4, 44: 5,
-    55: 6, 66: 7, 77: 6, 88: 7, 99: 8,
+    11: 2,
+    22: 3,
+    33: 4,
+    44: 5,
+    55: 6,
+    66: 7,
+    77: 6,
+    88: 7,
+    99: 8,
   };
 
   const calculateFrequencies = () => {
     const frequencies = { ...gridData.frequencies };
     const driver = userData?.numerologyData?.driver;
     const conductor = userData?.numerologyData?.conductor;
+
     if (driver) frequencies[driver] = (frequencies[driver] || 0) + 1;
     if (conductor) frequencies[conductor] = (frequencies[conductor] || 0) + 1;
+
     return frequencies;
   };
 
-  const baseFrequencies = calculateFrequencies();
+  const frequencies = calculateFrequencies();
 
-  const getHiddenNumbers = (inputFreq) => {
-    const freq = { ...inputFreq };
-    const hiddenCountMap = {};
-    const visited = new Set();
-    let hasNew = true;
+  const getHiddenNumbers = () => {
+  const fullFreq = { ...frequencies };        // Clone of original frequencies
+  const hiddenCountMap = {};                  // Final hidden numbers (green)
+  const visited = new Set();                  // To prevent repeat processing
+  let hasNew = true;
 
-    while (hasNew) {
-      hasNew = false;
-      for (let i = 1; i <= 9; i++) {
-        const count = freq[i] || 0;
-        const repeatCount = Math.floor(count / 2);
-        const repeated = Number(String(i).repeat(2));
+  while (hasNew) {
+    hasNew = false;
 
-        if (repeatCount >= 1 && hiddenMap[repeated]) {
-          const hidden = hiddenMap[repeated];
-          const key = `${i}->${hidden}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            hiddenCountMap[hidden] = (hiddenCountMap[hidden] || 0) + repeatCount;
-            freq[hidden] = (freq[hidden] || 0) + repeatCount;
-            hasNew = true;
-          }
-        }
-      }
-    }
-
-    return { hiddenCountMap, fullFrequencies: freq };
-  };
-
-  const { hiddenCountMap, fullFrequencies } = getHiddenNumbers(baseFrequencies);
-
-  // Calculate reduced sums from base frequency for stage 1
-  const getMissingReducedSums = (sourceFreq, derivedFromFreq) => {
-    const missing = {};
     for (let i = 1; i <= 9; i++) {
-      const count = derivedFromFreq[i] || 0;
-      if (count >= 2) {
-        const repeated = Number(String(i).repeat(2));
-        const reduced = String(repeated).split("").map(Number).reduce((a, b) => a + b, 0);
-        if (!sourceFreq[reduced]) {
-          missing[reduced] = (missing[reduced] || 0) + Math.floor(count / 2);
+      const count = fullFreq[i] || 0;
+      const repeatCount = Math.floor(count / 2);
+      const repeated = Number(String(i).repeat(2)); // e.g., 22, 33
+
+      if (repeatCount >= 1 && hiddenMap[repeated]) {
+        const hidden = hiddenMap[repeated];
+
+        // Avoid infinite loop — only process new repeats
+        const key = `${i}->${hidden}`;
+        if (!visited.has(key)) {
+          visited.add(key);
+          hiddenCountMap[hidden] = (hiddenCountMap[hidden] || 0) + repeatCount;
+          fullFreq[hidden] = (fullFreq[hidden] || 0) + repeatCount;
+          hasNew = true; // New hidden added, loop again
         }
       }
     }
-    return missing;
-  };
+  }
 
-  const stage1Missing = getMissingReducedSums(baseFrequencies, baseFrequencies);
-  const stage2Missing = getMissingReducedSums(fullFrequencies, fullFrequencies);
+  return hiddenCountMap;
+};
+
+
+  const hiddenNumbers = getHiddenNumbers();
 
   const renderGridCell = (digit) => {
-    const baseCount = baseFrequencies[digit] || 0;
-    const hiddenCount = hiddenCountMap[digit] || 0;
-    const stage1MinusCount = stage1Missing[digit] || 0;
-    const stage2MinusCount = stage2Missing[digit] || 0;
+    const count = frequencies[digit] || 0;
+    const hiddenCount = hiddenNumbers[digit] || 0;
 
     return (
       <div className="relative aspect-square bg-white border border-gray-300 rounded-lg flex items-center justify-center text-center p-2">
         {/* Main numbers */}
-        {baseCount > 0 && (
+        {count > 0 && (
           <div className="text-2xl md:text-3xl font-semibold text-gray-800 flex flex-wrap justify-center">
-            {String(digit).repeat(baseCount)}
+            {String(digit).repeat(count)}
           </div>
         )}
 
-        {/* Hidden numbers */}
+        {/* Hidden numbers shown in green circle */}
         {hiddenCount > 0 && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-l font-bold">
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center text-l font-bold">
             {String(digit).repeat(hiddenCount)}
-          </div>
-        )}
-
-        {/* Red minus signs */}
-        {(stage1MinusCount > 0 || stage2MinusCount > 0) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-1 pointer-events-none">
-            {[...Array(stage1MinusCount)].map((_, i) => (
-              <span key={`s1-${i}`} className="text-red-600 text-xl font-bold leading-none">-</span>
-            ))}
-            {[...Array(stage2MinusCount)].map((_, i) => (
-              <span key={`s2-${i}`} className="text-red-400 text-xl font-bold leading-none">-</span>
-            ))}
           </div>
         )}
       </div>
@@ -133,6 +113,10 @@ export const LoshoGrid = ({ gridData, userData }) => {
             ))}
           </div>
         </CardContent>
+
+        <div className="px-6 pb-6 text-center text-sm text-gray-600 space-y-2">
+          {/* Optional legend or insights can go here */}
+        </div>
       </Card>
     </div>
   );

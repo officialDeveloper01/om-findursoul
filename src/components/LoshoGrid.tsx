@@ -91,8 +91,8 @@ export const LoshoGrid = ({ gridData, userData }) => {
       ) {
         const total = digit * (actualCount + hiddenCount);
         const reduced = singleDigitSum(total);
-        if (!frequencies[reduced]) {
-          dashes[reduced] = (dashes[reduced] || 0) + 1;
+        if (!frequencies[reduced] && !dashes[reduced]) {
+          dashes[reduced] = 1;
         }
       }
     }

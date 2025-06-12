@@ -72,7 +72,7 @@ export const CelestialHeader = ({ currentView, setCurrentView }: CelestialHeader
 
             {/* User Info */}
             <div className="flex items-center gap-4 ml-4 pl-4 border-l border-amber-200">
-              <span className="text-slate-600 text-sm font-medium">
+              <span className="text-white text-sm font-medium">
                 {user?.email?.split('@')[0]}
               </span>
               <Button 

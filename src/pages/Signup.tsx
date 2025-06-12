@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +12,13 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [authPass, setAuthPass] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { signup } = useAuth();
   const navigate = useNavigate();
+
+  const FIXED_AUTH_PASS = 'vedic2024'; // 🔐 Replace with your secure pass
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +27,12 @@ const Signup = () => {
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (authPass !== FIXED_AUTH_PASS) {
+      setError('Invalid Auth Pass');
       setLoading(false);
       return;
     }
@@ -73,6 +81,7 @@ const Signup = () => {
             <CardTitle className="text-2xl font-light text-slate-700">Begin Your Journey</CardTitle>
             <p className="text-slate-500 mt-2">Create your sacred space to explore cosmic wisdom</p>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
@@ -80,7 +89,7 @@ const Signup = () => {
                   {error}
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="name" className="flex items-center gap-2 text-slate-700">
                   <User size={16} />
@@ -140,6 +149,21 @@ const Signup = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm your password"
+                  className="border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="authPass" className="flex items-center gap-2 text-slate-700">
+                  🔐 Auth Pass
+                </Label>
+                <Input
+                  id="authPass"
+                  type="password"
+                  value={authPass}
+                  onChange={(e) => setAuthPass(e.target.value)}
+                  placeholder="Enter the secret pass"
                   className="border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
                   required
                 />

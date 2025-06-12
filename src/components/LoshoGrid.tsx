@@ -13,51 +13,36 @@ export const LoshoGrid = ({ gridData, userData }) => {
     99: 8,
   };
 
-  const calculateFrequencies = () => {
-    const frequencies = { ...gridData.frequencies };
-    const driver = userData?.numerologyData?.driver;
-    const conductor = userData?.numerologyData?.conductor;
-
-    if (driver) frequencies[driver] = (frequencies[driver] || 0) + 1;
-    if (conductor) frequencies[conductor] = (frequencies[conductor] || 0) + 1;
-
-    return frequencies;
-  };
-
-  const frequencies = calculateFrequencies();
+  const frequencies = { ...gridData.frequencies }; // no driver/conductor added
 
   const getHiddenNumbers = () => {
-  const fullFreq = { ...frequencies };        // Clone of original frequencies
-  const hiddenCountMap = {};                  // Final hidden numbers (green)
-  const visited = new Set();                  // To prevent repeat processing
-  let hasNew = true;
+    const fullFreq = { ...frequencies };
+    const hiddenCountMap = {};
+    const visited = new Set();
+    let hasNew = true;
 
-  while (hasNew) {
-    hasNew = false;
+    while (hasNew) {
+      hasNew = false;
+      for (let i = 1; i <= 9; i++) {
+        const count = fullFreq[i] || 0;
+        const repeatCount = Math.floor(count / 2);
+        const repeated = Number(String(i).repeat(2));
 
-    for (let i = 1; i <= 9; i++) {
-      const count = fullFreq[i] || 0;
-      const repeatCount = Math.floor(count / 2);
-      const repeated = Number(String(i).repeat(2)); // e.g., 22, 33
-
-      if (repeatCount >= 1 && hiddenMap[repeated]) {
-        const hidden = hiddenMap[repeated];
-
-        // Avoid infinite loop — only process new repeats
-        const key = `${i}->${hidden}`;
-        if (!visited.has(key)) {
-          visited.add(key);
-          hiddenCountMap[hidden] = (hiddenCountMap[hidden] || 0) + repeatCount;
-          fullFreq[hidden] = (fullFreq[hidden] || 0) + repeatCount;
-          hasNew = true; // New hidden added, loop again
+        if (repeatCount >= 1 && hiddenMap[repeated]) {
+          const hidden = hiddenMap[repeated];
+          const key = `${i}->${hidden}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            hiddenCountMap[hidden] = (hiddenCountMap[hidden] || 0) + repeatCount;
+            fullFreq[hidden] = (fullFreq[hidden] || 0) + repeatCount;
+            hasNew = true;
+          }
         }
       }
     }
-  }
 
-  return hiddenCountMap;
-};
-
+    return hiddenCountMap;
+  };
 
   const hiddenNumbers = getHiddenNumbers();
 
@@ -67,14 +52,11 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
     return (
       <div className="relative aspect-square bg-white border border-gray-300 rounded-lg flex items-center justify-center text-center p-2">
-        {/* Main numbers */}
         {count > 0 && (
           <div className="text-2xl md:text-3xl font-semibold text-gray-800 flex flex-wrap justify-center">
             {String(digit).repeat(count)}
           </div>
         )}
-
-        {/* Hidden numbers shown in green circle */}
         {hiddenCount > 0 && (
           <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center text-l font-bold">
             {String(digit).repeat(hiddenCount)}

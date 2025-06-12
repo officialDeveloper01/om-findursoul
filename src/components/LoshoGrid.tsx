@@ -13,12 +13,12 @@ export const LoshoGrid = ({ gridData, userData }) => {
     99: 8,
   };
 
-  const frequencies = { ...gridData.frequencies }; // no driver/conductor added
+  const frequencies: Record<number, number> = { ...gridData.frequencies };
 
   const getHiddenNumbers = () => {
     const fullFreq = { ...frequencies };
-    const hiddenCountMap = {};
-    const visited = new Set();
+    const hiddenCountMap: Record<number, number> = {};
+    const visited = new Set<string>();
     let hasNew = true;
 
     while (hasNew) {
@@ -46,9 +46,66 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
   const hiddenNumbers = getHiddenNumbers();
 
-  const renderGridCell = (digit) => {
+  const singleDigitSum = (num: number): number => {
+    while (num >= 10) {
+      num = num
+        .toString()
+        .split('')
+        .reduce((sum, digit) => sum + parseInt(digit), 0);
+    }
+    return num;
+  };
+
+  const calcLength = (numStr: string) => {
+    return numStr.replace(/[^0-9]/g, '').length;
+  };
+
+  const gridNumbers = [
+    [4, 9, 2],
+    [3, 5, 7],
+    [8, 1, 6],
+  ];
+
+  const calculateDashes = () => {
+    const dashes: Record<number, number> = {};
+
+    const gridCells = gridNumbers.flat();
+    for (let i = 0; i < gridCells.length; i++) {
+      const digit = gridCells[i];
+      const actualCount = frequencies[digit] || 0;
+      const hiddenCount = hiddenNumbers[digit] || 0;
+
+      // -------- First Phase: more than one actual digit --------
+      if (actualCount > 1) {
+        const total = digit * actualCount;
+        const reduced = singleDigitSum(total);
+        if (!frequencies[reduced]) {
+          dashes[reduced] = (dashes[reduced] || 0) + 1;
+        }
+      }
+
+      // -------- Second Phase: has actuals or hiddenCount > 2 --------
+      if (
+        (actualCount > 0 || hiddenCount > 1) &&
+        !(actualCount === 0 && hiddenCount === 1)
+      ) {
+        const total = digit * (actualCount + hiddenCount);
+        const reduced = singleDigitSum(total);
+        if (!frequencies[reduced]) {
+          dashes[reduced] = (dashes[reduced] || 0) + 1;
+        }
+      }
+    }
+
+    return dashes;
+  };
+
+  const dashes = calculateDashes();
+
+  const renderGridCell = (digit: number) => {
     const count = frequencies[digit] || 0;
     const hiddenCount = hiddenNumbers[digit] || 0;
+    const dashCount = dashes[digit] || 0;
 
     return (
       <div className="relative aspect-square bg-white border border-gray-300 rounded-lg flex items-center justify-center text-center p-2">
@@ -62,15 +119,14 @@ export const LoshoGrid = ({ gridData, userData }) => {
             {String(digit).repeat(hiddenCount)}
           </div>
         )}
+        {dashCount > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-red-600 font-extrabold text-3xl pointer-events-none">
+            {"_".repeat(dashCount)}
+          </div>
+        )}
       </div>
     );
   };
-
-  const gridNumbers = [
-    [4, 9, 2],
-    [3, 5, 7],
-    [8, 1, 6],
-  ];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -95,10 +151,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
             ))}
           </div>
         </CardContent>
-
-        <div className="px-6 pb-6 text-center text-sm text-gray-600 space-y-2">
-          {/* Optional legend or insights can go here */}
-        </div>
       </Card>
     </div>
   );

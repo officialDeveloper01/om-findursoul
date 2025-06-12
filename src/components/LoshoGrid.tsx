@@ -1,6 +1,12 @@
+
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AntarDashaTable } from './AntarDashaTable';
+import { calculateAntarDasha, planetMap } from '@/utils/antarDashaCalculator';
 
 export const LoshoGrid = ({ gridData, userData }) => {
+  const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);
+
   const hiddenMap = {
     11: 2,
     22: 3,
@@ -56,10 +62,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
     return num;
   };
 
-  const calcLength = (numStr: string) => {
-    return numStr.replace(/[^0-9]/g, '').length;
-  };
-
   const gridNumbers = [
     [4, 9, 2],
     [3, 5, 7],
@@ -68,14 +70,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
   const calculateDashes = () => {
     const dashes: Record<number, number> = {};
-
     const gridCells = gridNumbers.flat();
+    
     for (let i = 0; i < gridCells.length; i++) {
       const digit = gridCells[i];
       const actualCount = frequencies[digit] || 0;
       const hiddenCount = hiddenNumbers[digit] || 0;
 
-      // -------- First Phase: more than one actual digit --------
       if (actualCount > 1) {
         const total = digit * actualCount;
         const reduced = singleDigitSum(total);
@@ -84,7 +85,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
         }
       }
 
-      // -------- Second Phase: has actuals or hiddenCount > 2 --------
       if (
         (actualCount > 0 || hiddenCount > 1) &&
         !(actualCount === 0 && hiddenCount === 1)
@@ -101,6 +101,35 @@ export const LoshoGrid = ({ gridData, userData }) => {
   };
 
   const dashes = calculateDashes();
+
+  // Get conductor series from numerology data
+  const conductorSeries = userData.numerologyData?.conductorSeries || [];
+  const bottomValues = userData.numerologyData?.bottomValues || [];
+
+  const handleConductorClick = (conductorNumber: number, ageIndex: number) => {
+    if (!conductorSeries[ageIndex] || !userData.dateOfBirth) return;
+    
+    const startAge = conductorSeries[ageIndex];
+    const planetName = planetMap[conductorNumber]?.name || 'Unknown';
+    
+    console.log('Clicked conductor:', { conductorNumber, startAge, planetName });
+    
+    try {
+      const antarDashaData = calculateAntarDasha(
+        userData.dateOfBirth,
+        startAge,
+        conductorNumber
+      );
+      
+      setSelectedAntarDasha({
+        data: antarDashaData,
+        planet: planetName,
+        startAge: startAge
+      });
+    } catch (error) {
+      console.error('Error calculating Antar Dasha:', error);
+    }
+  };
 
   const renderGridCell = (digit: number) => {
     const count = frequencies[digit] || 0;
@@ -151,7 +180,50 @@ export const LoshoGrid = ({ gridData, userData }) => {
             ))}
           </div>
         </CardContent>
+
+        {/* Conductor Series Display */}
+        {conductorSeries.length > 0 && bottomValues.length > 0 && (
+          <CardContent className="pt-0">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">Conductor Series</h3>
+              <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha</p>
+            </div>
+            
+            {/* Ages Row */}
+            <div className="grid grid-cols-11 gap-2 mb-2">
+              {conductorSeries.map((age, index) => (
+                <div key={index} className="text-center text-sm font-medium text-gray-600 py-1">
+                  {age}
+                </div>
+              ))}
+            </div>
+            
+            {/* Conductor Numbers Row - Clickable */}
+            <div className="grid grid-cols-11 gap-2">
+              {bottomValues.map((number, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleConductorClick(number, index)}
+                  className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                  title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
+                >
+                  {number}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        )}
       </Card>
+
+      {/* Antar Dasha Table */}
+      {selectedAntarDasha && (
+        <AntarDashaTable
+          data={selectedAntarDasha.data}
+          planet={selectedAntarDasha.planet}
+          startAge={selectedAntarDasha.startAge}
+          onClose={() => setSelectedAntarDasha(null)}
+        />
+      )}
     </div>
   );
 };

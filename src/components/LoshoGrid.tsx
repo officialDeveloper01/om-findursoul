@@ -183,7 +183,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
               {gridNumbers.flat().map((digit, index) => (
-                <div key={index}>{renderGridCell(digit)}</div>
+                <div key={`grid-cell-${digit}-${index}`}>{renderGridCell(digit)}</div>
               ))}
             </div>
           </div>
@@ -197,21 +197,21 @@ export const LoshoGrid = ({ gridData, userData }) => {
               </div>
               
               {/* Ages Row */}
-              <div className="grid grid-cols-11 gap-2 mb-2">
+              <div className="grid grid-cols-11 gap-1 mb-2">
                 {conductorSeries.map((age, index) => (
-                  <div key={index} className="text-center text-sm font-medium text-gray-600 py-1">
+                  <div key={`age-${age}-${index}`} className="text-center text-xs font-medium text-gray-600 py-1">
                     {age}
                   </div>
                 ))}
               </div>
               
               {/* Conductor Numbers Row - Clickable */}
-              <div className="grid grid-cols-11 gap-2">
+              <div className="grid grid-cols-11 gap-1">
                 {bottomValues.map((number, index) => (
                   <button
-                    key={index}
+                    key={`conductor-${number}-${index}`}
                     onClick={() => handleConductorClick(number, index)}
-                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-sm md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
                     title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
                   >
                     {number}

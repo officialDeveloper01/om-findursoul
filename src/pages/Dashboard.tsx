@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserDataForm } from '@/components/UserDataForm';
@@ -73,11 +72,22 @@ const Dashboard = () => {
       
       console.log('Data saved to Firebase with timestamp:', timestamp);
       
-      // Set results for display with iOS-safe state update
-      requestAnimationFrame(() => {
-        setAllResults(results);
-        setCurrentView('results');
-      });
+      // iOS-safe state update with error handling
+      if (typeof window !== 'undefined') {
+        try {
+          requestAnimationFrame(() => {
+            setAllResults(results);
+            setCurrentView('results');
+          });
+        } catch (error) {
+          console.error('Error updating state:', error);
+          // Fallback for iOS
+          setTimeout(() => {
+            setAllResults(results);
+            setCurrentView('results');
+          }, 100);
+        }
+      }
       
     } catch (error) {
       console.error('Error saving data:', error);
@@ -88,14 +98,28 @@ const Dashboard = () => {
   }, [user]);
 
   const handleNewEntry = useCallback(() => {
-    // iOS-safe state reset
-    requestAnimationFrame(() => {
-      setUserData(null);
-      setGridData(null);
-      setNumerologyData(null);
-      setAllResults([]);
-      setCurrentView('form');
-    });
+    // iOS-safe state reset with error handling
+    if (typeof window !== 'undefined') {
+      try {
+        requestAnimationFrame(() => {
+          setUserData(null);
+          setGridData(null);
+          setNumerologyData(null);
+          setAllResults([]);
+          setCurrentView('form');
+        });
+      } catch (error) {
+        console.error('Error resetting state:', error);
+        // Fallback for iOS
+        setTimeout(() => {
+          setUserData(null);
+          setGridData(null);
+          setNumerologyData(null);
+          setAllResults([]);
+          setCurrentView('form');
+        }, 100);
+      }
+    }
   }, []);
 
   return (
@@ -202,43 +226,27 @@ const Dashboard = () => {
                 {allResults.length === 1 ? (
                   // Single person - full width card
                   <div className="max-w-5xl mx-auto slide-up">
-                    <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
-                      <div className="p-6">
-                        <div className="text-center mb-6">
-                          <h3 className="text-2xl font-semibold text-blue-800 mb-3">
-                            {allResults[0].fullName}
-                          </h3>
-                          <Badge 
-                            variant="outline" 
-                            className="bg-amber-100 text-amber-700 border-amber-300 px-3 py-1 text-sm font-medium rounded-full"
-                          >
-                            Main Analysis
-                          </Badge>
-                        </div>
-                        
-                        <LoshoGrid 
-                          gridData={{
-                            frequencies: allResults[0].gridData,
-                            grid: [],
-                            originalDate: allResults[0].dateOfBirth,
-                            digits: []
-                          }} 
-                          userData={{
-                            fullName: allResults[0].fullName,
-                            dateOfBirth: allResults[0].dateOfBirth,
-                            timeOfBirth: allResults[0].timeOfBirth,
-                            placeOfBirth: allResults[0].placeOfBirth,
-                            numerologyData: allResults[0].numerologyData
-                          }}
-                        />
-                      </div>
-                    </Card>
+                    <LoshoGrid 
+                      gridData={{
+                        frequencies: allResults[0].gridData,
+                        grid: [],
+                        originalDate: allResults[0].dateOfBirth,
+                        digits: []
+                      }} 
+                      userData={{
+                        fullName: allResults[0].fullName,
+                        dateOfBirth: allResults[0].dateOfBirth,
+                        timeOfBirth: allResults[0].timeOfBirth,
+                        placeOfBirth: allResults[0].placeOfBirth,
+                        numerologyData: allResults[0].numerologyData
+                      }}
+                    />
                   </div>
                 ) : (
                   // Multiple people - grid layout
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {allResults.map((result, index) => (
-                      <div key={index} className="slide-up">
+                      <div key={`result-${index}-${result.fullName}`} className="slide-up">
                         <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
                           <div className="p-6">
                             <div className="text-center mb-6">

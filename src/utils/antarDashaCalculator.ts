@@ -153,12 +153,15 @@ export const calculatePratyantarDasha = (
       toDate = addDays(currentDate, proportionalDays);
     }
 
+    const actualDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
+
     pratyantarData.push({
-      pratyantar: pratyantar.name,
-      days: pratyantar.days,
-      from: formatDate(fromDate),
-      to: formatDate(toDate)
+    pratyantar: pratyantar.name,
+    days: actualDays,
+    from: formatDate(fromDate),
+    to: formatDate(toDate)
     });
+
 
     currentDate = new Date(toDate);
   }

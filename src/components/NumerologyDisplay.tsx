@@ -61,42 +61,6 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
           )}
 
           {/* Conductor Series with Responsive Layout */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-medium text-gray-700 text-center">Conductor Series</h4>
-            
-            {/* Responsive grid that maintains alignment */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2 max-w-full">
-              {(numerologyData.conductorSeries || []).map((number, index) => {
-                const bottomValue = numerologyData.bottomValues?.[index] || 0;
-                
-                return (
-                  <div key={index} className="flex flex-col items-center space-y-1">
-                    {/* Conductor number */}
-                    <div 
-                      className={`
-                        w-full aspect-square flex items-center justify-center rounded-lg border-2 font-semibold text-center
-                        ${number === numerologyData.conductorBase 
-                          ? 'bg-amber-100 border-amber-400 text-amber-800' 
-                          : 'bg-white border-gray-200 text-gray-700'
-                        }
-                      `}
-                    >
-                      <span className="text-sm sm:text-base lg:text-lg">{number || 0}</span>
-                    </div>
-                    
-                    {/* Bottom value directly below */}
-                    <div className="w-full aspect-square flex items-center justify-center rounded-md border bg-gray-50 border-gray-300 text-gray-600 shadow-sm">
-                      <span className="text-xs sm:text-sm font-medium">{bottomValue}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <p className="text-sm text-gray-500 text-center px-4">
-              Base number ({numerologyData.conductorBase || 0}) is highlighted. Bottom values are aligned below each conductor number.
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

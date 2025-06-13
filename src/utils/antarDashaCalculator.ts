@@ -88,7 +88,7 @@ export const calculateAntarDasha = (
     }
 
     antarDashaData.push({
-      antar: `${planetMap[planetNumber].name}–${antar.name}`,
+      antar: `${antar.name}`,
       days: antar.days,
       from: formatDate(fromDate),
       to: formatDate(toDate)

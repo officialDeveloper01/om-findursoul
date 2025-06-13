@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { ref, get } from 'firebase/database';
 import { database } from '@/config/firebase';
 import { Phone, Calendar, MapPin, Clock } from 'lucide-react';
 import { LoshoGrid } from './LoshoGrid';
-import { NumerologyDisplay } from './NumerologyDisplay';
 
 export const SearchTables = () => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -147,19 +145,6 @@ export const SearchTables = () => {
                         timeOfBirth: result.timeOfBirth,
                         placeOfBirth: result.placeOfBirth,
                         numerologyData: result.numerologyData
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Numerology Display */}
-                  <div>
-                    <NumerologyDisplay 
-                      numerologyData={result.numerologyData} 
-                      userData={{
-                        fullName: result.fullName,
-                        dateOfBirth: result.dateOfBirth,
-                        timeOfBirth: result.timeOfBirth,
-                        placeOfBirth: result.placeOfBirth
                       }}
                     />
                   </div>

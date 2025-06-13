@@ -1,4 +1,3 @@
-
 interface PlanetData {
   name: string;
   days: number;
@@ -16,20 +15,19 @@ const planetMap: Record<number, PlanetData> = {
   9: { name: 'MANGAL', days: 192 }
 };
 
-// Get planet sequence starting from a specific planet number
+// --- FIXED PLANET SEQUENCE ---
+const fixedSequence = [1, 2, 9, 4, 3, 8, 5, 7, 6];
+
 const getPlanetSequence = (startPlanetNumber: number): PlanetData[] => {
-  const sequence: PlanetData[] = [];
-  let currentNumber = startPlanetNumber;
-  
-  for (let i = 0; i < 9; i++) {
-    sequence.push(planetMap[currentNumber]);
-    currentNumber = currentNumber === 9 ? 1 : currentNumber + 1;
-  }
-  
-  return sequence;
+  const startIndex = fixedSequence.indexOf(startPlanetNumber);
+  const rotatedSequence = [
+    ...fixedSequence.slice(startIndex),
+    ...fixedSequence.slice(0, startIndex)
+  ];
+  return rotatedSequence.map(num => planetMap[num]);
 };
 
-// Add days to a date
+// Add days to a date (no leap year logic)
 const addDays = (date: Date, days: number): Date => {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
@@ -44,65 +42,61 @@ const formatDate = (date: Date): string => {
   return `${day}/${month}/${year}`;
 };
 
-// Parse DD/MM/YYYY date string
+// Parse date in format YYYY-MM-DD (from native input type)
 const parseDate = (dateStr: string): Date => {
-  const [day, month, year] = dateStr.split('/').map(Number);
-  return new Date(year, month - 1, day);
+  const [yearStr, monthStr, dayStr] = dateStr.split('-');
+  const day = parseInt(dayStr, 10);
+  const month = parseInt(monthStr, 10) - 1;
+  const year = parseInt(yearStr, 10);
+  return new Date(year, month, day);
 };
 
+// Main Antar Dasha calculator
 export const calculateAntarDasha = (
-  dateOfBirth: string,
+  dateOfBirth: string,     // Format: 'YYYY-MM-DD'
   startAge: number,
-  planetNumber: number
+  planetNumber: number     // Clicked planet number (1–9)
 ) => {
-  console.log('Calculating Antar Dasha for:', { dateOfBirth, startAge, planetNumber });
-  
   // Parse DOB and calculate start date
   const dobDate = parseDate(dateOfBirth);
   const startDate = new Date(dobDate);
   startDate.setFullYear(startDate.getFullYear() + startAge);
-  
-  // Calculate end date (9 years later)
+
+  // Ensure table ends exactly after 9 years (same day & month)
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 9);
-  
-  console.log('Start date:', startDate, 'End date:', endDate);
-  
-  // Get planet sequence starting from the clicked planet
+
+  // Planet sequence (fixed and rotated)
   const planetSequence = getPlanetSequence(planetNumber);
-  
+
   const antarDashaData = [];
   let currentDate = new Date(startDate);
-  
-  // Calculate total days for proper distribution
-  const totalDaysInPeriod = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const totalPlanetDays = planetSequence.reduce((sum, planet) => sum + planet.days, 0);
-  
+
+  const totalDays = 365 * 9;
+  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
+
   for (let i = 0; i < planetSequence.length; i++) {
-    const planet = planetSequence[i];
+    const antar = planetSequence[i];
     const fromDate = new Date(currentDate);
-    
+
     let toDate: Date;
     if (i === planetSequence.length - 1) {
-      // Last entry - ensure it ends exactly on the 9-year mark
-      toDate = new Date(endDate);
+      toDate = new Date(endDate); // End on same DD/MM after 9 years
     } else {
-      // Scale the days proportionally to fit exactly in 9 years
-      const scaledDays = Math.round((planet.days / totalPlanetDays) * totalDaysInPeriod);
-      toDate = addDays(currentDate, scaledDays);
+      const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
+      toDate = addDays(currentDate, proportionalDays);
     }
-    
+
     antarDashaData.push({
-      antar: planet.name,
-      days: planet.days,
+      antar: `${planetMap[planetNumber].name}–${antar.name}`,
+      days: antar.days,
       from: formatDate(fromDate),
       to: formatDate(toDate)
     });
-    
+
     currentDate = new Date(toDate);
   }
-  
-  console.log('Generated Antar Dasha data:', antarDashaData);
+
   return antarDashaData;
 };
 

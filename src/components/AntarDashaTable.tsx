@@ -37,7 +37,8 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
       const pratyantar = calculatePratyantarDasha(
         row.from,
         row.to,
-        row.planetNumber
+        row.planetNumber,
+        planet
       );
       
       setPratyantarData(pratyantar);

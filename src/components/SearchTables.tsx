@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ export const SearchTables = () => {
   const [searched, setSearched] = useState(false);
   const [selectedResults, setSelectedResults] = useState([]);
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSearched(true);
@@ -57,9 +57,9 @@ export const SearchTables = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mobileNumber]);
 
-  const handleShowResults = (groupId: string) => {
+  const handleShowResults = useCallback((groupId: string) => {
     console.log('Showing results for group:', groupId);
     
     // Get all entries from the same group
@@ -75,12 +75,18 @@ export const SearchTables = () => {
       numerologyData: result.numerologyData
     }));
     
-    setSelectedResults(formattedResults);
-  };
+    // iOS-safe state update
+    requestAnimationFrame(() => {
+      setSelectedResults(formattedResults);
+    });
+  }, [searchResults]);
 
-  const handleBackToSearch = () => {
-    setSelectedResults([]);
-  };
+  const handleBackToSearch = useCallback(() => {
+    // iOS-safe state update
+    requestAnimationFrame(() => {
+      setSelectedResults([]);
+    });
+  }, []);
 
   // If showing results, display them in responsive grid
   if (selectedResults.length > 0) {
@@ -105,33 +111,67 @@ export const SearchTables = () => {
           </p>
         </div>
 
-        {/* Responsive Grid Display for Search Results */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {selectedResults.map((result, index) => (
-            <div key={index}>
-              <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
-                <div className="p-6">
-                  {/* Header with Name and Relation Badge */}
-                  <div className="text-center mb-6">
-                    <h4 className="text-xl font-semibold text-blue-800 mb-3">
-                      {result.fullName}
-                    </h4>
-                    <Badge 
-                      variant="outline" 
-                      className={`
-                        px-3 py-1 text-sm font-medium rounded-full
-                        ${result.relation === 'SELF' 
-                          ? 'bg-amber-100 text-amber-700 border-amber-300' 
-                          : 'bg-blue-100 text-blue-700 border-blue-300'
-                        }
-                      `}
-                    >
-                      {result.relation === 'SELF' ? 'Main' : result.relation}
-                    </Badge>
-                  </div>
-                  
-                  {/* Lo Shu Grid */}
-                  <div className="mb-6">
+        {/* Display Results - Single card for one person, grid for multiple */}
+        {selectedResults.length === 1 ? (
+          // Single person - full width card
+          <div className="max-w-5xl mx-auto">
+            <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
+              <div className="p-6">
+                <div className="text-center mb-6">
+                  <h4 className="text-2xl font-semibold text-blue-800 mb-3">
+                    {selectedResults[0].fullName}
+                  </h4>
+                  <Badge 
+                    variant="outline" 
+                    className="bg-amber-100 text-amber-700 border-amber-300 px-3 py-1 text-sm font-medium rounded-full"
+                  >
+                    Search Result
+                  </Badge>
+                </div>
+                
+                <LoshoGrid 
+                  gridData={{
+                    frequencies: selectedResults[0].gridData,
+                    grid: [],
+                    originalDate: selectedResults[0].dateOfBirth,
+                    digits: []
+                  }} 
+                  userData={{
+                    fullName: selectedResults[0].fullName,
+                    dateOfBirth: selectedResults[0].dateOfBirth,
+                    timeOfBirth: selectedResults[0].timeOfBirth,
+                    placeOfBirth: selectedResults[0].placeOfBirth,
+                    numerologyData: selectedResults[0].numerologyData
+                  }}
+                />
+              </div>
+            </Card>
+          </div>
+        ) : (
+          // Multiple people - grid layout
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {selectedResults.map((result, index) => (
+              <div key={index}>
+                <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
+                  <div className="p-6">
+                    <div className="text-center mb-6">
+                      <h4 className="text-xl font-semibold text-blue-800 mb-3">
+                        {result.fullName}
+                      </h4>
+                      <Badge 
+                        variant="outline" 
+                        className={`
+                          px-3 py-1 text-sm font-medium rounded-full
+                          ${result.relation === 'SELF' 
+                            ? 'bg-amber-100 text-amber-700 border-amber-300' 
+                            : 'bg-blue-100 text-blue-700 border-blue-300'
+                          }
+                        `}
+                      >
+                        {result.relation === 'SELF' ? 'Main' : result.relation}
+                      </Badge>
+                    </div>
+                    
                     <LoshoGrid 
                       gridData={{
                         frequencies: result.gridData,
@@ -148,11 +188,11 @@ export const SearchTables = () => {
                       }}
                     />
                   </div>
-                </div>
-              </Card>
-            </div>
-          ))}
-        </div>
+                </Card>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

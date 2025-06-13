@@ -1,7 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
+import { CompactNumerologyRow } from './CompactNumerologyRow';
 import { calculateAntarDasha, planetMap } from '@/utils/antarDashaCalculator';
 
 export const LoshoGrid = ({ gridData, userData }) => {
@@ -21,7 +22,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
   const frequencies: Record<number, number> = { ...gridData.frequencies };
 
-  const getHiddenNumbers = () => {
+  const getHiddenNumbers = useCallback(() => {
     const fullFreq = { ...frequencies };
     const hiddenCountMap: Record<number, number> = {};
     const visited = new Set<string>();
@@ -48,7 +49,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
     }
 
     return hiddenCountMap;
-  };
+  }, [frequencies]);
 
   const hiddenNumbers = getHiddenNumbers();
 
@@ -68,7 +69,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
     [8, 1, 6],
   ];
 
-  const calculateDashes = () => {
+  const calculateDashes = useCallback(() => {
     const dashes: Record<number, number> = {};
     const gridCells = gridNumbers.flat();
     
@@ -98,7 +99,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
     }
 
     return dashes;
-  };
+  }, [frequencies, hiddenNumbers]);
 
   const dashes = calculateDashes();
 
@@ -106,10 +107,8 @@ export const LoshoGrid = ({ gridData, userData }) => {
   const numerologyData = userData.numerologyData || {};
   const conductorSeries = numerologyData.conductorSeries || [];
   const bottomValues = numerologyData.bottomValues || [];
-  const driver = numerologyData.driver || 0;
-  const conductor = numerologyData.conductor || 0;
 
-  const handleConductorClick = (conductorNumber: number, ageIndex: number) => {
+  const handleConductorClick = useCallback((conductorNumber: number, ageIndex: number) => {
     if (!conductorSeries[ageIndex] || !userData.dateOfBirth) return;
     
     const startAge = conductorSeries[ageIndex];
@@ -132,7 +131,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
     } catch (error) {
       console.error('Error calculating Antar Dasha:', error);
     }
-  };
+  }, [conductorSeries, userData.dateOfBirth]);
 
   const renderGridCell = (digit: number) => {
     const count = frequencies[digit] || 0;
@@ -163,7 +162,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
-        <CardHeader className="text-center pb-6">
+        <CardHeader className="text-center pb-4">
           <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
             Complete Numerology Analysis
           </CardTitle>
@@ -176,7 +175,10 @@ export const LoshoGrid = ({ gridData, userData }) => {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-6">
+          {/* Compact Numerology Row */}
+          <CompactNumerologyRow numerologyData={numerologyData} />
+
           {/* Lo Shu Grid */}
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
@@ -186,43 +188,9 @@ export const LoshoGrid = ({ gridData, userData }) => {
             </div>
           </div>
 
-          {/* Driver and Conductor Numbers */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
-              <h3 className="text-lg font-medium text-gray-700 mb-2">Driver Number</h3>
-              <div className="text-4xl font-bold text-amber-600">{driver}</div>
-            </div>
-            
-            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-medium text-gray-700 mb-2">Conductor Number</h3>
-              <div className="text-4xl font-bold text-blue-600">{conductor}</div>
-            </div>
-          </div>
-
-          {/* Chaldean Numbers */}
-          {numerologyData.chaldeanNumbers && (
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-gray-700 text-center">Chaldean Name Numerology</h4>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Name Number</h5>
-                  <div className="text-2xl font-bold text-purple-600">{numerologyData.chaldeanNumbers.nameNumber || 0}</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Soul Urge</h5>
-                  <div className="text-2xl font-bold text-green-600">{numerologyData.chaldeanNumbers.soulUrgeNumber || 0}</div>
-                </div>
-                <div className="text-center p-4 bg-pink-50 rounded-lg border border-pink-200">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Personality</h5>
-                  <div className="text-2xl font-bold text-pink-600">{numerologyData.chaldeanNumbers.personalityNumber || 0}</div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Conductor Series - Clickable for Antar Dasha */}
           {conductorSeries.length > 0 && bottomValues.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-gray-700">Conductor Series (Maha Dasha)</h3>
                 <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>

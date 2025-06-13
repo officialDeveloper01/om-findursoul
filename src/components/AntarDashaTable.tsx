@@ -1,6 +1,6 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { calculatePratyantarDasha, calculateDainikDasha } from '@/utils/antarDashaCalculator';
@@ -26,10 +26,12 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
   const [expandedPratyantarRow, setExpandedPratyantarRow] = useState<string | null>(null);
   const [dainikData, setDainikData] = useState<any[]>([]);
 
-  const handleRowClick = async (index: number, row: AntarDashaRow) => {
+  const handleRowClick = useCallback(async (index: number, row: AntarDashaRow) => {
     if (expandedRow === index) {
       setExpandedRow(null);
       setPratyantarData([]);
+      setExpandedPratyantarRow(null);
+      setDainikData([]);
       return;
     }
 
@@ -43,12 +45,14 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
       
       setPratyantarData(pratyantar);
       setExpandedRow(index);
+      setExpandedPratyantarRow(null);
+      setDainikData([]);
     } catch (error) {
       console.error('Error calculating Pratyantar Dasha:', error);
     }
-  };
+  }, [expandedRow, planet]);
 
-  const handlePratyantarRowClick = async (pratyantarIndex: number, pratyantarRow: any, antarRow: AntarDashaRow) => {
+  const handlePratyantarRowClick = useCallback(async (pratyantarIndex: number, pratyantarRow: any, antarRow: AntarDashaRow) => {
     const rowKey = `${expandedRow}-${pratyantarIndex}`;
     
     if (expandedPratyantarRow === rowKey) {
@@ -72,11 +76,11 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
     } catch (error) {
       console.error('Error calculating Dainik Dasha:', error);
     }
-  };
+  }, [expandedRow, expandedPratyantarRow, planet]);
 
   return (
     <Card className="mt-6 shadow-lg border border-amber-200">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-amber-700">
             {planet} Maha Dasha (Age {startAge} - {startAge + 9})
@@ -91,124 +95,124 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-amber-50">
-                <TableHead className="font-semibold text-amber-800 w-8"></TableHead>
-                <TableHead className="font-semibold text-amber-800">ANTAR</TableHead>
-                <TableHead className="font-semibold text-amber-800">DAYS</TableHead>
-                <TableHead className="font-semibold text-amber-800">FROM</TableHead>
-                <TableHead className="font-semibold text-amber-800">TO</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+      <CardContent className="p-0">
+        <div className="w-full">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-amber-50 border-b border-amber-200">
+                <th className="text-left py-2 px-3 font-semibold text-amber-800 w-8"></th>
+                <th className="text-left py-2 px-3 font-semibold text-amber-800">ANTAR</th>
+                <th className="text-left py-2 px-3 font-semibold text-amber-800">DAYS</th>
+                <th className="text-left py-2 px-3 font-semibold text-amber-800">FROM</th>
+                <th className="text-left py-2 px-3 font-semibold text-amber-800">TO</th>
+              </tr>
+            </thead>
+            <tbody>
               {data.map((row, index) => (
                 <>
-                  <TableRow 
+                  <tr 
                     key={index} 
-                    className="hover:bg-amber-25 cursor-pointer transition-colors"
+                    className="hover:bg-amber-25 cursor-pointer transition-colors border-b border-gray-100"
                     onClick={() => handleRowClick(index, row)}
                   >
-                    <TableCell className="text-center">
+                    <td className="py-2 px-3 text-center">
                       {expandedRow === index ? (
                         <ChevronDown size={16} className="text-amber-600" />
                       ) : (
                         <ChevronRight size={16} className="text-amber-600" />
                       )}
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-800">{row.antar}</TableCell>
-                    <TableCell className="text-gray-600">{row.days}</TableCell>
-                    <TableCell className="text-gray-600">{row.from}</TableCell>
-                    <TableCell className="text-gray-600">{row.to}</TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="py-2 px-3 font-medium text-gray-800">{row.antar}</td>
+                    <td className="py-2 px-3 text-gray-600">{row.days}</td>
+                    <td className="py-2 px-3 text-gray-600">{row.from}</td>
+                    <td className="py-2 px-3 text-gray-600">{row.to}</td>
+                  </tr>
                   
                   {expandedRow === index && pratyantarData.length > 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="p-0">
-                        <div className="bg-orange-25 border-l-4 border-orange-300 ml-4 mr-2 my-2">
-                          <div className="p-4">
-                            <h4 className="text-sm font-semibold text-orange-700 mb-3">
+                    <tr>
+                      <td colSpan={5} className="p-0">
+                        <div className="bg-orange-25 border-l-4 border-orange-300 mx-2 my-1">
+                          <div className="p-3">
+                            <h4 className="text-sm font-semibold text-orange-700 mb-2">
                               Pratyantar Dasha - {planet} - {row.antar}
                             </h4>
-                            <Table>
-                              <TableHeader>
-                                <TableRow className="bg-orange-50">
-                                  <TableHead className="font-medium text-orange-800 text-sm w-6"></TableHead>
-                                  <TableHead className="font-medium text-orange-800 text-sm">PRATYANTAR</TableHead>
-                                  <TableHead className="font-medium text-orange-800 text-sm">DAYS</TableHead>
-                                  <TableHead className="font-medium text-orange-800 text-sm">FROM</TableHead>
-                                  <TableHead className="font-medium text-orange-800 text-sm">TO</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-orange-50">
+                                  <th className="text-left py-1 px-2 font-medium text-orange-800 w-6"></th>
+                                  <th className="text-left py-1 px-2 font-medium text-orange-800">PRATYANTAR</th>
+                                  <th className="text-left py-1 px-2 font-medium text-orange-800">DAYS</th>
+                                  <th className="text-left py-1 px-2 font-medium text-orange-800">FROM</th>
+                                  <th className="text-left py-1 px-2 font-medium text-orange-800">TO</th>
+                                </tr>
+                              </thead>
+                              <tbody>
                                 {pratyantarData.map((pratyRow, pratyIndex) => (
                                   <>
-                                    <TableRow 
+                                    <tr 
                                       key={pratyIndex} 
-                                      className="text-sm hover:bg-orange-100 cursor-pointer transition-colors"
+                                      className="hover:bg-orange-100 cursor-pointer transition-colors border-b border-orange-100"
                                       onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
                                     >
-                                      <TableCell className="text-center">
+                                      <td className="py-1 px-2 text-center">
                                         {expandedPratyantarRow === `${index}-${pratyIndex}` ? (
-                                          <ChevronDown size={14} className="text-orange-600" />
+                                          <ChevronDown size={12} className="text-orange-600" />
                                         ) : (
-                                          <ChevronRight size={14} className="text-orange-600" />
+                                          <ChevronRight size={12} className="text-orange-600" />
                                         )}
-                                      </TableCell>
-                                      <TableCell className="font-medium text-gray-700">{pratyRow.pratyantar}</TableCell>
-                                      <TableCell className="text-gray-600">{pratyRow.days}</TableCell>
-                                      <TableCell className="text-gray-600">{pratyRow.from}</TableCell>
-                                      <TableCell className="text-gray-600">{pratyRow.to}</TableCell>
-                                    </TableRow>
+                                      </td>
+                                      <td className="py-1 px-2 font-medium text-gray-700">{pratyRow.pratyantar}</td>
+                                      <td className="py-1 px-2 text-gray-600">{pratyRow.days}</td>
+                                      <td className="py-1 px-2 text-gray-600">{pratyRow.from}</td>
+                                      <td className="py-1 px-2 text-gray-600">{pratyRow.to}</td>
+                                    </tr>
                                     
                                     {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
-                                      <TableRow>
-                                        <TableCell colSpan={5} className="p-0">
-                                          <div className="bg-red-25 border-l-4 border-red-300 ml-6 mr-2 my-2">
-                                            <div className="p-3">
-                                              <h5 className="text-xs font-semibold text-red-700 mb-2">
+                                      <tr>
+                                        <td colSpan={5} className="p-0">
+                                          <div className="bg-red-25 border-l-4 border-red-300 mx-2 my-1">
+                                            <div className="p-2">
+                                              <h5 className="text-xs font-semibold text-red-700 mb-1">
                                                 Dainik Dasha - {planet} - {row.antar} - {pratyRow.pratyantar}
                                               </h5>
-                                              <Table>
-                                                <TableHeader>
-                                                  <TableRow className="bg-red-50">
-                                                    <TableHead className="font-medium text-red-800 text-xs">DAINIK</TableHead>
-                                                    <TableHead className="font-medium text-red-800 text-xs">DAYS</TableHead>
-                                                    <TableHead className="font-medium text-red-800 text-xs">FROM</TableHead>
-                                                    <TableHead className="font-medium text-red-800 text-xs">TO</TableHead>
-                                                  </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
+                                              <table className="w-full text-xs">
+                                                <thead>
+                                                  <tr className="bg-red-50">
+                                                    <th className="text-left py-1 px-2 font-medium text-red-800">DAINIK</th>
+                                                    <th className="text-left py-1 px-2 font-medium text-red-800">DAYS</th>
+                                                    <th className="text-left py-1 px-2 font-medium text-red-800">FROM</th>
+                                                    <th className="text-left py-1 px-2 font-medium text-red-800">TO</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
                                                   {dainikData.map((dainikRow, dainikIndex) => (
-                                                    <TableRow key={dainikIndex} className="text-xs">
-                                                      <TableCell className="font-medium text-gray-700">{dainikRow.dainik}</TableCell>
-                                                      <TableCell className="text-gray-600">{dainikRow.days}</TableCell>
-                                                      <TableCell className="text-gray-600">{dainikRow.from}</TableCell>
-                                                      <TableCell className="text-gray-600">{dainikRow.to}</TableCell>
-                                                    </TableRow>
+                                                    <tr key={dainikIndex} className="border-b border-red-100">
+                                                      <td className="py-1 px-2 font-medium text-gray-700">{dainikRow.dainik}</td>
+                                                      <td className="py-1 px-2 text-gray-600">{dainikRow.days}</td>
+                                                      <td className="py-1 px-2 text-gray-600">{dainikRow.from}</td>
+                                                      <td className="py-1 px-2 text-gray-600">{dainikRow.to}</td>
+                                                    </tr>
                                                   ))}
-                                                </TableBody>
-                                              </Table>
+                                                </tbody>
+                                              </table>
                                             </div>
                                           </div>
-                                        </TableCell>
-                                      </TableRow>
+                                        </td>
+                                      </tr>
                                     )}
                                   </>
                                 ))}
-                              </TableBody>
-                            </Table>
+                              </tbody>
+                            </table>
                           </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   )}
                 </>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>

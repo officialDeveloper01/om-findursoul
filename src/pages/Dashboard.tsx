@@ -1,9 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserDataForm } from '@/components/UserDataForm';
 import { LoshoGrid } from '@/components/LoshoGrid';
-import { NumerologyDisplay } from '@/components/NumerologyDisplay';
 import { SearchTables } from '@/components/SearchTables';
 import { CelestialHeader } from '@/components/CelestialHeader';
 import { SpiritualFooter } from '@/components/SpiritualFooter';
@@ -25,7 +24,7 @@ const Dashboard = () => {
   const [allResults, setAllResults] = useState([]);
   const { user } = useAuth();
 
-  const handleFormSubmit = async (data) => {
+  const handleFormSubmit = useCallback(async (data) => {
     console.log('Form submitted with entries:', data);
     setIsLoading(true);
     
@@ -74,9 +73,11 @@ const Dashboard = () => {
       
       console.log('Data saved to Firebase with timestamp:', timestamp);
       
-      // Set results for display
-      setAllResults(results);
-      setCurrentView('results');
+      // Set results for display with iOS-safe state update
+      requestAnimationFrame(() => {
+        setAllResults(results);
+        setCurrentView('results');
+      });
       
     } catch (error) {
       console.error('Error saving data:', error);
@@ -84,15 +85,18 @@ const Dashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
-  const handleNewEntry = () => {
-    setUserData(null);
-    setGridData(null);
-    setNumerologyData(null);
-    setAllResults([]);
-    setCurrentView('form');
-  };
+  const handleNewEntry = useCallback(() => {
+    // iOS-safe state reset
+    requestAnimationFrame(() => {
+      setUserData(null);
+      setGridData(null);
+      setNumerologyData(null);
+      setAllResults([]);
+      setCurrentView('form');
+    });
+  }, []);
 
   return (
     <div className="min-h-screen celestial-bg">
@@ -194,33 +198,67 @@ const Dashboard = () => {
                   </Button>
                 </div>
                 
-                {/* Responsive Grid Display for All Family Members */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {allResults.map((result, index) => (
-                    <div key={index} className="slide-up">
-                      <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
-                        <div className="p-6">
-                          {/* Header with Name and Relation Badge */}
-                          <div className="text-center mb-6">
-                            <h3 className="text-xl font-semibold text-blue-800 mb-3">
-                              {result.fullName}
-                            </h3>
-                            <Badge 
-                              variant="outline" 
-                              className={`
-                                px-3 py-1 text-sm font-medium rounded-full
-                                ${result.relation === 'SELF' 
-                                  ? 'bg-amber-100 text-amber-700 border-amber-300' 
-                                  : 'bg-blue-100 text-blue-700 border-blue-300'
-                                }
-                              `}
-                            >
-                              {result.relation === 'SELF' ? 'Main' : result.relation}
-                            </Badge>
-                          </div>
-                          
-                          {/* Lo Shu Grid */}
-                          <div className="mb-6">
+                {/* Display Results - Single card for one person, grid for multiple */}
+                {allResults.length === 1 ? (
+                  // Single person - full width card
+                  <div className="max-w-5xl mx-auto slide-up">
+                    <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
+                      <div className="p-6">
+                        <div className="text-center mb-6">
+                          <h3 className="text-2xl font-semibold text-blue-800 mb-3">
+                            {allResults[0].fullName}
+                          </h3>
+                          <Badge 
+                            variant="outline" 
+                            className="bg-amber-100 text-amber-700 border-amber-300 px-3 py-1 text-sm font-medium rounded-full"
+                          >
+                            Main Analysis
+                          </Badge>
+                        </div>
+                        
+                        <LoshoGrid 
+                          gridData={{
+                            frequencies: allResults[0].gridData,
+                            grid: [],
+                            originalDate: allResults[0].dateOfBirth,
+                            digits: []
+                          }} 
+                          userData={{
+                            fullName: allResults[0].fullName,
+                            dateOfBirth: allResults[0].dateOfBirth,
+                            timeOfBirth: allResults[0].timeOfBirth,
+                            placeOfBirth: allResults[0].placeOfBirth,
+                            numerologyData: allResults[0].numerologyData
+                          }}
+                        />
+                      </div>
+                    </Card>
+                  </div>
+                ) : (
+                  // Multiple people - grid layout
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {allResults.map((result, index) => (
+                      <div key={index} className="slide-up">
+                        <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
+                          <div className="p-6">
+                            <div className="text-center mb-6">
+                              <h3 className="text-xl font-semibold text-blue-800 mb-3">
+                                {result.fullName}
+                              </h3>
+                              <Badge 
+                                variant="outline" 
+                                className={`
+                                  px-3 py-1 text-sm font-medium rounded-full
+                                  ${result.relation === 'SELF' 
+                                    ? 'bg-amber-100 text-amber-700 border-amber-300' 
+                                    : 'bg-blue-100 text-blue-700 border-blue-300'
+                                  }
+                                `}
+                              >
+                                {result.relation === 'SELF' ? 'Main' : result.relation}
+                              </Badge>
+                            </div>
+                            
                             <LoshoGrid 
                               gridData={{
                                 frequencies: result.gridData,
@@ -237,24 +275,11 @@ const Dashboard = () => {
                               }}
                             />
                           </div>
-                          
-                          {/* Numerology Display */}
-                          <div>
-                            <NumerologyDisplay 
-                              numerologyData={result.numerologyData} 
-                              userData={{
-                                fullName: result.fullName,
-                                dateOfBirth: result.dateOfBirth,
-                                timeOfBirth: result.timeOfBirth,
-                                placeOfBirth: result.placeOfBirth
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
+                        </Card>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

@@ -1,4 +1,3 @@
-
 interface PlanetData {
   name: string;
   days: number;
@@ -16,7 +15,7 @@ const planetMap: Record<number, PlanetData> = {
   9: { name: 'MANGAL', days: 192 }
 };
 
-// --- FIXED PLANET SEQUENCE ---
+// Fixed planetary sequence
 const fixedSequence = [1, 2, 9, 4, 3, 8, 5, 7, 6];
 
 const getPlanetSequence = (startPlanetNumber: number): PlanetData[] => {
@@ -28,14 +27,12 @@ const getPlanetSequence = (startPlanetNumber: number): PlanetData[] => {
   return rotatedSequence.map(num => planetMap[num]);
 };
 
-// Add days to a date (no leap year logic)
 const addDays = (date: Date, days: number): Date => {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 };
 
-// Format date to DD/MM/YYYY
 const formatDate = (date: Date): string => {
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -43,72 +40,57 @@ const formatDate = (date: Date): string => {
   return `${day}/${month}/${year}`;
 };
 
-// Parse date in format YYYY-MM-DD (from native input type)
 const parseDate = (dateStr: string): Date => {
   const [yearStr, monthStr, dayStr] = dateStr.split('-');
-  const day = parseInt(dayStr, 10);
-  const month = parseInt(monthStr, 10) - 1;
-  const year = parseInt(yearStr, 10);
-  return new Date(year, month, day);
+  return new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
 };
 
-// Parse date in format DD/MM/YYYY
 const parseDateDDMMYYYY = (dateStr: string): Date => {
   const [dayStr, monthStr, yearStr] = dateStr.split('/');
-  const day = parseInt(dayStr, 10);
-  const month = parseInt(monthStr, 10) - 1;
-  const year = parseInt(yearStr, 10);
-  return new Date(year, month, day);
+  return new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
 };
 
-// Get planet number from name
 const getPlanetNumberFromName = (planetName: string): number => {
   for (const [key, value] of Object.entries(planetMap)) {
-    if (value.name === planetName) {
-      return parseInt(key);
-    }
+    if (value.name === planetName) return parseInt(key);
   }
-  return 1; // Default to SURYA
+  return 1; // fallback
 };
 
-// Main Antar Dasha calculator
+// ------------------ Antar Dasha ------------------ //
 export const calculateAntarDasha = (
-  dateOfBirth: string,     // Format: 'YYYY-MM-DD'
+  dateOfBirth: string,
   startAge: number,
-  planetNumber: number     // Clicked planet number (1–9)
+  planetNumber: number
 ) => {
-  // Parse DOB and calculate start date
   const dobDate = parseDate(dateOfBirth);
   const startDate = new Date(dobDate);
   startDate.setFullYear(startDate.getFullYear() + startAge);
 
-  // Ensure table ends exactly after 9 years (same day & month)
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 9);
 
-  // Planet sequence (fixed and rotated)
   const planetSequence = getPlanetSequence(planetNumber);
+  const totalDays = 365 * 9;
+  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
 
   const antarDashaData: any[] = [];
   let currentDate = new Date(startDate);
 
-  const totalDays = 365 * 9;
-  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
-
   for (let i = 0; i < planetSequence.length; i++) {
     const antar = planetSequence[i];
     const fromDate = new Date(currentDate);
-
     let toDate: Date;
+
     if (i === planetSequence.length - 1) {
-      toDate = new Date(endDate); // End on same DD/MM after 9 years
+      toDate = new Date(endDate);
     } else {
       const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
       toDate = addDays(currentDate, proportionalDays);
     }
 
     antarDashaData.push({
-      antar: `${antar.name}`,
+      antar: antar.name,
       days: antar.days,
       from: formatDate(fromDate),
       to: formatDate(toDate),
@@ -121,33 +103,29 @@ export const calculateAntarDasha = (
   return antarDashaData;
 };
 
-// Calculate Pratyantar Dasha for a specific Antar Dasha period
+// ------------------ Pratyantar Dasha ------------------ //
 export const calculatePratyantarDasha = (
-  fromDateStr: string,     // Format: 'DD/MM/YYYY'
-  toDateStr: string,       // Format: 'DD/MM/YYYY'
-  startPlanetNumber: number // Planet number for this Antar Dasha
+  fromDateStr: string, // DD/MM/YYYY
+  toDateStr: string,   // DD/MM/YYYY
+  startPlanetNumber: number,
+  mainPlanetName: string
 ) => {
   const startDate = parseDateDDMMYYYY(fromDateStr);
   const endDate = parseDateDDMMYYYY(toDateStr);
-  
-  // Calculate total days for this Antar Dasha period
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  
-  // Get planet sequence starting from the Antar Dasha planet
-  const planetSequence = getPlanetSequence(startPlanetNumber);
-  
-  const pratyantarData: any[] = [];
+  const sequence = getPlanetSequence(startPlanetNumber);
+  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+
+  const pratyantarData = [];
   let currentDate = new Date(startDate);
-  
-  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
 
-  for (let i = 0; i < planetSequence.length; i++) {
-    const pratyantar = planetSequence[i];
+  for (let i = 0; i < sequence.length; i++) {
+    const pratyantar = sequence[i];
     const fromDate = new Date(currentDate);
-
     let toDate: Date;
-    if (i === planetSequence.length - 1) {
-      toDate = new Date(endDate); // End exactly at the Antar Dasha end date
+
+    if (i === sequence.length - 1) {
+      toDate = new Date(endDate);
     } else {
       const proportionalDays = Math.round((pratyantar.days / totalPlanetDays) * totalDays);
       toDate = addDays(currentDate, proportionalDays);
@@ -156,12 +134,12 @@ export const calculatePratyantarDasha = (
     const actualDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
 
     pratyantarData.push({
-    pratyantar: pratyantar.name,
-    days: actualDays,
-    from: formatDate(fromDate),
-    to: formatDate(toDate)
+      title: `${mainPlanetName} – ${pratyantar.name}`,
+      pratyantar: pratyantar.name,
+      days: actualDays,
+      from: formatDate(fromDate),
+      to: formatDate(toDate)
     });
-
 
     currentDate = new Date(toDate);
   }

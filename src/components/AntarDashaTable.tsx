@@ -102,7 +102,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
                         <div className="bg-orange-25 border-l-4 border-orange-300 ml-4 mr-2 my-2">
                           <div className="p-4">
                             <h4 className="text-sm font-semibold text-orange-700 mb-3">
-                              Pratyantar Dasha - {row.antar}
+                              Pratyantar Dasha - {planet} - {row.antar}
                             </h4>
                             <Table>
                               <TableHeader>

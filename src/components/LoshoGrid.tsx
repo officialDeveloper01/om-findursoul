@@ -147,7 +147,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
           </div>
         )}
         {hiddenCount > 0 && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center text-sm font-bold">
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center text-sm font-bold">
             {String(digit).repeat(hiddenCount)}
           </div>
         )}

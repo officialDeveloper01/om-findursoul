@@ -1,11 +1,10 @@
-
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { calculatePratyantarDasha, calculateDainikDasha } from '@/utils/antarDashaCalculator';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 interface AntarDashaRow {
   antar: string;
@@ -82,11 +81,24 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
   }, [expandedRow, expandedPratyantarRow, planet]);
 
   const formatDateForMobile = (dateStr: string) => {
+    if (!dateStr) return { dayMonth: "N/A", year: "N/A" };
+    
     const date = new Date(dateStr);
+    if (!isValid(date)) return { dayMonth: "N/A", year: "N/A" };
+    
     return {
       dayMonth: format(date, "dd/MM"),
       year: format(date, "yyyy")
     };
+  };
+
+  const formatDateSafe = (dateStr: string, formatString: string = "dd/MM/yyyy") => {
+    if (!dateStr) return "N/A";
+    
+    const date = new Date(dateStr);
+    if (!isValid(date)) return "N/A";
+    
+    return format(date, formatString);
   };
 
   const renderMobileRow = (row: AntarDashaRow, index: number) => {
@@ -241,8 +253,8 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
                       </td>
                       <td className="py-1 px-2 font-medium text-gray-800 text-xs md:text-sm">{row.antar}</td>
                       <td className="py-1 px-2 text-gray-600 text-xs">{row.days}</td>
-                      <td className="py-1 px-2 text-gray-600 text-xs">{row.from}</td>
-                      <td className="py-1 px-2 text-gray-600 text-xs">{row.to}</td>
+                      <td className="py-1 px-2 text-gray-600 text-xs">{formatDateSafe(row.from)}</td>
+                      <td className="py-1 px-2 text-gray-600 text-xs">{formatDateSafe(row.to)}</td>
                     </tr>
                     
                     {expandedRow === index && pratyantarData.length > 0 && (
@@ -280,8 +292,8 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
                                         </td>
                                         <td className="py-1 px-1 font-medium text-gray-700 text-xs">{pratyRow.pratyantar}</td>
                                         <td className="py-1 px-1 text-gray-600 text-xs">{pratyRow.days}</td>
-                                        <td className="py-1 px-1 text-gray-600 text-xs">{pratyRow.from}</td>
-                                        <td className="py-1 px-1 text-gray-600 text-xs">{pratyRow.to}</td>
+                                        <td className="py-1 px-1 text-gray-600 text-xs">{formatDateSafe(pratyRow.from)}</td>
+                                        <td className="py-1 px-1 text-gray-600 text-xs">{formatDateSafe(pratyRow.to)}</td>
                                       </tr>
                                       
                                       {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
@@ -306,8 +318,8 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
                                                       <tr key={`dainik-desktop-${index}-${pratyIndex}-${dainikIndex}-${dainikRow.dainik}`} className="border-b border-red-100">
                                                         <td className="py-1 px-1 font-medium text-gray-700 text-xs">{dainikRow.dainik}</td>
                                                         <td className="py-1 px-1 text-gray-600 text-xs">{dainikRow.days}</td>
-                                                        <td className="py-1 px-1 text-gray-600 text-xs">{dainikRow.from}</td>
-                                                        <td className="py-1 px-1 text-gray-600 text-xs">{dainikRow.to}</td>
+                                                        <td className="py-1 px-1 text-gray-600 text-xs">{formatDateSafe(dainikRow.from)}</td>
+                                                        <td className="py-1 px-1 text-gray-600 text-xs">{formatDateSafe(dainikRow.to)}</td>
                                                       </tr>
                                                     ))}
                                                   </tbody>

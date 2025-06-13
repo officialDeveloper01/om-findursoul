@@ -102,9 +102,12 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
   const dashes = calculateDashes();
 
-  // Get conductor series from numerology data
-  const conductorSeries = userData.numerologyData?.conductorSeries || [];
-  const bottomValues = userData.numerologyData?.bottomValues || [];
+  // Get numerology data
+  const numerologyData = userData.numerologyData || {};
+  const conductorSeries = numerologyData.conductorSeries || [];
+  const bottomValues = numerologyData.bottomValues || [];
+  const driver = numerologyData.driver || 0;
+  const conductor = numerologyData.conductor || 0;
 
   const handleConductorClick = (conductorNumber: number, ageIndex: number) => {
     if (!conductorSeries[ageIndex] || !userData.dateOfBirth) return;
@@ -144,7 +147,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
           </div>
         )}
         {hiddenCount > 0 && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center text-l font-bold">
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 flex items-center justify-center text-sm font-bold">
             {String(digit).repeat(hiddenCount)}
           </div>
         )}
@@ -162,7 +165,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
         <CardHeader className="text-center pb-6">
           <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
-            Heal Your Soul
+            Complete Numerology Analysis
           </CardTitle>
           <div className="space-y-1 text-gray-600 mt-2">
             <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>
@@ -173,46 +176,83 @@ export const LoshoGrid = ({ gridData, userData }) => {
           </div>
         </CardHeader>
 
-        <CardContent className="flex justify-center items-center py-8">
-          <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
-            {gridNumbers.flat().map((digit, index) => (
-              <div key={index}>{renderGridCell(digit)}</div>
-            ))}
+        <CardContent className="space-y-8">
+          {/* Lo Shu Grid */}
+          <div className="flex justify-center items-center">
+            <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
+              {gridNumbers.flat().map((digit, index) => (
+                <div key={index}>{renderGridCell(digit)}</div>
+              ))}
+            </div>
           </div>
-        </CardContent>
 
-        {/* Conductor Series Display */}
-        {conductorSeries.length > 0 && bottomValues.length > 0 && (
-          <CardContent className="pt-0">
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-700">Conductor Series</h3>
-              <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha</p>
+          {/* Driver and Conductor Numbers */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <h3 className="text-lg font-medium text-gray-700 mb-2">Driver Number</h3>
+              <div className="text-4xl font-bold text-amber-600">{driver}</div>
             </div>
             
-            {/* Ages Row */}
-            <div className="grid grid-cols-11 gap-2 mb-2">
-              {conductorSeries.map((age, index) => (
-                <div key={index} className="text-center text-sm font-medium text-gray-600 py-1">
-                  {age}
+            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-medium text-gray-700 mb-2">Conductor Number</h3>
+              <div className="text-4xl font-bold text-blue-600">{conductor}</div>
+            </div>
+          </div>
+
+          {/* Chaldean Numbers */}
+          {numerologyData.chaldeanNumbers && (
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium text-gray-700 text-center">Chaldean Name Numerology</h4>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h5 className="text-sm font-medium text-gray-700 mb-2">Name Number</h5>
+                  <div className="text-2xl font-bold text-purple-600">{numerologyData.chaldeanNumbers.nameNumber || 0}</div>
                 </div>
-              ))}
+                <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h5 className="text-sm font-medium text-gray-700 mb-2">Soul Urge</h5>
+                  <div className="text-2xl font-bold text-green-600">{numerologyData.chaldeanNumbers.soulUrgeNumber || 0}</div>
+                </div>
+                <div className="text-center p-4 bg-pink-50 rounded-lg border border-pink-200">
+                  <h5 className="text-sm font-medium text-gray-700 mb-2">Personality</h5>
+                  <div className="text-2xl font-bold text-pink-600">{numerologyData.chaldeanNumbers.personalityNumber || 0}</div>
+                </div>
+              </div>
             </div>
-            
-            {/* Conductor Numbers Row - Clickable */}
-            <div className="grid grid-cols-11 gap-2">
-              {bottomValues.map((number, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleConductorClick(number, index)}
-                  className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-lg font-bold text-amber-800 transition-colors cursor-pointer"
-                  title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
-                >
-                  {number}
-                </button>
-              ))}
+          )}
+
+          {/* Conductor Series - Clickable for Antar Dasha */}
+          {conductorSeries.length > 0 && bottomValues.length > 0 && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-700">Conductor Series (Maha Dasha)</h3>
+                <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>
+              </div>
+              
+              {/* Ages Row */}
+              <div className="grid grid-cols-11 gap-2 mb-2">
+                {conductorSeries.map((age, index) => (
+                  <div key={index} className="text-center text-sm font-medium text-gray-600 py-1">
+                    {age}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Conductor Numbers Row - Clickable */}
+              <div className="grid grid-cols-11 gap-2">
+                {bottomValues.map((number, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleConductorClick(number, index)}
+                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                    title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
+                  >
+                    {number}
+                  </button>
+                ))}
+              </div>
             </div>
-          </CardContent>
-        )}
+          )}
+        </CardContent>
       </Card>
 
       {/* Antar Dasha Table */}

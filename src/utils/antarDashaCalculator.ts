@@ -138,13 +138,60 @@ export const calculatePratyantarDasha = (
       pratyantar: pratyantar.name,
       days: actualDays,
       from: formatDate(fromDate),
-      to: formatDate(toDate)
+      to: formatDate(toDate),
+      planetNumber: getPlanetNumberFromName(pratyantar.name)
     });
 
     currentDate = new Date(toDate);
   }
 
   return pratyantarData;
+};
+
+// ------------------ Dainik Dasha ------------------ //
+export const calculateDainikDasha = (
+  fromDateStr: string, // DD/MM/YYYY
+  toDateStr: string,   // DD/MM/YYYY
+  startPlanetNumber: number,
+  mainPlanetName: string,
+  antarPlanetName: string,
+  pratyantarPlanetName: string
+) => {
+  const startDate = parseDateDDMMYYYY(fromDateStr);
+  const endDate = parseDateDDMMYYYY(toDateStr);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const sequence = getPlanetSequence(startPlanetNumber);
+  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+
+  const dainikData = [];
+  let currentDate = new Date(startDate);
+
+  for (let i = 0; i < sequence.length; i++) {
+    const dainik = sequence[i];
+    const fromDate = new Date(currentDate);
+    let toDate: Date;
+
+    if (i === sequence.length - 1) {
+      toDate = new Date(endDate);
+    } else {
+      const proportionalDays = (dainik.days / totalPlanetDays) * totalDays;
+      toDate = addDays(currentDate, Math.round(proportionalDays));
+    }
+
+    const actualDays = (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    dainikData.push({
+      title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+      dainik: dainik.name,
+      days: Math.round(actualDays * 100) / 100, // Round to 2 decimal places
+      from: formatDate(fromDate),
+      to: formatDate(toDate)
+    });
+
+    currentDate = new Date(toDate);
+  }
+
+  return dainikData;
 };
 
 export { planetMap };

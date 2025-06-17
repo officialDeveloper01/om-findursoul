@@ -1,3 +1,4 @@
+
 interface PlanetData {
   name: string;
   days: number;
@@ -69,6 +70,50 @@ export const calculateAntarDasha = (
 
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 9);
+
+  const planetSequence = getPlanetSequence(planetNumber);
+  const totalDays = 365 * 9;
+  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
+
+  const antarDashaData: any[] = [];
+  let currentDate = new Date(startDate);
+
+  for (let i = 0; i < planetSequence.length; i++) {
+    const antar = planetSequence[i];
+    const fromDate = new Date(currentDate);
+    let toDate: Date;
+
+    if (i === planetSequence.length - 1) {
+      toDate = new Date(endDate);
+    } else {
+      const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
+      toDate = addDays(currentDate, proportionalDays);
+    }
+
+    antarDashaData.push({
+      antar: antar.name,
+      days: antar.days,
+      from: formatDate(fromDate),
+      to: formatDate(toDate),
+      planetNumber: getPlanetNumberFromName(antar.name)
+    });
+
+    currentDate = new Date(toDate);
+  }
+
+  return antarDashaData;
+};
+
+// ------------------ Pre-Birth Antar Dasha ------------------ //
+export const calculatePreBirthAntarDasha = (
+  dateOfBirth: string,
+  planetNumber: number
+) => {
+  const dobDate = parseDate(dateOfBirth);
+  const startDate = new Date(dobDate);
+  startDate.setFullYear(startDate.getFullYear() - 9); // Start 9 years before birth
+
+  const endDate = new Date(dobDate); // End at date of birth
 
   const planetSequence = getPlanetSequence(planetNumber);
   const totalDays = 365 * 9;

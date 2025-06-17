@@ -1,4 +1,3 @@
-
 interface PlanetData {
   name: string;
   days: number;
@@ -107,16 +106,23 @@ export const calculateAntarDasha = (
 // ------------------ Pre-Birth Antar Dasha ------------------ //
 export const calculatePreBirthAntarDasha = (
   dateOfBirth: string,
-  planetNumber: number
+  planetNumber: number,
+  conductorValue?: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
   const startDate = new Date(dobDate);
   startDate.setFullYear(startDate.getFullYear() - 9); // Start 9 years before birth
 
-  const endDate = new Date(dobDate); // End at date of birth
+  // End at DOB + conductor value years (if provided), otherwise end at DOB
+  const endDate = new Date(dobDate);
+  if (conductorValue) {
+    endDate.setFullYear(endDate.getFullYear() + conductorValue);
+  }
 
-  const planetSequence = getPlanetSequence(planetNumber);
-  const totalDays = 365 * 9;
+  // Get planetary sequence and reverse it for pre-birth calculation
+  const planetSequence = getPlanetSequence(planetNumber).reverse();
+  
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
 
   const antarDashaData: any[] = [];

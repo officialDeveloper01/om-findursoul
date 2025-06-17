@@ -183,7 +183,7 @@ export const calculateDainikDasha = (
     dainikData.push({
       title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
       dainik: dainik.name,
-      days: Math.round(actualDays * 100) / 100,
+      days: Math.round(actualDays * 100) / 100, // Round to 2 decimal places
       from: formatDate(fromDate),
       to: formatDate(toDate)
     });
@@ -193,93 +193,5 @@ export const calculateDainikDasha = (
 
   return dainikData;
 };
-
-// ------------------ Pre-Birth Antar Dasha ------------------ //
-export const calculatePreBirthAntarDasha = (
-  dateOfBirth: string,
-  planetNumber: number
-): {
-  mahaDashaTitle: string;
-  antarDashaRows: {
-    antar: string;
-    from: string;
-    to: string;
-    days: number;
-  }[];
-} => {
-  const dobDate = parseDate(dateOfBirth);
-  const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() - 9); // Start 9 years before DOB
-
-  const reversedSequence = [...fixedSequence].reverse();
-  const startIndex = reversedSequence.indexOf(planetNumber);
-  const rotatedSequence = [
-    ...reversedSequence.slice(startIndex),
-    ...reversedSequence.slice(0, startIndex)
-  ];
-  const planetSequence = rotatedSequence.map(num => planetMap[num]);
-
-  const totalDays = 365 * 9;
-  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
-
-  const fullAntarRows: {
-    antar: string;
-    from: string;
-    to: string;
-    days: number;
-  }[] = [];
-
-  let currentDate = new Date(startDate);
-
-  for (let i = 0; i < planetSequence.length; i++) {
-    const antar = planetSequence[i];
-    const fromDate = new Date(currentDate);
-    let toDate: Date;
-
-    if (i === planetSequence.length - 1) {
-      toDate = new Date(dobDate);
-    } else {
-      const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
-      toDate = addDays(currentDate, proportionalDays);
-    }
-
-    const days = Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    fullAntarRows.push({
-      antar: antar.name,
-      from: formatDate(fromDate),
-      to: formatDate(toDate),
-      days
-    });
-
-    currentDate = new Date(toDate);
-  }
-
-  // Filter: Keep only rows where DOB falls between from and to or later
-  const dobTime = dobDate.getTime();
-  const startingIndex = fullAntarRows.findIndex(row => {
-    const from = parseDateDDMMYYYY(row.from).getTime();
-    const to = parseDateDDMMYYYY(row.to).getTime();
-    return dobTime >= from && dobTime <= to;
-  });
-
-  const antarDashaRows = startingIndex !== -1
-    ? fullAntarRows.slice(startingIndex)
-    : [];
-
-  // Compute Maha Dasha title range
-  const mahaStartAge = 0;
-  const lastDate = antarDashaRows.length
-    ? parseDateDDMMYYYY(antarDashaRows[antarDashaRows.length - 1].to)
-    : dobDate;
-
-  const ageDiff = lastDate.getFullYear() - dobDate.getFullYear();
-  const mahaEndAge = ageDiff;
-
-  const mahaDashaTitle = `Maha Dasha (Age ${mahaStartAge} - ${mahaEndAge})`;
-
-  return { mahaDashaTitle, antarDashaRows };
-};
-
 
 export { planetMap };

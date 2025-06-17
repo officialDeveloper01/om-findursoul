@@ -4,9 +4,10 @@ import { Badge } from '@/components/ui/badge';
 
 interface CompactNumerologyRowProps {
   numerologyData: any;
+  userData: any;
 }
 
-export const CompactNumerologyRow = ({ numerologyData }: CompactNumerologyRowProps) => {
+export const CompactNumerologyRow = ({ numerologyData, userData }: CompactNumerologyRowProps) => {
   const driver = numerologyData.driver || 0;
   const conductor = numerologyData.conductor || 0;
   const chaldeanNumbers = numerologyData.chaldeanNumbers || {};

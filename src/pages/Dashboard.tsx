@@ -128,50 +128,6 @@ const Dashboard = () => {
       <CelestialHeader currentView={currentView} setCurrentView={setCurrentView} />
 
       {/* Hero Section - Only show when on form view */}
-      {currentView === 'form' && allResults.length === 0 && (
-        <section className="pt-24 pb-16 px-4 text-center text-white">
-          <div className="max-w-4xl mx-auto">
-            <div className="slide-up">
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 mystic-text">
-                Discover Your Sacred Numbers
-              </h1>
-              <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Unlock the ancient wisdom hidden in your birth details through 
-                <span className="golden-glow"> Vedic Numerology </span> 
-                and the mystical 
-                <span className="golden-glow"> Lo Shu Grid</span>
-              </p>
-              
-              {/* Feature Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                <Card className="sacred-card">
-                  <CardContent className="p-6 text-center">
-                    <Sparkles className="w-12 h-12 text-amber-500 mx-auto mb-4 floating" />
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Numerology Analysis</h3>
-                    <p className="text-slate-600 text-sm">Driver, Conductor & Chaldean calculations</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="sacred-card">
-                  <CardContent className="p-6 text-center">
-                    <BarChart3 className="w-12 h-12 text-purple-500 mx-auto mb-4 floating" />
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Lo Shu Grid</h3>
-                    <p className="text-slate-600 text-sm">Sacred geometry patterns from your birth date</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="sacred-card">
-                  <CardContent className="p-6 text-center">
-                    <BookOpen className="w-12 h-12 text-emerald-500 mx-auto mb-4 floating" />
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Spiritual Insights</h3>
-                    <p className="text-slate-600 text-sm">Ancient wisdom for modern life guidance</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Main Content */}
       <main className="relative">

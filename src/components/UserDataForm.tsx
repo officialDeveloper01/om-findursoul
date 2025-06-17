@@ -1,11 +1,11 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, Clock, MapPin, User, Phone, Plus } from 'lucide-react';
+import { Calendar, MapPin, User, Phone, Plus } from 'lucide-react';
 import { RelativeForm } from './RelativeForm';
+import { TimeInput } from './TimeInput';
 
 export const UserDataForm = ({ onSubmit }) => {
   const [mainFormData, setMainFormData] = useState({
@@ -140,16 +140,11 @@ export const UserDataForm = ({ onSubmit }) => {
 
               <div className="space-y-2">
                 <Label htmlFor="timeOfBirth" className="flex items-center gap-2 text-gray-700">
-                  <Clock size={16} />
                   Time of Birth
                 </Label>
-                <Input
-                  id="timeOfBirth"
-                  type="time"
+                <TimeInput
                   value={mainFormData.timeOfBirth}
-                  onChange={(e) => handleMainInputChange('timeOfBirth', e.target.value)}
-                  className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
-                  required
+                  onChange={(value) => handleMainInputChange('timeOfBirth', value)}
                   disabled={isSubmitting}
                 />
               </div>

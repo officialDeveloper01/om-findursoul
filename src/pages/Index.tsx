@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UserDataForm } from '@/components/UserDataForm';
 import { LoshoGrid } from '@/components/LoshoGrid';
@@ -27,19 +26,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      {/* Header */}
-      <header className="text-center py-12 px-4">
-        <h1 className="text-6xl font-bold text-gray-800 mb-4 tracking-wider">
-          OM
-        </h1>
-        <p className="text-2xl text-amber-600 font-light tracking-widest">
-          HEAL YOUR SOUL
-        </p>
-        <div className="w-24 h-0.5 bg-amber-400 mx-auto mt-6"></div>
-      </header>
-
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 pb-12">
+      <main className="max-w-4xl mx-auto px-4 py-12">
         {currentView === 'form' && (
           <div className="space-y-8">
             <div className="text-center mb-8">

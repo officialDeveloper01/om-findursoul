@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { calculatePratyantarDasha, calculateDainikDasha } from '@/utils/antarDashaCalculator';
+import { format, isValid } from 'date-fns';
 
 interface AntarDashaRow {
   antar: string;
@@ -26,12 +27,28 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
   const [expandedPratyantarRow, setExpandedPratyantarRow] = useState<string | null>(null);
   const [dainikData, setDainikData] = useState<any[]>([]);
 
-  const formatDateCell = (date: string) => (
-    <div className="flex flex-col sm:flex-row sm:gap-1 sm:items-center">
-      <span>{date.slice(0, 6)}</span>
-      <span>{date.slice(6)}</span>
-    </div>
-  );
+  const formatDateCell = (date: string) => {
+    if (!date) return <span>N/A</span>;
+    
+    const dateObj = new Date(date);
+    if (!isValid(dateObj)) return <span>N/A</span>;
+
+    // Mobile format: two lines
+    const dayMonth = format(dateObj, "dd/MM");
+    const year = format(dateObj, "yyyy");
+
+    return (
+      <div className="flex flex-col sm:flex-row sm:gap-1 sm:items-center">
+        <div className="block sm:hidden">
+          <div>{dayMonth}</div>
+          <div className="text-xs text-gray-400">{year}</div>
+        </div>
+        <div className="hidden sm:block">
+          {format(dateObj, "dd/MM/yyyy")}
+        </div>
+      </div>
+    );
+  };
 
   const handleRowClick = async (index: number, row: AntarDashaRow) => {
     if (expandedRow === index) {
@@ -86,124 +103,133 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="overflow-x-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-amber-50">
-              <TableHead className="w-6 px-1 py-0.5 text-xs text-amber-800"></TableHead>
-              <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">ANTAR</TableHead>
-              <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">DAYS</TableHead>
-              <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">FROM</TableHead>
-              <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">TO</TableHead>
-            </TableRow>
-          </TableHeader>
+      <CardContent>
+        {/* Main Antar Dasha Table with independent scroll */}
+        <div className="overflow-x-auto w-full">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow className="bg-amber-50">
+                <TableHead className="w-6 px-1 py-0.5 text-xs text-amber-800"></TableHead>
+                <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">ANTAR</TableHead>
+                <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">DAYS</TableHead>
+                <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">FROM</TableHead>
+                <TableHead className="px-1 py-0.5 text-xs text-amber-800 whitespace-nowrap">TO</TableHead>
+              </TableRow>
+            </TableHeader>
 
-          <TableBody>
-            {data.map((row, index) => (
-              <>
-                <TableRow
-                  key={index}
-                  className="hover:bg-amber-25 cursor-pointer transition-colors"
-                  onClick={() => handleRowClick(index, row)}
-                >
-                  <TableCell className="text-center">
-                    {expandedRow === index ? (
-                      <ChevronDown size={16} className="text-amber-600" />
-                    ) : (
-                      <ChevronRight size={16} className="text-amber-600" />
-                    )}
-                  </TableCell>
-                  <TableCell className="text-gray-800 font-medium">{row.antar}</TableCell>
-                  <TableCell className="text-gray-600">{row.days}</TableCell>
-                  <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(row.from)}</TableCell>
-                  <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(row.to)}</TableCell>
-                </TableRow>
-
-                {expandedRow === index && pratyantarData.length > 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="p-0">
-                      <div className="bg-orange-25 border-l-4 border-orange-300 ml-4 mr-2 my-2">
-                        <div className="p-4">
-                          <h4 className="text-sm font-semibold text-orange-700 mb-3">
-                            Pratyantar Dasha – {planet} – {row.antar}
-                          </h4>
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-orange-50">
-                                <TableHead className="w-6 text-orange-800 text-sm"></TableHead>
-                                <TableHead className="text-orange-800 text-sm">PRATYANTAR</TableHead>
-                                <TableHead className="text-orange-800 text-sm">DAYS</TableHead>
-                                <TableHead className="text-orange-800 text-sm">FROM</TableHead>
-                                <TableHead className="text-orange-800 text-sm">TO</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {pratyantarData.map((pratyRow, pratyIndex) => (
-                                <>
-                                  <TableRow
-                                    key={pratyIndex}
-                                    className="text-sm hover:bg-orange-100 cursor-pointer"
-                                    onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
-                                  >
-                                    <TableCell className="text-center">
-                                      {expandedPratyantarRow === `${index}-${pratyIndex}` ? (
-                                        <ChevronDown size={14} className="text-orange-600" />
-                                      ) : (
-                                        <ChevronRight size={14} className="text-orange-600" />
-                                      )}
-                                    </TableCell>
-                                    <TableCell className="text-gray-700 font-medium">{pratyRow.pratyantar}</TableCell>
-                                    <TableCell className="text-gray-600">{pratyRow.days}</TableCell>
-                                    <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(pratyRow.from)}</TableCell>
-                                    <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(pratyRow.to)}</TableCell>
-                                  </TableRow>
-
-                                  {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
-                                    <TableRow>
-                                      <TableCell colSpan={5} className="p-0">
-                                        <div className="bg-red-25 border-l-4 border-red-300 ml-6 mr-2 my-2">
-                                          <div className="p-3">
-                                            <h5 className="text-xs font-semibold text-red-700 mb-2">
-                                              Dainik Dasha – {planet} – {row.antar} – {pratyRow.pratyantar}
-                                            </h5>
-                                            <Table>
-                                              <TableHeader>
-                                                <TableRow className="bg-red-50">
-                                                  <TableHead className="text-red-800 text-xs">DAINIK</TableHead>
-                                                  <TableHead className="text-red-800 text-xs">DAYS</TableHead>
-                                                  <TableHead className="text-red-800 text-xs">FROM</TableHead>
-                                                  <TableHead className="text-red-800 text-xs">TO</TableHead>
-                                                </TableRow>
-                                              </TableHeader>
-                                              <TableBody>
-                                                {dainikData.map((dainikRow, dainikIndex) => (
-                                                  <TableRow key={dainikIndex} className="text-xs">
-                                                    <TableCell className="text-gray-700 font-medium">{dainikRow.dainik}</TableCell>
-                                                    <TableCell className="text-gray-600">{dainikRow.days}</TableCell>
-                                                    <TableCell className="text-gray-600 text-xs">{formatDateCell(dainikRow.from)}</TableCell>
-                                                    <TableCell className="text-gray-600 text-xs">{formatDateCell(dainikRow.to)}</TableCell>
-                                                  </TableRow>
-                                                ))}
-                                              </TableBody>
-                                            </Table>
-                                          </div>
-                                        </div>
-                                      </TableCell>
-                                    </TableRow>
-                                  )}
-                                </>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </div>
+            <TableBody>
+              {data.map((row, index) => (
+                <>
+                  <TableRow
+                    key={index}
+                    className="hover:bg-amber-25 cursor-pointer transition-colors"
+                    onClick={() => handleRowClick(index, row)}
+                  >
+                    <TableCell className="text-center">
+                      {expandedRow === index ? (
+                        <ChevronDown size={16} className="text-amber-600" />
+                      ) : (
+                        <ChevronRight size={16} className="text-amber-600" />
+                      )}
                     </TableCell>
+                    <TableCell className="text-gray-800 font-medium">{row.antar}</TableCell>
+                    <TableCell className="text-gray-600">{row.days}</TableCell>
+                    <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(row.from)}</TableCell>
+                    <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(row.to)}</TableCell>
                   </TableRow>
-                )}
-              </>
-            ))}
-          </TableBody>
-        </Table>
+
+                  {expandedRow === index && pratyantarData.length > 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="p-0">
+                        <div className="bg-orange-25 border-l-4 border-orange-300 ml-4 mr-2 my-2">
+                          <div className="p-4">
+                            <h4 className="text-sm font-semibold text-orange-700 mb-3">
+                              Pratyantar Dasha – {planet} – {row.antar}
+                            </h4>
+                            {/* Pratyantar Table with independent scroll */}
+                            <div className="overflow-x-auto w-full">
+                              <Table className="min-w-full">
+                                <TableHeader>
+                                  <TableRow className="bg-orange-50">
+                                    <TableHead className="w-6 text-orange-800 text-sm"></TableHead>
+                                    <TableHead className="text-orange-800 text-sm whitespace-nowrap">PRATYANTAR</TableHead>
+                                    <TableHead className="text-orange-800 text-sm whitespace-nowrap">DAYS</TableHead>
+                                    <TableHead className="text-orange-800 text-sm whitespace-nowrap">FROM</TableHead>
+                                    <TableHead className="text-orange-800 text-sm whitespace-nowrap">TO</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {pratyantarData.map((pratyRow, pratyIndex) => (
+                                    <>
+                                      <TableRow
+                                        key={pratyIndex}
+                                        className="text-sm hover:bg-orange-100 cursor-pointer"
+                                        onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
+                                      >
+                                        <TableCell className="text-center">
+                                          {expandedPratyantarRow === `${index}-${pratyIndex}` ? (
+                                            <ChevronDown size={14} className="text-orange-600" />
+                                          ) : (
+                                            <ChevronRight size={14} className="text-orange-600" />
+                                          )}
+                                        </TableCell>
+                                        <TableCell className="text-gray-700 font-medium">{pratyRow.pratyantar}</TableCell>
+                                        <TableCell className="text-gray-600">{pratyRow.days}</TableCell>
+                                        <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(pratyRow.from)}</TableCell>
+                                        <TableCell className="text-gray-600 text-xs sm:text-sm">{formatDateCell(pratyRow.to)}</TableCell>
+                                      </TableRow>
+
+                                      {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
+                                        <TableRow>
+                                          <TableCell colSpan={5} className="p-0">
+                                            <div className="bg-red-25 border-l-4 border-red-300 ml-6 mr-2 my-2">
+                                              <div className="p-3">
+                                                <h5 className="text-xs font-semibold text-red-700 mb-2">
+                                                  Dainik Dasha – {planet} – {row.antar} – {pratyRow.pratyantar}
+                                                </h5>
+                                                {/* Dainik Table with independent scroll */}
+                                                <div className="overflow-x-auto w-full">
+                                                  <Table className="min-w-full">
+                                                    <TableHeader>
+                                                      <TableRow className="bg-red-50">
+                                                        <TableHead className="text-red-800 text-xs whitespace-nowrap">DAINIK</TableHead>
+                                                        <TableHead className="text-red-800 text-xs whitespace-nowrap">DAYS</TableHead>
+                                                        <TableHead className="text-red-800 text-xs whitespace-nowrap">FROM</TableHead>
+                                                        <TableHead className="text-red-800 text-xs whitespace-nowrap">TO</TableHead>
+                                                      </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                      {dainikData.map((dainikRow, dainikIndex) => (
+                                                        <TableRow key={dainikIndex} className="text-xs">
+                                                          <TableCell className="text-gray-700 font-medium">{dainikRow.dainik}</TableCell>
+                                                          <TableCell className="text-gray-600">{dainikRow.days}</TableCell>
+                                                          <TableCell className="text-gray-600 text-xs">{formatDateCell(dainikRow.from)}</TableCell>
+                                                          <TableCell className="text-gray-600 text-xs">{formatDateCell(dainikRow.to)}</TableCell>
+                                                        </TableRow>
+                                                      ))}
+                                                    </TableBody>
+                                                  </Table>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </TableCell>
+                                        </TableRow>
+                                      )}
+                                    </>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

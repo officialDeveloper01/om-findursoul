@@ -110,8 +110,10 @@ export const calculatePreBirthAntarDasha = (
   conductorValue?: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
+  
+  // Start 9 years before birth
   const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() - 9); // Start 9 years before birth
+  startDate.setFullYear(startDate.getFullYear() - 9);
 
   // End at DOB + conductor value years (if provided), otherwise end at DOB
   const endDate = new Date(dobDate);
@@ -122,6 +124,7 @@ export const calculatePreBirthAntarDasha = (
   // Get planetary sequence and reverse it for pre-birth calculation
   const planetSequence = getPlanetSequence(planetNumber).reverse();
   
+  // Calculate total days for the entire period
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
 
@@ -134,21 +137,35 @@ export const calculatePreBirthAntarDasha = (
     let toDate: Date;
 
     if (i === planetSequence.length - 1) {
+      // Last row should end exactly at the specified end date
       toDate = new Date(endDate);
     } else {
       const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
       toDate = addDays(currentDate, proportionalDays);
+      
+      // Ensure we don't exceed the end date
+      if (toDate > endDate) {
+        toDate = new Date(endDate);
+      }
     }
+
+    // Calculate actual days for this period
+    const actualDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
 
     antarDashaData.push({
       antar: antar.name,
-      days: antar.days,
+      days: actualDays, // Use actual calculated days instead of planet days
       from: formatDate(fromDate),
       to: formatDate(toDate),
       planetNumber: getPlanetNumberFromName(antar.name)
     });
 
     currentDate = new Date(toDate);
+    
+    // Stop if we've reached the end date
+    if (currentDate >= endDate) {
+      break;
+    }
   }
 
   return antarDashaData;

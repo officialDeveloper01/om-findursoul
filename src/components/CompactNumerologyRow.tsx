@@ -16,7 +16,6 @@ export const CompactNumerologyRow = ({ numerologyData }: CompactNumerologyRowPro
     { label: 'Conductor', value: conductor, color: 'bg-blue-100 text-blue-700 border-blue-300' },
     { label: 'Name', value: chaldeanNumbers.nameNumber || 0, color: 'bg-purple-100 text-purple-700 border-purple-300' },
     { label: 'Soul', value: chaldeanNumbers.soulUrgeNumber || 0, color: 'bg-green-100 text-green-700 border-green-300' },
-    { label: 'Personality', value: chaldeanNumbers.personalityNumber || 0, color: 'bg-pink-100 text-pink-700 border-pink-300' },
   ];
 
   return (

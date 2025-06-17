@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Clock } from 'lucide-react';
 
 interface TimeInputProps {
@@ -12,7 +11,8 @@ interface TimeInputProps {
 }
 
 export const TimeInput = ({ value, onChange, disabled = false, className = "" }: TimeInputProps) => {
-  const [time12, setTime12] = useState('');
+  const [hour, setHour] = useState('12');
+  const [minute, setMinute] = useState('00');
   const [period, setPeriod] = useState<'AM' | 'PM'>('AM');
 
   // Convert 24-hour format to 12-hour format when value changes
@@ -22,27 +22,28 @@ export const TimeInput = ({ value, onChange, disabled = false, className = "" }:
       const hour24 = parseInt(hours);
       
       if (hour24 === 0) {
-        setTime12(`12:${minutes}`);
+        setHour('12');
+        setMinute(minutes);
         setPeriod('AM');
       } else if (hour24 < 12) {
-        setTime12(`${hour24.toString().padStart(2, '0')}:${minutes}`);
+        setHour(hour24.toString());
+        setMinute(minutes);
         setPeriod('AM');
       } else if (hour24 === 12) {
-        setTime12(`12:${minutes}`);
+        setHour('12');
+        setMinute(minutes);
         setPeriod('PM');
       } else {
-        setTime12(`${(hour24 - 12).toString().padStart(2, '0')}:${minutes}`);
+        setHour((hour24 - 12).toString());
+        setMinute(minutes);
         setPeriod('PM');
       }
     }
   }, [value]);
 
   // Convert 12-hour format to 24-hour format and call onChange
-  const handleTimeChange = (newTime: string, newPeriod: 'AM' | 'PM') => {
-    if (!newTime) return;
-    
-    const [hours, minutes] = newTime.split(':');
-    let hour24 = parseInt(hours);
+  const updateTime = (newHour: string, newMinute: string, newPeriod: 'AM' | 'PM') => {
+    let hour24 = parseInt(newHour);
     
     if (newPeriod === 'AM' && hour24 === 12) {
       hour24 = 0;
@@ -50,47 +51,70 @@ export const TimeInput = ({ value, onChange, disabled = false, className = "" }:
       hour24 += 12;
     }
     
-    const time24 = `${hour24.toString().padStart(2, '0')}:${minutes}`;
+    const time24 = `${hour24.toString().padStart(2, '0')}:${newMinute}`;
     onChange(time24);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = e.target.value;
-    setTime12(newTime);
-    handleTimeChange(newTime, period);
+  const handleHourChange = (newHour: string) => {
+    setHour(newHour);
+    updateTime(newHour, minute, period);
   };
 
-  const handlePeriodToggle = () => {
-    const newPeriod = period === 'AM' ? 'PM' : 'AM';
-    setPeriod(newPeriod);
-    if (time12) {
-      handleTimeChange(time12, newPeriod);
-    }
+  const handleMinuteChange = (newMinute: string) => {
+    setMinute(newMinute);
+    updateTime(hour, newMinute, period);
   };
+
+  const handlePeriodChange = (newPeriod: 'AM' | 'PM') => {
+    setPeriod(newPeriod);
+    updateTime(hour, minute, newPeriod);
+  };
+
+  // Generate hour options (1-12)
+  const hourOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+  
+  // Generate minute options (00-59)
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="relative flex-1">
-        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <Input
-          type="time"
-          value={time12}
-          onChange={handleInputChange}
-          disabled={disabled}
-          className="pl-10 border-gray-200 focus:border-amber-400 focus:ring-amber-400"
-          step="60"
-        />
+      <Clock className="text-gray-400 w-4 h-4 flex-shrink-0" />
+      
+      <div className="flex gap-1 flex-1">
+        <Select value={hour} onValueChange={handleHourChange} disabled={disabled}>
+          <SelectTrigger className="w-16 border-gray-200 focus:border-amber-400 focus:ring-amber-400">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg max-h-48 z-50">
+            {hourOptions.map((h) => (
+              <SelectItem key={h} value={h}>{h}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <span className="flex items-center text-gray-500">:</span>
+
+        <Select value={minute} onValueChange={handleMinuteChange} disabled={disabled}>
+          <SelectTrigger className="w-16 border-gray-200 focus:border-amber-400 focus:ring-amber-400">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg max-h-48 z-50">
+            {minuteOptions.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={period} onValueChange={handlePeriodChange} disabled={disabled}>
+          <SelectTrigger className="w-16 border-gray-200 focus:border-amber-400 focus:ring-amber-400">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg z-50">
+            <SelectItem value="AM">AM</SelectItem>
+            <SelectItem value="PM">PM</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={handlePeriodToggle}
-        disabled={disabled}
-        className="px-3 py-1 text-sm font-medium border-gray-200 hover:bg-amber-50 hover:border-amber-300"
-      >
-        {period}
-      </Button>
     </div>
   );
 };

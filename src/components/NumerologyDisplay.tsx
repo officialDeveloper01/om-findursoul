@@ -39,11 +39,11 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
             </div>
           </div>
 
-          {/* Chaldean Numbers */}
+          {/* Chaldean Numbers - Removed Personality Number */}
           {numerologyData.chaldeanNumbers && (
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-700 text-center">Chaldean Name Numerology</h4>
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <h5 className="text-sm font-medium text-gray-700 mb-2">Name Number</h5>
                   <div className="text-2xl font-bold text-blue-600">{numerologyData.chaldeanNumbers.nameNumber || 0}</div>
@@ -51,10 +51,6 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
                 <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
                   <h5 className="text-sm font-medium text-gray-700 mb-2">Soul Urge</h5>
                   <div className="text-2xl font-bold text-purple-600">{numerologyData.chaldeanNumbers.soulUrgeNumber || 0}</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Personality</h5>
-                  <div className="text-2xl font-bold text-green-600">{numerologyData.chaldeanNumbers.personalityNumber || 0}</div>
                 </div>
               </div>
             </div>

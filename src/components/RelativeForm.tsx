@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, MapPin, User, X } from 'lucide-react';
+import { Calendar, MapPin, User, X } from 'lucide-react';
+import { TimeInput } from './TimeInput';
 
 const RELATION_OPTIONS = [
   { value: 'FATHER', label: 'Father' },
@@ -142,16 +142,11 @@ export const RelativeForm = ({ onUpdate, onRemove, index, initialData = {} }: Re
 
             <div className="space-y-2">
               <Label htmlFor={`timeOfBirth-${index}`} className="flex items-center gap-2 text-gray-700">
-                <Clock size={16} />
                 Time of Birth
               </Label>
-              <Input
-                id={`timeOfBirth-${index}`}
-                type="time"
+              <TimeInput
                 value={formData.timeOfBirth}
-                onChange={(e) => handleInputChange('timeOfBirth', e.target.value)}
-                className="border-gray-200 focus:border-amber-400 focus:ring-amber-400"
-                required
+                onChange={(value) => handleInputChange('timeOfBirth', value)}
               />
             </div>
 

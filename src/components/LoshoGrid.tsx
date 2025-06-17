@@ -177,7 +177,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
         <CardContent className="space-y-6">
           {/* Compact Numerology Row */}
-          <CompactNumerologyRow numerologyData={numerologyData} />
+          <CompactNumerologyRow numerologyData={numerologyData} userData={userData} />
 
           {/* Lo Shu Grid */}
           <div className="flex justify-center items-center">

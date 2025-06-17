@@ -1,9 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
 import { CompactNumerologyRow } from './CompactNumerologyRow';
-import { calculateAntarDasha, planetMap } from '@/utils/antarDashaCalculator';
+import { calculateAntarDasha, calculatePreBirthAntarDasha, planetMap } from '@/utils/antarDashaCalculator';
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);

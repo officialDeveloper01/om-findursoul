@@ -27,12 +27,20 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
   const [expandedPratyantarRow, setExpandedPratyantarRow] = useState<string | null>(null);
   const [dainikData, setDainikData] = useState<any[]>([]);
 
-  const formatDateCell = (date: string) => (
-    <div className="flex flex-col sm:flex-row sm:gap-1 sm:items-center">
-      <span>{date.slice(0, 6)}</span>
-      <span>{date.slice(6)}</span>
-    </div>
-  );
+  // Validate data is an array before rendering
+  if (!Array.isArray(data)) {
+    return null;
+  }
+
+  const formatDateCell = (date: string) => {
+    const [day, month, year] = date.split('/');
+    return (
+      <div className="flex flex-col text-xs sm:flex-row sm:items-center sm:gap-1">
+        <span>{day}/{month}</span>
+        <span>{year}</span>
+      </div>
+    );
+  };
 
   const handleRowClick = async (index: number, row: AntarDashaRow) => {
     if (expandedRow === index) {

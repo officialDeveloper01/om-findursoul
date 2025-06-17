@@ -194,4 +194,60 @@ export const calculateDainikDasha = (
   return dainikData;
 };
 
+// New function for pre-birth Antar Dasha calculation
+export const calculatePreBirthAntarDasha = (
+  dateOfBirth: string,
+  planetNumber: number
+) => {
+  const dobDate = parseDate(dateOfBirth);
+  const startDate = new Date(dobDate);
+  startDate.setFullYear(startDate.getFullYear() - 9); // 9 years before DOB
+
+  // Use reversed planetary sequence for pre-birth
+  const reversedSequence = [...fixedSequence].reverse();
+  const startIndex = reversedSequence.indexOf(planetNumber);
+  const rotatedSequence = [
+    ...reversedSequence.slice(startIndex),
+    ...reversedSequence.slice(0, startIndex)
+  ];
+  const planetSequence = rotatedSequence.map(num => planetMap[num]);
+
+  const totalDays = 365 * 9;
+  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
+
+  const antarDashaData: any[] = [];
+  let currentDate = new Date(startDate);
+
+  for (let i = 0; i < planetSequence.length; i++) {
+    const antar = planetSequence[i];
+    const fromDate = new Date(currentDate);
+    let toDate: Date;
+
+    if (i === planetSequence.length - 1) {
+      toDate = new Date(dobDate);
+    } else {
+      const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
+      toDate = addDays(currentDate, proportionalDays);
+    }
+
+    antarDashaData.push({
+      antar: antar.name,
+      days: antar.days,
+      from: formatDate(fromDate),
+      to: formatDate(toDate),
+      planetNumber: getPlanetNumberFromName(antar.name)
+    });
+
+    currentDate = new Date(toDate);
+  }
+
+  // Filter to only include rows where DOB falls within or after the date range
+  const filteredData = antarDashaData.filter(row => {
+    const rowToDate = parseDateDDMMYYYY(row.to);
+    return rowToDate >= dobDate;
+  });
+
+  return filteredData;
+};
+
 export { planetMap };

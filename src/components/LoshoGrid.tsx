@@ -114,19 +114,34 @@ export const LoshoGrid = ({ gridData, userData }) => {
     const startAge = conductorSeries[ageIndex];
     const planetName = planetMap[conductorNumber]?.name || 'Unknown';
     
-    console.log('Clicked conductor:', { conductorNumber, startAge, planetName });
+    console.log('Clicked conductor:', { conductorNumber, startAge, planetName, ageIndex });
     
     try {
-      const antarDashaData = calculateAntarDasha(
-        userData.dateOfBirth,
-        startAge,
-        conductorNumber
-      );
+      let antarDashaData;
+      let tableTitle;
+
+      if (ageIndex === 0) {
+        // Pre-birth Antar Dasha for index 0
+        antarDashaData = calculatePreBirthAntarDasha(
+          userData.dateOfBirth,
+          conductorNumber
+        );
+        tableTitle = `0 – ${conductorNumber}`;
+      } else {
+        // Regular post-birth Antar Dasha for other indexes
+        antarDashaData = calculateAntarDasha(
+          userData.dateOfBirth,
+          startAge,
+          conductorNumber
+        );
+        tableTitle = planetName;
+      }
       
       setSelectedAntarDasha({
         data: antarDashaData,
-        planet: planetName,
-        startAge: startAge
+        planet: ageIndex === 0 ? tableTitle : planetName,
+        startAge: ageIndex === 0 ? 0 : startAge,
+        isPreBirth: ageIndex === 0
       });
     } catch (error) {
       console.error('Error calculating Antar Dasha:', error);

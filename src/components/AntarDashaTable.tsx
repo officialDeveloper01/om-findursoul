@@ -18,9 +18,10 @@ interface AntarDashaTableProps {
   planet: string;
   startAge: number;
   onClose: () => void;
+  isPreBirth?: boolean;
 }
 
-export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaTableProps) => {
+export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = false }: AntarDashaTableProps) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [pratyantarData, setPratyantarData] = useState<any[]>([]);
   const [expandedPratyantarRow, setExpandedPratyantarRow] = useState<string | null>(null);
@@ -74,12 +75,19 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose }: AntarDashaT
     }
   };
 
+  const getTableTitle = () => {
+    if (isPreBirth) {
+      return `${planet} (Pre-Birth Dasha)`;
+    }
+    return `${planet} Maha Dasha (Age ${startAge} - ${startAge + 9})`;
+  };
+
   return (
     <Card className="mt-6 shadow-lg border border-amber-200">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-amber-700">
-            {planet} Maha Dasha (Age {startAge} - {startAge + 9})
+            {getTableTitle()}
           </CardTitle>
           <Button onClick={onClose} variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
             <X size={18} />

@@ -79,7 +79,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
     if (isPreBirth) {
       return `${planet} (Pre-Birth Dasha)`;
     }
-    return `${planet} Maha Dasha (Age ${startAge} - ${startAge + 9})`;
+    return `${planet} Maha Dasha (Age ${startAge - 9} - ${startAge})`;
   };
 
   return (

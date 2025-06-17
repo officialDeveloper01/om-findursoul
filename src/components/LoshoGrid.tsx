@@ -1,236 +1,235 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Sparkles, Calendar, User, MapPin, Clock } from 'lucide-react';
-import { NumerologyDisplay } from './NumerologyDisplay';
 import { AntarDashaTable } from './AntarDashaTable';
-import { PreBirthAntarDashaTable } from './PreBirthAntarDashaTable';
-import { calculateAntarDasha } from '@/utils/antarDashaCalculator';
+import { CompactNumerologyRow } from './CompactNumerologyRow';
+import { calculateAntarDasha, planetMap } from '@/utils/antarDashaCalculator';
 
-interface LoshoGridProps {
-  gridData: {
-    frequencies: Record<number, number>;
-    grid: number[];
-    originalDate: string;
-    digits: number[];
+export const LoshoGrid = ({ gridData, userData }) => {
+  const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);
+
+  const hiddenMap = {
+    11: 2,
+    22: 3,
+    33: 4,
+    44: 5,
+    55: 6,
+    66: 7,
+    77: 6,
+    88: 7,
+    99: 8,
   };
-  userData: {
-    fullName: string;
-    dateOfBirth: string;
-    timeOfBirth: string;
-    placeOfBirth: string;
-    numerologyData: any;
-  };
-}
 
-export const LoshoGrid = ({ gridData, userData }: LoshoGridProps) => {
-  const [selectedDasha, setSelectedDasha] = useState(null);
-  const [preBirthDasha, setPreBirthDasha] = useState(null);
+  const frequencies: Record<number, number> = { ...gridData.frequencies };
 
-  const formatDate = (date: string) => {
-    try {
-      const jsDate = new Date(date);
-      const day = jsDate.getDate().toString().padStart(2, '0');
-      const month = (jsDate.getMonth() + 1).toString().padStart(2, '0');
-      const year = jsDate.getFullYear();
-      return `${day}/${month}/${year}`;
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Invalid Date";
+  const getHiddenNumbers = useCallback(() => {
+    const fullFreq = { ...frequencies };
+    const hiddenCountMap: Record<number, number> = {};
+    const visited = new Set<string>();
+    let hasNew = true;
+
+    while (hasNew) {
+      hasNew = false;
+      for (let i = 1; i <= 9; i++) {
+        const count = fullFreq[i] || 0;
+        const repeatCount = Math.floor(count / 2);
+        const repeated = Number(String(i).repeat(2));
+
+        if (repeatCount >= 1 && hiddenMap[repeated]) {
+          const hidden = hiddenMap[repeated];
+          const key = `${i}->${hidden}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            hiddenCountMap[hidden] = (hiddenCountMap[hidden] || 0) + repeatCount;
+            fullFreq[hidden] = (fullFreq[hidden] || 0) + repeatCount;
+            hasNew = true;
+          }
+        }
+      }
     }
+
+    return hiddenCountMap;
+  }, [frequencies]);
+
+  const hiddenNumbers = getHiddenNumbers();
+
+  const singleDigitSum = (num: number): number => {
+    while (num >= 10) {
+      num = num
+        .toString()
+        .split('')
+        .reduce((sum, digit) => sum + parseInt(digit), 0);
+    }
+    return num;
   };
 
-  const gridNumberMap = {
-    1: { row: 0, col: 0 },
-    2: { row: 0, col: 1 },
-    3: { row: 0, col: 2 },
-    4: { row: 1, col: 0 },
-    5: { row: 1, col: 1 },
-    6: { row: 1, col: 2 },
-    7: { row: 2, col: 0 },
-    8: { row: 2, col: 1 },
-    9: { row: 2, col: 2 },
-  };
+  const gridNumbers = [
+    [4, 9, 2],
+    [3, 5, 7],
+    [8, 1, 6],
+  ];
 
-  const missingNumbers = Object.keys(gridData.frequencies)
-    .map(Number)
-    .filter(num => gridData.frequencies[num] === 0);
-
-  const handleConductorClick = (conductorValue, index, conductorSeries) => {
-    console.log('Conductor clicked:', conductorValue, 'at index:', index);
+  const calculateDashes = useCallback(() => {
+    const dashes: Record<number, number> = {};
+    const gridCells = gridNumbers.flat();
     
-    // Only handle clicks on the first conductor (index 0) for now
-    if (index === 0) {
-      const title = `0 – ${conductorValue}`;
-      console.log('Pre-birth Dasha title:', title);
-      
-      setPreBirthDasha({
-        conductorValue,
-        title,
-        dateOfBirth: userData.dateOfBirth,
-        index
-      });
-      
-      // Close regular dasha if open
-      setSelectedDasha(null);
+    for (let i = 0; i < gridCells.length; i++) {
+      const digit = gridCells[i];
+      const actualCount = frequencies[digit] || 0;
+      const hiddenCount = hiddenNumbers[digit] || 0;
+
+      if (actualCount > 1) {
+        const total = digit * actualCount;
+        const reduced = singleDigitSum(total);
+        if (!frequencies[reduced]) {
+          dashes[reduced] = (dashes[reduced] || 0) + 1;
+        }
+      }
+
+      if (
+        (actualCount > 0 || hiddenCount > 1) &&
+        !(actualCount === 0 && hiddenCount === 1)
+      ) {
+        const total = digit * (actualCount + hiddenCount);
+        const reduced = singleDigitSum(total);
+        if (!frequencies[reduced] && !dashes[reduced]) {
+          dashes[reduced] = 1;
+        }
+      }
     }
-  };
 
-  const handleDashaClick = (planetNumber, planetName, startAge) => {
-    const antarDashaData = calculateAntarDasha(userData.dateOfBirth, startAge, planetNumber);
-    setSelectedDasha({
-      data: antarDashaData,
-      planet: planetName,
-      startAge: startAge
-    });
-    setPreBirthDasha(null);
-  };
+    return dashes;
+  }, [frequencies, hiddenNumbers]);
 
-  const handleCloseDasha = () => {
-    setSelectedDasha(null);
-  };
+  const dashes = calculateDashes();
 
-  const handleClosePreBirthDasha = () => {
-    setPreBirthDasha(null);
+  // Get numerology data
+  const numerologyData = userData.numerologyData || {};
+  const conductorSeries = numerologyData.conductorSeries || [];
+  const bottomValues = numerologyData.bottomValues || [];
+
+  const handleConductorClick = useCallback((conductorNumber: number, ageIndex: number) => {
+    if (!conductorSeries[ageIndex] || !userData.dateOfBirth) return;
+    
+    const startAge = conductorSeries[ageIndex];
+    const planetName = planetMap[conductorNumber]?.name || 'Unknown';
+    
+    console.log('Clicked conductor:', { conductorNumber, startAge, planetName });
+    
+    try {
+      const antarDashaData = calculateAntarDasha(
+        userData.dateOfBirth,
+        startAge,
+        conductorNumber
+      );
+      
+      setSelectedAntarDasha({
+        data: antarDashaData,
+        planet: planetName,
+        startAge: startAge
+      });
+    } catch (error) {
+      console.error('Error calculating Antar Dasha:', error);
+    }
+  }, [conductorSeries, userData.dateOfBirth]);
+
+  const renderGridCell = (digit: number) => {
+    const count = frequencies[digit] || 0;
+    const hiddenCount = hiddenNumbers[digit] || 0;
+    const dashCount = dashes[digit] || 0;
+
+    return (
+      <div className="relative aspect-square bg-white border border-gray-300 rounded-lg flex items-center justify-center text-center p-2">
+        {count > 0 && (
+          <div className="text-2xl md:text-3xl font-semibold text-gray-800 flex flex-wrap justify-center">
+            {String(digit).repeat(count)}
+          </div>
+        )}
+        {hiddenCount > 0 && (
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center text-sm font-bold">
+            {String(digit).repeat(hiddenCount)}
+          </div>
+        )}
+        {dashCount > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-red-600 font-extrabold text-3xl pointer-events-none">
+            {"_".repeat(dashCount)}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6">
-      {/* User Info Card */}
-      <Card className="shadow-lg border border-gray-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-blue-700 flex items-center gap-2">
-            <User size={20} />
-            {userData.fullName}
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
+            Complete Numerology Analysis
           </CardTitle>
+          <div className="space-y-1 text-gray-600 mt-2">
+            <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>
+            <p className="text-sm md:text-base">
+              Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}
+            </p>
+            <p className="text-sm md:text-base">{userData.placeOfBirth}</p>
+          </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar size={16} className="text-blue-500" />
-            Date of Birth: {formatDate(userData.dateOfBirth)}
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Clock size={16} className="text-blue-500" />
-            Time of Birth: {userData.timeOfBirth || 'N/A'}
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <MapPin size={16} className="text-blue-500" />
-            Place of Birth: {userData.placeOfBirth || 'N/A'}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Losho Grid Card */}
-      <Card className="shadow-lg border border-amber-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-amber-700">Losho Grid</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(number => (
-              <div key={number} className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-semibold text-lg">
-                  {number}
-                </div>
-                <span className="text-sm text-gray-500 mt-1">
-                  {gridData.frequencies[number]}
-                </span>
-              </div>
-            ))}
+        <CardContent className="space-y-6">
+          {/* Compact Numerology Row */}
+          <CompactNumerologyRow numerologyData={numerologyData} />
+
+          {/* Lo Shu Grid */}
+          <div className="flex justify-center items-center">
+            <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
+              {gridNumbers.flat().map((digit, index) => (
+                <div key={`grid-cell-${digit}-${index}`}>{renderGridCell(digit)}</div>
+              ))}
+            </div>
           </div>
-          {missingNumbers.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm text-red-500">
-                Missing Numbers: {missingNumbers.join(', ')}
-              </p>
+
+          {/* Conductor Series - Clickable for Antar Dasha */}
+          {conductorSeries.length > 0 && bottomValues.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-700">Conductor Series (Maha Dasha)</h3>
+                <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>
+              </div>
+              
+              {/* Ages Row */}
+              <div className="grid grid-cols-11 gap-1 mb-2">
+                {conductorSeries.map((age, index) => (
+                  <div key={`age-${age}-${index}`} className="text-center text-xs font-medium text-gray-600 py-1">
+                    {age}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Conductor Numbers Row - Clickable */}
+              <div className="grid grid-cols-11 gap-1">
+                {bottomValues.map((number, index) => (
+                  <button
+                    key={`conductor-${number}-${index}`}
+                    onClick={() => handleConductorClick(number, index)}
+                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-sm md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                    title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
+                  >
+                    {number}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
-      
-      {/* Conductor Series Card */}
-      <Card className="shadow-lg border border-purple-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-purple-700 flex items-center gap-2">
-            <Sparkles size={20} />
-            Conductor Series
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-11 gap-2">
-            {userData.numerologyData.conductorSeries.map((conductor, index) => (
-              <div 
-                key={index} 
-                className="flex flex-col items-center cursor-pointer hover:bg-purple-50 p-2 rounded transition-colors"
-                onClick={() => handleConductorClick(conductor, index, userData.numerologyData.conductorSeries)}
-              >
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 font-semibold text-sm mb-1">
-                  {conductor}
-                </div>
-                <span className="text-xs text-purple-600">{userData.numerologyData.bottomValues[index]}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Numerology Display */}
-      <NumerologyDisplay numerologyData={userData.numerologyData} />
-
-      {/* Planet Buttons Grid */}
-      <Card className="shadow-lg border border-green-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-green-700">Antar Dasha</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-3 gap-4">
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(1, 'SURYA', 0)}>
-            Surya (Sun)
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(2, 'CHANDRA', 1)}>
-            Chandra (Moon)
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(9, 'MANGAL', 2)}>
-            Mangal (Mars)
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(4, 'RAHU', 3)}>
-            Rahu
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(3, 'GURU', 4)}>
-            Guru (Jupiter)
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(8, 'SHANI', 5)}>
-            Shani (Saturn)
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(5, 'BUDH', 6)}>
-            Budh (Mercury)
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(7, 'KETU', 7)}>
-            Ketu
-          </Button>
-          <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-50" onClick={() => handleDashaClick(6, 'SHUKRA', 8)}>
-            Shukra (Venus)
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Pre-birth Antar Dasha Table */}
-      {preBirthDasha && (
-        <PreBirthAntarDashaTable
-          conductorValue={preBirthDasha.conductorValue}
-          title={preBirthDasha.title}
-          dateOfBirth={preBirthDasha.dateOfBirth}
-          onClose={handleClosePreBirthDasha}
-        />
-      )}
-
-      {/* Regular Antar Dasha Table */}
-      {selectedDasha && (
+      {/* Antar Dasha Table */}
+      {selectedAntarDasha && (
         <AntarDashaTable
-          data={selectedDasha.data}
-          planet={selectedDasha.planet}
-          startAge={selectedDasha.startAge}
-          onClose={handleCloseDasha}
+          data={selectedAntarDasha.data}
+          planet={selectedAntarDasha.planet}
+          startAge={selectedAntarDasha.startAge}
+          onClose={() => setSelectedAntarDasha(null)}
         />
       )}
     </div>

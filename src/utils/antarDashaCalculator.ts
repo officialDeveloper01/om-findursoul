@@ -62,6 +62,14 @@ const getPlanetNumberFromName = (planetName: string): number => {
   return 1;
 };
 
+const formatISTDate = (date: Date): string => {
+  const [day, month, year] = date
+    .toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })
+    .split('/');
+  return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+};
+
+
 export const calculateAntarDasha = (
   dateOfBirth: string,
   startAge: number,
@@ -127,17 +135,20 @@ export const calculatePreBirthAntarDasha = (
     const originalDays = planet.days;
 
     if (!crossedDOB) {
-      const newDate = subtractDays(currentDate, originalDays);
+      const newDate = new Date(currentDate);
+      newDate.setDate(newDate.getDate() - originalDays);
 
       if (newDate <= dobDate) {
-        const daysTillDOB = Math.ceil((currentDate.getTime() - dobDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysTillDOB = Math.ceil(
+          (currentDate.getTime() - dobDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
         antarDashaData.push({
           antar: planet.name,
           days: daysTillDOB,
-          from: formatDate(dobDate),
-          to: formatDate(currentDate),
-          planetNumber: getPlanetNumberFromName(planet.name)
+          from: formatISTDate(dobDate),
+          to: formatISTDate(currentDate),
+          planetNumber: getPlanetNumberFromName(planet.name),
         });
 
         crossedDOB = true;
@@ -145,11 +156,11 @@ export const calculatePreBirthAntarDasha = (
         antarDashaData.push({
           antar: planet.name,
           days: originalDays,
-          from: formatDate(subtractDays(currentDate, originalDays)),
-          to: formatDate(currentDate),
-          planetNumber: getPlanetNumberFromName(planet.name)
+          from: formatISTDate(newDate),
+          to: formatISTDate(currentDate),
+          planetNumber: getPlanetNumberFromName(planet.name),
         });
-        currentDate = subtractDays(currentDate, originalDays);
+        currentDate = newDate;
       }
     } else {
       antarDashaData.push({
@@ -157,13 +168,14 @@ export const calculatePreBirthAntarDasha = (
         days: 0,
         from: '–',
         to: '–',
-        planetNumber: getPlanetNumberFromName(planet.name)
+        planetNumber: getPlanetNumberFromName(planet.name),
       });
     }
   }
 
   return antarDashaData.reverse();
 };
+
 
 export const calculatePratyantarDasha = (
   fromDateStr: string,

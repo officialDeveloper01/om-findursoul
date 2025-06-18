@@ -6,6 +6,7 @@ import { calculateAntarDasha, calculatePreBirthAntarDasha, planetMap } from '@/u
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);
+  const [tableEndDates, setTableEndDates] = useState<Record<number, string>>({}); // Track end dates by age index
 
   const hiddenMap = {
     11: 2,
@@ -120,21 +121,33 @@ export const LoshoGrid = ({ gridData, userData }) => {
       let tableTitle;
 
       if (ageIndex === 0) {
-        // Pre-birth Antar Dasha for index 0 - pass the first conductor age series value
+        // Pre-birth Antar Dasha for index 0
         antarDashaData = calculatePreBirthAntarDasha(
           userData.dateOfBirth,
           conductorNumber,
-          startAge // Use startAge (conductor series value) instead of conductorNumber
+          startAge
         );
         tableTitle = `0 – ${startAge}`;
       } else {
-        // Regular post-birth Antar Dasha for other indexes
+        // For subsequent tables, use the end date from the previous table if available
+        const previousEndDate = tableEndDates[ageIndex - 1];
+        
         antarDashaData = calculateAntarDasha(
           userData.dateOfBirth,
           startAge,
-          conductorNumber
+          conductorNumber,
+          previousEndDate // Pass the end date from previous table
         );
         tableTitle = planetName;
+      }
+      
+      // Store the end date of this table for the next one
+      if (antarDashaData.length > 0) {
+        const lastRow = antarDashaData[antarDashaData.length - 1];
+        setTableEndDates(prev => ({
+          ...prev,
+          [ageIndex]: lastRow.to
+        }));
       }
       
       setSelectedAntarDasha({
@@ -146,7 +159,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
     } catch (error) {
       console.error('Error calculating Antar Dasha:', error);
     }
-  }, [conductorSeries, userData.dateOfBirth]);
+  }, [conductorSeries, userData.dateOfBirth, tableEndDates]);
 
   const renderGridCell = (digit: number) => {
     const count = frequencies[digit] || 0;

@@ -77,11 +77,15 @@ const formatISTDate = (date: Date): string => {
 export const calculateAntarDasha = (
   dateOfBirth: string,
   startAge: number,
-  planetNumber: number
+  planetNumber: number,
+  startFromDate?: string // Optional parameter for date continuity
 ) => {
   const dobDate = parseDate(dateOfBirth);
-  const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() + startAge);
+  
+  // Use provided start date or calculate from age
+  const startDate = startFromDate ? 
+    parseDateDDMMYYYY(startFromDate) : 
+    new Date(dobDate.getFullYear() + startAge, dobDate.getMonth(), dobDate.getDate());
 
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 9);

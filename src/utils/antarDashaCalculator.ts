@@ -32,6 +32,12 @@ const addDays = (date: Date, days: number): Date => {
   return result;
 };
 
+const subtractDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() - days);
+  return result;
+};
+
 const formatDate = (date: Date): string => {
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -104,52 +110,59 @@ export const calculateAntarDasha = (
 export const calculatePreBirthAntarDasha = (
   dateOfBirth: string,
   planetNumber: number,
-  conductorValue?: number
+  conductorValue: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
+  const targetAgeDate = new Date(dobDate);
+  targetAgeDate.setFullYear(targetAgeDate.getFullYear() + conductorValue);
 
-  const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() - 9);
-
-  const endDate = new Date(dobDate);
-  if (conductorValue) {
-    endDate.setFullYear(endDate.getFullYear() + conductorValue);
-  }
-
-  const planetSequence = getPlanetSequence(planetNumber).reverse();
-
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
-
+  const reversedSequence = getPlanetSequence(planetNumber).reverse();
+  let currentDate = new Date(targetAgeDate);
   const antarDashaData: any[] = [];
-  let currentDate = new Date(startDate);
 
-  for (let i = 0; i < planetSequence.length; i++) {
-    const antar = planetSequence[i];
-    const fromDate = new Date(currentDate);
-    let proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
-    let toDate = addDays(currentDate, proportionalDays);
+  let crossedDOB = false;
 
-    if (i === planetSequence.length - 1 || toDate > endDate) {
-      toDate = new Date(endDate);
+  for (let i = 0; i < reversedSequence.length; i++) {
+    const planet = reversedSequence[i];
+    const originalDays = planet.days;
+
+    if (!crossedDOB) {
+      const newDate = subtractDays(currentDate, originalDays);
+
+      if (newDate <= dobDate) {
+        const daysTillDOB = Math.ceil((currentDate.getTime() - dobDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        antarDashaData.push({
+          antar: planet.name,
+          days: daysTillDOB,
+          from: formatDate(dobDate),
+          to: formatDate(currentDate),
+          planetNumber: getPlanetNumberFromName(planet.name)
+        });
+
+        crossedDOB = true;
+      } else {
+        antarDashaData.push({
+          antar: planet.name,
+          days: originalDays,
+          from: formatDate(subtractDays(currentDate, originalDays)),
+          to: formatDate(currentDate),
+          planetNumber: getPlanetNumberFromName(planet.name)
+        });
+        currentDate = subtractDays(currentDate, originalDays);
+      }
+    } else {
+      antarDashaData.push({
+        antar: planet.name,
+        days: 0,
+        from: '–',
+        to: '–',
+        planetNumber: getPlanetNumberFromName(planet.name)
+      });
     }
-
-    const actualDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    antarDashaData.push({
-      antar: `${antar.name}`,
-      days: actualDays,
-      from: formatDate(fromDate),
-      to: formatDate(toDate),
-      planetNumber: getPlanetNumberFromName(antar.name)
-    });
-
-    currentDate = new Date(toDate);
-
-    if (currentDate >= endDate) break;
   }
 
-  return antarDashaData;
+  return antarDashaData.reverse();
 };
 
 export const calculatePratyantarDasha = (

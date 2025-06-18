@@ -1,3 +1,10 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 interface PlanetData {
   name: string;
   days: number;
@@ -39,24 +46,20 @@ const subtractDays = (date: Date, days: number): Date => {
 };
 
 const formatDate = (date: Date): string => {
-  // Convert to IST by adding 5.5 hours offset
-  const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
-  const istDate = new Date(date.getTime() + istOffset);
-  
-  const day = istDate.getUTCDate().toString().padStart(2, '0');
-  const month = (istDate.getUTCMonth() + 1).toString().padStart(2, '0');
-  const year = istDate.getUTCFullYear();
-  return `${day}/${month}/${year}`;
+  // Use dayjs to format date in IST timezone
+  return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
 
 const parseDate = (dateStr: string): Date => {
-  const [yearStr, monthStr, dayStr] = dateStr.split('-');
-  return new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
+  // Parse date string and interpret in IST timezone
+  const istDate = dayjs.tz(dateStr, 'Asia/Kolkata');
+  return istDate.toDate();
 };
 
 const parseDateDDMMYYYY = (dateStr: string): Date => {
-  const [dayStr, monthStr, yearStr] = dateStr.split('/');
-  return new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
+  // Parse DD/MM/YYYY format and interpret in IST timezone
+  const istDate = dayjs.tz(dateStr, 'DD/MM/YYYY', 'Asia/Kolkata');
+  return istDate.toDate();
 };
 
 const getPlanetNumberFromName = (planetName: string): number => {
@@ -67,16 +70,9 @@ const getPlanetNumberFromName = (planetName: string): number => {
 };
 
 const formatISTDate = (date: Date): string => {
-  // Convert to IST by adding 5.5 hours offset
-  const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
-  const istDate = new Date(date.getTime() + istOffset);
-  
-  const day = istDate.getUTCDate().toString().padStart(2, '0');
-  const month = (istDate.getUTCMonth() + 1).toString().padStart(2, '0');
-  const year = istDate.getUTCFullYear();
-  return `${day}/${month}/${year}`;
+  // Use dayjs to format date in IST timezone
+  return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
-
 
 export const calculateAntarDasha = (
   dateOfBirth: string,

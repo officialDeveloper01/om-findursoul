@@ -39,9 +39,13 @@ const subtractDays = (date: Date, days: number): Date => {
 };
 
 const formatDate = (date: Date): string => {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
+  // Convert to IST by adding 5.5 hours offset
+  const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+  const istDate = new Date(date.getTime() + istOffset);
+  
+  const day = istDate.getUTCDate().toString().padStart(2, '0');
+  const month = (istDate.getUTCMonth() + 1).toString().padStart(2, '0');
+  const year = istDate.getUTCFullYear();
   return `${day}/${month}/${year}`;
 };
 
@@ -63,10 +67,14 @@ const getPlanetNumberFromName = (planetName: string): number => {
 };
 
 const formatISTDate = (date: Date): string => {
-  const [day, month, year] = date
-    .toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })
-    .split('/');
-  return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+  // Convert to IST by adding 5.5 hours offset
+  const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+  const istDate = new Date(date.getTime() + istOffset);
+  
+  const day = istDate.getUTCDate().toString().padStart(2, '0');
+  const month = (istDate.getUTCMonth() + 1).toString().padStart(2, '0');
+  const year = istDate.getUTCFullYear();
+  return `${day}/${month}/${year}`;
 };
 
 

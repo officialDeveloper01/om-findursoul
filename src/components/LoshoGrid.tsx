@@ -120,13 +120,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
       let tableTitle;
 
       if (ageIndex === 0) {
-        // Pre-birth Antar Dasha for index 0 - pass conductor value for end date calculation
+        // Pre-birth Antar Dasha for index 0 - pass the first conductor age series value
         antarDashaData = calculatePreBirthAntarDasha(
           userData.dateOfBirth,
           conductorNumber,
-          conductorNumber // Pass conductor value as the end year offset
+          startAge // Use startAge (conductor series value) instead of conductorNumber
         );
-        tableTitle = `0 – ${conductorNumber}`;
+        tableTitle = `0 – ${startAge}`;
       } else {
         // Regular post-birth Antar Dasha for other indexes
         antarDashaData = calculateAntarDasha(

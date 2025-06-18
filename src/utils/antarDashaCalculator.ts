@@ -81,7 +81,8 @@ export const calculateAntarDasha = (
 ) => {
   const dobDate = parseDate(dateOfBirth);
   const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() + startAge - 9);
+  const mahaDashaStartAge = startAge - 9;
+  startDate.setFullYear(startDate.getFullYear() + mahaDashaStartAge);
 
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 9);

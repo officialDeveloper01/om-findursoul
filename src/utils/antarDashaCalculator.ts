@@ -70,7 +70,7 @@ export const calculateAntarDasha = (
   
   // Correct start date: DOB + (startAge - 9)
   const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() + (startAge - 9));
+  startDate.setFullYear(startDate.getFullYear() + (startAge));
 
   const endDate = new Date(dobDate);
   endDate.setFullYear(endDate.getFullYear() + startAge);

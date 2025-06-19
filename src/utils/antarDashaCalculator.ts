@@ -1,3 +1,4 @@
+
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -76,6 +77,8 @@ export const calculateAntarDasha = (
   planetNumber: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
+  
+  // Fix: Start from DOB + (startAge - 9) and end at DOB + startAge
   const startDate = new Date(dobDate);
   startDate.setFullYear(startDate.getFullYear() + (startAge - 9));
 
@@ -175,7 +178,6 @@ export const calculatePreBirthAntarDasha = (
 
   return antarDashaData.reverse();
 };
-
 
 export const calculatePratyantarDasha = (
   fromDateStr: string,

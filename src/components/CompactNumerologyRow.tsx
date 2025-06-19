@@ -26,10 +26,10 @@ export const CompactNumerologyRow = ({ numerologyData, userData }: CompactNumero
         <Badge
           key={index}
           variant="outline"
-          className={`${item.color} px-3 py-1 text-sm font-bold rounded-full flex items-center gap-1`}
+          className={`${item.color} px-3 py-1 font-bold rounded-full flex items-center gap-1`}
         >
-          <span className="text-xs font-bold">{item.label}:</span>
-          <span className="font-bold text-base">{item.value}</span>
+          <span className="font-bold">{item.label}:</span>
+          <span className="font-bold">{item.value}</span>
         </Badge>
       ))}
     </div>

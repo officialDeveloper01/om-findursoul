@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
@@ -168,7 +169,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
           </div>
         )}
         {hiddenCount > 0 && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center text-sm font-bold">
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center font-bold">
             {String(digit).repeat(hiddenCount)}
           </div>
         )}
@@ -223,37 +224,37 @@ export const LoshoGrid = ({ gridData, userData }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">Name:</span>
+                <span className="text-gray-600 font-bold">Name:</span>
                 <span className="font-bold text-gray-800">{userData.fullName}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">DOB & Time:</span>
+                <span className="text-gray-600 font-bold">DOB & Time:</span>
                 <span className="font-bold text-gray-800">
                   {formatDate(userData.dateOfBirth)} {formatTime(userData.timeOfBirth)}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">Age:</span>
+                <span className="text-gray-600 font-bold">Age:</span>
                 <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
               </div>
             </div>
             
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">Name Number:</span>
+                <span className="text-gray-600 font-bold">Name Number:</span>
                 <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
               </div>
               
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">MULAANK:</span>
+                <span className="text-gray-600 font-bold">MULAANK:</span>
                 <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">BHAGYAANK:</span>
+                <span className="text-gray-600 font-bold">BHAGYAANK:</span>
                 <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-bold">Soul Number:</span>
+                <span className="text-gray-600 font-bold">Soul Number:</span>
                 <span className="font-bold text-green-700 text-lg">{numerologyData.soulNumber || 0}</span>
               </div>
             </div>
@@ -275,12 +276,12 @@ export const LoshoGrid = ({ gridData, userData }) => {
             <div className="space-y-3">
               <div className="text-center">
                 <h3 className="text-lg font-bold text-gray-700">BHAGYAANK Series (Maha Dasha)</h3>
-                <p className="text-sm text-gray-500 font-bold">Click on any number below to view Antar Dasha table</p>
+                <p className="text-gray-500 font-bold">Click on any number below to view Antar Dasha table</p>
               </div>
               
               <div className="grid grid-cols-11 gap-1 mb-2">
                 {conductorSeries.map((age, index) => (
-                  <div key={`age-${age}-${index}`} className="text-center text-xs font-bold text-gray-600 py-1">
+                  <div key={`age-${age}-${index}`} className="text-center font-bold text-gray-600 py-1">
                     {age}
                   </div>
                 ))}
@@ -291,7 +292,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
                   <button
                     key={`conductor-${number}-${index}`}
                     onClick={() => handleConductorClick(number, index)}
-                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-sm md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
                     title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
                   >
                     {number}

@@ -11,22 +11,24 @@ export const CompactNumerologyRow = ({ numerologyData, userData }: CompactNumero
   const driver = numerologyData.driver || 0;
   const conductor = numerologyData.conductor || 0;
   const chaldeanNumbers = numerologyData.chaldeanNumbers || {};
+  const soulNumber = numerologyData.soulNumber || 0;
   
   const items = [
     { label: 'MULAANK', value: driver, color: 'bg-amber-100 text-amber-700 border-amber-300' },
     { label: 'BHAGYAANK', value: conductor, color: 'bg-blue-100 text-blue-700 border-blue-300' },
+    { label: 'Soul Number', value: soulNumber, color: 'bg-green-100 text-green-700 border-green-300' },
     { label: 'Name', value: chaldeanNumbers.nameNumber || 0, color: 'bg-purple-100 text-purple-700 border-purple-300' },
   ];
 
   return (
-    <div className="flex flex-wrap gap-3 justify-center items-center py-3">
+    <div className="flex flex-wrap gap-3 justify-center items-center py-3" style={{ fontFamily: 'Calibri, sans-serif' }}>
       {items.map((item, index) => (
         <Badge
           key={index}
           variant="outline"
-          className={`${item.color} px-3 py-1 text-sm font-medium rounded-full flex items-center gap-1`}
+          className={`${item.color} px-3 py-1 text-sm font-bold rounded-full flex items-center gap-1`}
         >
-          <span className="text-xs">{item.label}:</span>
+          <span className="text-xs font-bold">{item.label}:</span>
           <span className="font-bold text-base">{item.value}</span>
         </Badge>
       ))}

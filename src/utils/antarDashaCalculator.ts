@@ -46,18 +46,15 @@ const subtractDays = (date: Date, days: number): Date => {
 };
 
 const formatDate = (date: Date): string => {
-  // Use dayjs to format date in IST timezone
   return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
 
 const parseDate = (dateStr: string): Date => {
-  // Parse date string and interpret in IST timezone
   const istDate = dayjs.tz(dateStr, 'Asia/Kolkata');
   return istDate.toDate();
 };
 
 const parseDateDDMMYYYY = (dateStr: string): Date => {
-  // Parse DD/MM/YYYY format and interpret in IST timezone
   const istDate = dayjs.tz(dateStr, 'DD/MM/YYYY', 'Asia/Kolkata');
   return istDate.toDate();
 };
@@ -70,7 +67,6 @@ const getPlanetNumberFromName = (planetName: string): number => {
 };
 
 const formatISTDate = (date: Date): string => {
-  // Use dayjs to format date in IST timezone
   return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
 
@@ -81,13 +77,13 @@ export const calculateAntarDasha = (
 ) => {
   const dobDate = parseDate(dateOfBirth);
   const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() + startAge  );
+  startDate.setFullYear(startDate.getFullYear() + (startAge - 9));
 
-  const endDate = new Date(startDate);
-  endDate.setFullYear(endDate.getFullYear() + 9);
+  const endDate = new Date(dobDate);
+  endDate.setFullYear(endDate.getFullYear() + startAge);
 
   const planetSequence = getPlanetSequence(planetNumber);
-  const totalDays = 365 * 9;
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
 
   const antarDashaData: any[] = [];

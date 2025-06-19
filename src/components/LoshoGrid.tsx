@@ -216,41 +216,45 @@ export const LoshoGrid = ({ gridData, userData }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8" style={{ fontFamily: 'Calibri, sans-serif' }}>
       {/* User Profile Header */}
       <Card className="shadow-lg border border-amber-200 mb-6">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600">Name:</span>
+                <span className="text-sm text-gray-600 font-bold">Name:</span>
                 <span className="font-bold text-gray-800">{userData.fullName}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600">DOB & Time:</span>
+                <span className="text-sm text-gray-600 font-bold">DOB & Time:</span>
                 <span className="font-bold text-gray-800">
                   {formatDate(userData.dateOfBirth)} {formatTime(userData.timeOfBirth)}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600">Age:</span>
+                <span className="text-sm text-gray-600 font-bold">Age:</span>
                 <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
               </div>
             </div>
             
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600">Name Number:</span>
+                <span className="text-sm text-gray-600 font-bold">Name Number:</span>
                 <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
               </div>
               
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-semibold">MULAANK:</span>
+                <span className="text-sm text-gray-600 font-bold">MULAANK:</span>
                 <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-semibold">BHAGYAANK:</span>
+                <span className="text-sm text-gray-600 font-bold">BHAGYAANK:</span>
                 <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600 font-bold">Soul Number:</span>
+                <span className="font-bold text-green-700 text-lg">{numerologyData.soulNumber || 0}</span>
               </div>
             </div>
           </div>
@@ -270,13 +274,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
           {conductorSeries.length > 0 && bottomValues.length > 0 && (
             <div className="space-y-3">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-700">BHAGYAANK Series (Maha Dasha)</h3>
-                <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>
+                <h3 className="text-lg font-bold text-gray-700">BHAGYAANK Series (Maha Dasha)</h3>
+                <p className="text-sm text-gray-500 font-bold">Click on any number below to view Antar Dasha table</p>
               </div>
               
               <div className="grid grid-cols-11 gap-1 mb-2">
                 {conductorSeries.map((age, index) => (
-                  <div key={`age-${age}-${index}`} className="text-center text-xs font-medium text-gray-600 py-1">
+                  <div key={`age-${age}-${index}`} className="text-center text-xs font-bold text-gray-600 py-1">
                     {age}
                   </div>
                 ))}

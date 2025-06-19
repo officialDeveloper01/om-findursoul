@@ -11,7 +11,19 @@ export const CompactNumerologyRow = ({ numerologyData, userData }: CompactNumero
   const driver = numerologyData.driver || 0;
   const conductor = numerologyData.conductor || 0;
   const chaldeanNumbers = numerologyData.chaldeanNumbers || {};
-  const soulNumber = numerologyData.soulNumber || 0;
+  
+  // Calculate Soul Number from DOB
+  const calculateSoulNumber = (dob: string) => {
+    if (!dob) return 0;
+    const day = parseInt(dob.split('-')[2]);
+    let sum = day;
+    while (sum > 9) {
+      sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
+    }
+    return sum;
+  };
+  
+  const soulNumber = calculateSoulNumber(userData.dateOfBirth);
   
   const items = [
     { label: 'MULAANK', value: driver, color: 'bg-amber-100 text-amber-700 border-amber-300' },

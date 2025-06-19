@@ -216,22 +216,32 @@ export const LoshoGrid = ({ gridData, userData }) => {
     return age;
   };
 
+  const calculateSoulNumber = (dob: string) => {
+    if (!dob) return 0;
+    const day = parseInt(dob.split('-')[2]);
+    let sum = day;
+    while (sum > 9) {
+      sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
+    }
+    return sum;
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" style={{ fontFamily: 'Calibri, sans-serif' }}>
-      {/* User Profile Header */}
+      {/* Updated User Profile Header */}
       <Card className="shadow-lg border border-amber-200 mb-6">
         <CardContent className="p-4">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{userData.fullName}</h2>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">Name:</span>
-                <span className="font-bold text-gray-800">{userData.fullName}</span>
+                <span className="text-gray-600 font-bold">DOB:</span>
+                <span className="font-bold text-gray-800">{formatDate(userData.dateOfBirth)}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">DOB & Time:</span>
-                <span className="font-bold text-gray-800">
-                  {formatDate(userData.dateOfBirth)} {formatTime(userData.timeOfBirth)}
-                </span>
+                <span className="text-gray-600 font-bold">Time:</span>
+                <span className="font-bold text-gray-800">{formatTime(userData.timeOfBirth)}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                 <span className="text-gray-600 font-bold">Age:</span>
@@ -241,21 +251,16 @@ export const LoshoGrid = ({ gridData, userData }) => {
             
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">Name Number:</span>
-                <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                 <span className="text-gray-600 font-bold">MULAANK:</span>
-                <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
+                <span className="font-bold text-amber-700">{numerologyData.driver || 0}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                 <span className="text-gray-600 font-bold">BHAGYAANK:</span>
-                <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
+                <span className="font-bold text-blue-700">{numerologyData.conductor || 0}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                 <span className="text-gray-600 font-bold">Soul Number:</span>
-                <span className="font-bold text-green-700 text-lg">{numerologyData.soulNumber || 0}</span>
+                <span className="font-bold text-green-700">{calculateSoulNumber(userData.dateOfBirth)}</span>
               </div>
             </div>
           </div>

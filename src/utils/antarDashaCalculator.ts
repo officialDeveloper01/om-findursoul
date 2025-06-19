@@ -40,12 +40,6 @@ const addDays = (date: Date, days: number): Date => {
   return result;
 };
 
-const subtractDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() - days);
-  return result;
-};
-
 const formatDate = (date: Date): string => {
   return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
@@ -65,10 +59,6 @@ const getPlanetNumberFromName = (planetName: string): number => {
     if (value.name === planetName) return parseInt(key);
   }
   return 1;
-};
-
-const formatISTDate = (date: Date): string => {
-  return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
 
 export const calculateAntarDasha = (
@@ -130,7 +120,6 @@ export const calculatePreBirthAntarDasha = (
   const reversedSequence = getPlanetSequence(planetNumber).reverse();
   let currentDate = new Date(targetAgeDate);
   const antarDashaData: any[] = [];
-
   let crossedDOB = false;
 
   for (let i = 0; i < reversedSequence.length; i++) {
@@ -149,8 +138,8 @@ export const calculatePreBirthAntarDasha = (
         antarDashaData.push({
           antar: planet.name,
           days: daysTillDOB,
-          from: formatISTDate(dobDate),
-          to: formatISTDate(currentDate),
+          from: formatDate(dobDate),
+          to: formatDate(currentDate),
           planetNumber: getPlanetNumberFromName(planet.name),
         });
 
@@ -159,8 +148,8 @@ export const calculatePreBirthAntarDasha = (
         antarDashaData.push({
           antar: planet.name,
           days: originalDays,
-          from: formatISTDate(newDate),
-          to: formatISTDate(currentDate),
+          from: formatDate(newDate),
+          to: formatDate(currentDate),
           planetNumber: getPlanetNumberFromName(planet.name),
         });
         currentDate = newDate;

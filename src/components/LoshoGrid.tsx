@@ -202,29 +202,58 @@ export const LoshoGrid = ({ gridData, userData }) => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 font-calibri">
       {/* User Info Table - Moved to top */}
-      <Card className="shadow-xl border border-gray-200 bg-white rounded-xl mb-8">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-w-2xl mx-auto">
-            <div className="font-bold text-blue-800">{userData.fullName}</div>
-            <div className="font-bold text-blue-800">Name Number: {numerologyData.chaldeanNumbers?.nameNumber || 0}</div>
-            
-            <div className="font-bold text-gray-700">
-              {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')}
-            </div>
-            <div className="font-bold text-amber-700">MULAANK: {numerologyData.driver || 0}</div>
-            
-            <div className="font-bold text-gray-700">
-              {formatTime(userData.timeOfBirth)}
-            </div>
-            <div className="font-bold text-blue-700">BHAGYAANK: {numerologyData.conductor || 0}</div>
-            
-            <div className="font-bold text-gray-700">
-              Age: {calculateAge(userData.dateOfBirth)} years
-            </div>
-            <div className="font-bold text-green-700">SOUL NUMBER: {numerologyData.chaldeanNumbers?.soulUrgeNumber || 0}</div>
-          </div>
-        </CardContent>
-      </Card>
+      <Card className="shadow-xl border border-amber-200 bg-white rounded-xl mb-8">
+  <CardContent className="p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12 max-w-4xl mx-auto">
+
+      {/* Row 1 */}
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">Name:</span>
+        <span className="font-bold text-gray-800">{userData.fullName}</span>
+      </div>
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">Age:</span>
+        <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
+      </div>
+
+      {/* Row 2 */}
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">Name Number:</span>
+        <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
+      </div>
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">MULAANK:</span>
+        <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
+      </div>
+
+      {/* Row 3 */}
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">DOB:</span>
+        <span className="font-bold text-gray-800">
+          {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')}
+        </span>
+      </div>
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">BHAGYAANK:</span>
+        <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
+      </div>
+
+      {/* Row 4 */}
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">Time:</span>
+        <span className="font-bold text-gray-800">{formatTime(userData.timeOfBirth)}</span>
+      </div>
+      <div className="flex gap-2">
+        <span className="text-gray-600 font-bold w-32">SOUL NUMBER:</span>
+        <span className="font-bold text-green-700 text-lg">{numerologyData.chaldeanNumbers?.soulUrgeNumber || 0}</span>
+      </div>
+
+    </div>
+  </CardContent>
+</Card>
+
+
+
 
       {/* Main Grid Card */}
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">

@@ -1,4 +1,3 @@
-
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -40,24 +39,16 @@ const addDays = (date: Date, days: number): Date => {
   return result;
 };
 
-const subtractDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() - days);
-  return result;
-};
-
 const formatDate = (date: Date): string => {
   return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
 };
 
 const parseDate = (dateStr: string): Date => {
-  const istDate = dayjs.tz(dateStr, 'Asia/Kolkata');
-  return istDate.toDate();
+  return dayjs.tz(dateStr, 'Asia/Kolkata').toDate();
 };
 
 const parseDateDDMMYYYY = (dateStr: string): Date => {
-  const istDate = dayjs.tz(dateStr, 'DD/MM/YYYY', 'Asia/Kolkata');
-  return istDate.toDate();
+  return dayjs.tz(dateStr, 'DD/MM/YYYY', 'Asia/Kolkata').toDate();
 };
 
 const getPlanetNumberFromName = (planetName: string): number => {
@@ -67,21 +58,14 @@ const getPlanetNumberFromName = (planetName: string): number => {
   return 1;
 };
 
-const formatISTDate = (date: Date): string => {
-  return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
-};
-
 export const calculateAntarDasha = (
   dateOfBirth: string,
   startAge: number,
   planetNumber: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
-  
-  // Fix: Start from DOB + (startAge - 9) and end at DOB + startAge
   const startDate = new Date(dobDate);
   startDate.setFullYear(startDate.getFullYear() + (startAge - 9));
-
   const endDate = new Date(dobDate);
   endDate.setFullYear(endDate.getFullYear() + startAge);
 
@@ -105,7 +89,7 @@ export const calculateAntarDasha = (
     }
 
     antarDashaData.push({
-      antar: `${antar.name}`,
+      antar: antar.name,
       days: Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)),
       from: formatDate(fromDate),
       to: formatDate(toDate),
@@ -142,15 +126,13 @@ export const calculatePreBirthAntarDasha = (
       newDate.setDate(newDate.getDate() - originalDays);
 
       if (newDate <= dobDate) {
-        const daysTillDOB = Math.ceil(
-          (currentDate.getTime() - dobDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const daysTillDOB = Math.ceil((currentDate.getTime() - dobDate.getTime()) / (1000 * 60 * 60 * 24));
 
         antarDashaData.push({
           antar: planet.name,
           days: daysTillDOB,
-          from: formatISTDate(dobDate),
-          to: formatISTDate(currentDate),
+          from: formatDate(dobDate),
+          to: formatDate(currentDate),
           planetNumber: getPlanetNumberFromName(planet.name),
         });
 
@@ -159,8 +141,8 @@ export const calculatePreBirthAntarDasha = (
         antarDashaData.push({
           antar: planet.name,
           days: originalDays,
-          from: formatISTDate(newDate),
-          to: formatISTDate(currentDate),
+          from: formatDate(newDate),
+          to: formatDate(currentDate),
           planetNumber: getPlanetNumberFromName(planet.name),
         });
         currentDate = newDate;
@@ -248,16 +230,14 @@ export const calculateDainikDasha = (
     if (i === sequence.length - 1) {
       toDate = new Date(endDate);
     } else {
-      const proportionalDays = (dainik.days / totalPlanetDays) * totalDays;
-      toDate = addDays(currentDate, Math.round(proportionalDays));
+      const proportionalDays = Math.round((dainik.days / totalPlanetDays) * totalDays);
+      toDate = addDays(currentDate, proportionalDays);
     }
-
-    const actualDays = (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24);
 
     dainikData.push({
       title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
       dainik: dainik.name,
-      days: Math.round(actualDays * 100) / 100,
+      days: Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)),
       from: formatDate(fromDate),
       to: formatDate(toDate)
     });

@@ -57,7 +57,17 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
 
     try {
       console.log('Calculating Pratyantar for row:', row);
-      const pratyantar = calculatePratyantarDasha(row.from, row.to, row.planetNumber, planet);
+      console.log('Using planetNumber:', row.planetNumber);
+      
+      const pratyantar = calculatePratyantarDasha(
+        row.from, 
+        row.to, 
+        row.planetNumber, 
+        planet
+      );
+      
+      console.log('Generated pratyantar data:', pratyantar);
+      
       setPratyantarData(pratyantar);
       setExpandedRow(index);
       setExpandedPratyantarRow(null);
@@ -79,14 +89,19 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
 
     try {
       console.log('Calculating Dainik for pratyantar row:', pratyantarRow);
+      console.log('Using planetNumber from pratyantar:', pratyantarRow.planetNumber);
+      
       const dainik = calculateDainikDasha(
         pratyantarRow.from,
         pratyantarRow.to,
-        pratyantarRow.planetNumber || antarRow.planetNumber,
+        pratyantarRow.planetNumber,
         planet,
         antarRow.antar,
         pratyantarRow.pratyantar
       );
+      
+      console.log('Generated dainik data:', dainik);
+      
       setDainikData(dainik);
       setExpandedPratyantarRow(rowKey);
     } catch (error) {
@@ -133,7 +148,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
             {data.map((row, index) => (
               <>
                 <TableRow
-                  key={index}
+                  key={`antar-${index}`}
                   className={`hover:bg-amber-25 transition-colors ${row.from !== '–' && row.to !== '–' ? 'cursor-pointer' : ''}`}
                   onClick={() => handleRowClick(index, row)}
                 >
@@ -153,7 +168,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                 </TableRow>
 
                 {expandedRow === index && pratyantarData.length > 0 && (
-                  <TableRow>
+                  <TableRow key={`pratyantar-container-${index}`}>
                     <TableCell colSpan={5} className="p-0">
                       <div className="bg-orange-25 border-l-4 border-orange-300 ml-2 mr-1 my-1">
                         <div className="p-2">
@@ -174,7 +189,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                               {pratyantarData.map((pratyRow, pratyIndex) => (
                                 <>
                                   <TableRow
-                                    key={pratyIndex}
+                                    key={`pratyantar-${index}-${pratyIndex}`}
                                     className="hover:bg-orange-100 cursor-pointer"
                                     onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
                                   >
@@ -192,7 +207,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                                   </TableRow>
 
                                   {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
-                                    <TableRow>
+                                    <TableRow key={`dainik-container-${index}-${pratyIndex}`}>
                                       <TableCell colSpan={5} className="p-0">
                                         <div className="bg-red-25 border-l-4 border-red-300 ml-4 mr-1 my-1">
                                           <div className="p-1">
@@ -210,7 +225,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                                               </TableHeader>
                                               <TableBody>
                                                 {dainikData.map((dainikRow, dainikIndex) => (
-                                                  <TableRow key={dainikIndex}>
+                                                  <TableRow key={`dainik-${index}-${pratyIndex}-${dainikIndex}`}>
                                                     <TableCell className="text-gray-700 font-bold px-1 py-1">{dainikRow.dainik}</TableCell>
                                                     <TableCell className="text-gray-600 font-bold px-1 py-1">{dainikRow.days}</TableCell>
                                                     <TableCell className="text-gray-600 font-bold px-1 py-1">{formatDateCell(dainikRow.from)}</TableCell>

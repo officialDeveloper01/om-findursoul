@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
@@ -128,13 +127,10 @@ export const LoshoGrid = ({ gridData, userData }) => {
         );
         tableTitle = `0 – ${startAge}`;
       } else {
-        const previousEndDate = tableEndDates[ageIndex - 1];
-        
         antarDashaData = calculateAntarDasha(
           userData.dateOfBirth,
           startAge,
-          conductorNumber,
-          previousEndDate
+          conductorNumber
         );
         tableTitle = planetName;
       }

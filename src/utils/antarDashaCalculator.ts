@@ -76,44 +76,50 @@ export const calculateAntarDasha = (
   planetNumber: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
+
+  // ✅ FIX: Start from (DOB + (startAge - 9))
   const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() + startAge);
+  startDate.setFullYear(startDate.getFullYear() + (startAge - 9));
 
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 9);
 
   const planetSequence = getPlanetSequence(planetNumber);
-  const totalDays = 365 * 9;
   const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
+  const totalPeriodDays = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  const antarDashaData: any[] = [];
   let currentDate = new Date(startDate);
+  let accumulatedDays = 0;
 
-  for (let i = 0; i < planetSequence.length; i++) {
-    const antar = planetSequence[i];
+  const antarDashaData = planetSequence.map((antar, i) => {
     const fromDate = new Date(currentDate);
-    let toDate: Date;
 
+    let days: number;
     if (i === planetSequence.length - 1) {
-      toDate = new Date(endDate);
+      // Ensure exact end date
+      days = totalPeriodDays - accumulatedDays;
     } else {
-      const proportionalDays = Math.round((antar.days / totalPlanetDays) * totalDays);
-      toDate = addDays(currentDate, proportionalDays);
+      days = Math.floor((antar.days / totalPlanetDays) * totalPeriodDays);
+      accumulatedDays += days;
     }
 
-    antarDashaData.push({
-      antar: `${antar.name}`,
-      days: Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)),
+    const toDate = addDays(fromDate, days);
+    currentDate = new Date(toDate);
+
+    return {
+      antar: antar.name,
+      days: days,
       from: formatDate(fromDate),
       to: formatDate(toDate),
-      planetNumber: getPlanetNumberFromName(antar.name)
-    });
-
-    currentDate = new Date(toDate);
-  }
+      planetNumber: getPlanetNumberFromName(antar.name),
+    };
+  });
 
   return antarDashaData;
 };
+
+
+
 
 export const calculatePreBirthAntarDasha = (
   dateOfBirth: string,

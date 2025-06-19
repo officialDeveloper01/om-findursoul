@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
@@ -7,7 +6,6 @@ import { calculateAntarDasha, calculatePreBirthAntarDasha, planetMap } from '@/u
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);
-  const [tableEndDates, setTableEndDates] = useState<Record<number, string>>({});
 
   const hiddenMap = {
     11: 2,
@@ -104,6 +102,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
   const dashes = calculateDashes();
 
+  // Get numerology data
   const numerologyData = userData.numerologyData || {};
   const conductorSeries = numerologyData.conductorSeries || [];
   const bottomValues = numerologyData.bottomValues || [];
@@ -121,13 +120,15 @@ export const LoshoGrid = ({ gridData, userData }) => {
       let tableTitle;
 
       if (ageIndex === 0) {
+        // Pre-birth Antar Dasha for index 0 - pass the first conductor age series value
         antarDashaData = calculatePreBirthAntarDasha(
           userData.dateOfBirth,
           conductorNumber,
-          startAge
+          startAge // Use startAge (conductor series value) instead of conductorNumber
         );
         tableTitle = `0 – ${startAge}`;
       } else {
+        // Regular post-birth Antar Dasha for other indexes
         antarDashaData = calculateAntarDasha(
           userData.dateOfBirth,
           startAge,
@@ -136,25 +137,16 @@ export const LoshoGrid = ({ gridData, userData }) => {
         tableTitle = planetName;
       }
       
-      if (antarDashaData.length > 0) {
-        const lastRow = antarDashaData[antarDashaData.length - 1];
-        setTableEndDates(prev => ({
-          ...prev,
-          [ageIndex]: lastRow.to
-        }));
-      }
-      
       setSelectedAntarDasha({
         data: antarDashaData,
         planet: ageIndex === 0 ? tableTitle : planetName,
         startAge: ageIndex === 0 ? 0 : startAge,
-        isPreBirth: ageIndex === 0,
-        userData: userData
+        isPreBirth: ageIndex === 0
       });
     } catch (error) {
       console.error('Error calculating Antar Dasha:', error);
     }
-  }, [conductorSeries, userData.dateOfBirth, tableEndDates, userData]);
+  }, [conductorSeries, userData.dateOfBirth]);
 
   const renderGridCell = (digit: number) => {
     const count = frequencies[digit] || 0;
@@ -169,7 +161,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
           </div>
         )}
         {hiddenCount > 0 && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center font-bold">
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center text-sm font-bold">
             {String(digit).repeat(hiddenCount)}
           </div>
         )}
@@ -182,93 +174,27 @@ export const LoshoGrid = ({ gridData, userData }) => {
     );
   };
 
-  const formatTime = (timeStr: string) => {
-    if (!timeStr) return '';
-    
-    const [hours, minutes] = timeStr.split(':');
-    const hour24 = parseInt(hours);
-    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-    const ampm = hour24 >= 12 ? 'PM' : 'AM';
-    
-    return `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
-  };
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  const calculateAge = (dob: string) => {
-    if (!dob) return 0;
-    const today = new Date();
-    const birthDate = new Date(dob);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age;
-  };
-
-  const calculateSoulNumber = (dob: string) => {
-    if (!dob) return 0;
-    const day = parseInt(dob.split('-')[2]);
-    let sum = day;
-    while (sum > 9) {
-      sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
-    }
-    return sum;
-  };
-
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8" style={{ fontFamily: 'Calibri, sans-serif' }}>
-      {/* Updated User Profile Header */}
-      <Card className="shadow-lg border border-amber-200 mb-6">
-        <CardContent className="p-4">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{userData.fullName}</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">DOB:</span>
-                <span className="font-bold text-gray-800">{formatDate(userData.dateOfBirth)}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">Time:</span>
-                <span className="font-bold text-gray-800">{formatTime(userData.timeOfBirth)}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">Age:</span>
-                <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">MULAANK:</span>
-                <span className="font-bold text-amber-700">{numerologyData.driver || 0}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">BHAGYAANK:</span>
-                <span className="font-bold text-blue-700">{numerologyData.conductor || 0}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-gray-600 font-bold">Soul Number:</span>
-                <span className="font-bold text-green-700">{calculateSoulNumber(userData.dateOfBirth)}</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
+            Complete Numerology Analysis
+          </CardTitle>
+          <div className="space-y-1 text-gray-600 mt-2">
+            <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>
+            <p className="text-sm md:text-base">
+              Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}
+            </p>
+            <p className="text-sm md:text-base">{userData.placeOfBirth}</p>
+          </div>
+        </CardHeader>
+
         <CardContent className="space-y-6">
+          {/* Compact Numerology Row */}
+          <CompactNumerologyRow numerologyData={numerologyData} userData={userData} />
+
+          {/* Lo Shu Grid */}
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
               {gridNumbers.flat().map((digit, index) => (
@@ -277,27 +203,30 @@ export const LoshoGrid = ({ gridData, userData }) => {
             </div>
           </div>
 
+          {/* Conductor Series - Clickable for Antar Dasha */}
           {conductorSeries.length > 0 && bottomValues.length > 0 && (
             <div className="space-y-3">
               <div className="text-center">
-                <h3 className="text-lg font-bold text-gray-700">BHAGYAANK Series (Maha Dasha)</h3>
-                <p className="text-gray-500 font-bold">Click on any number below to view Antar Dasha table</p>
+                <h3 className="text-lg font-semibold text-gray-700">Conductor Series (Maha Dasha)</h3>
+                <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>
               </div>
               
+              {/* Ages Row */}
               <div className="grid grid-cols-11 gap-1 mb-2">
                 {conductorSeries.map((age, index) => (
-                  <div key={`age-${age}-${index}`} className="text-center font-bold text-gray-600 py-1">
+                  <div key={`age-${age}-${index}`} className="text-center text-xs font-medium text-gray-600 py-1">
                     {age}
                   </div>
                 ))}
               </div>
               
+              {/* Conductor Numbers Row - Clickable */}
               <div className="grid grid-cols-11 gap-1">
                 {bottomValues.map((number, index) => (
                   <button
                     key={`conductor-${number}-${index}`}
                     onClick={() => handleConductorClick(number, index)}
-                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-sm md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
                     title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
                   >
                     {number}
@@ -309,14 +238,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
         </CardContent>
       </Card>
 
+      {/* Antar Dasha Table */}
       {selectedAntarDasha && (
         <AntarDashaTable
           data={selectedAntarDasha.data}
           planet={selectedAntarDasha.planet}
           startAge={selectedAntarDasha.startAge}
           onClose={() => setSelectedAntarDasha(null)}
-          isPreBirth={selectedAntarDasha.isPreBirth}
-          userData={selectedAntarDasha.userData}
         />
       )}
     </div>

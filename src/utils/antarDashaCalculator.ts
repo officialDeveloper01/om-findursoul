@@ -1,11 +1,3 @@
-
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
 interface PlanetData {
   name: string;
   days: number;
@@ -40,18 +32,27 @@ const addDays = (date: Date, days: number): Date => {
   return result;
 };
 
+const subtractDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() - days);
+  return result;
+};
+
 const formatDate = (date: Date): string => {
-  return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 };
 
 const parseDate = (dateStr: string): Date => {
-  const istDate = dayjs.tz(dateStr, 'Asia/Kolkata');
-  return istDate.toDate();
+  const [yearStr, monthStr, dayStr] = dateStr.split('-');
+  return new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
 };
 
 const parseDateDDMMYYYY = (dateStr: string): Date => {
-  const istDate = dayjs.tz(dateStr, 'DD/MM/YYYY', 'Asia/Kolkata');
-  return istDate.toDate();
+  const [dayStr, monthStr, yearStr] = dateStr.split('/');
+  return new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
 };
 
 const getPlanetNumberFromName = (planetName: string): number => {
@@ -61,22 +62,28 @@ const getPlanetNumberFromName = (planetName: string): number => {
   return 1;
 };
 
+const formatISTDate = (date: Date): string => {
+  const [day, month, year] = date
+    .toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })
+    .split('/');
+  return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+};
+
+
 export const calculateAntarDasha = (
   dateOfBirth: string,
   startAge: number,
   planetNumber: number
 ) => {
   const dobDate = parseDate(dateOfBirth);
-  
-  // Correct start date: DOB + (startAge - 9)
   const startDate = new Date(dobDate);
-  startDate.setFullYear(startDate.getFullYear() + (startAge));
+  startDate.setFullYear(startDate.getFullYear() + startAge);
 
-  const endDate = new Date(dobDate);
-  endDate.setFullYear(endDate.getFullYear() + startAge);
+  const endDate = new Date(startDate);
+  endDate.setFullYear(endDate.getFullYear() + 9);
 
   const planetSequence = getPlanetSequence(planetNumber);
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const totalDays = 365 * 9;
   const totalPlanetDays = planetSequence.reduce((sum, p) => sum + p.days, 0);
 
   const antarDashaData: any[] = [];
@@ -120,6 +127,7 @@ export const calculatePreBirthAntarDasha = (
   const reversedSequence = getPlanetSequence(planetNumber).reverse();
   let currentDate = new Date(targetAgeDate);
   const antarDashaData: any[] = [];
+
   let crossedDOB = false;
 
   for (let i = 0; i < reversedSequence.length; i++) {
@@ -138,8 +146,8 @@ export const calculatePreBirthAntarDasha = (
         antarDashaData.push({
           antar: planet.name,
           days: daysTillDOB,
-          from: formatDate(dobDate),
-          to: formatDate(currentDate),
+          from: formatISTDate(dobDate),
+          to: formatISTDate(currentDate),
           planetNumber: getPlanetNumberFromName(planet.name),
         });
 
@@ -148,8 +156,8 @@ export const calculatePreBirthAntarDasha = (
         antarDashaData.push({
           antar: planet.name,
           days: originalDays,
-          from: formatDate(newDate),
-          to: formatDate(currentDate),
+          from: formatISTDate(newDate),
+          to: formatISTDate(currentDate),
           planetNumber: getPlanetNumberFromName(planet.name),
         });
         currentDate = newDate;
@@ -167,6 +175,7 @@ export const calculatePreBirthAntarDasha = (
 
   return antarDashaData.reverse();
 };
+
 
 export const calculatePratyantarDasha = (
   fromDateStr: string,
@@ -248,8 +257,7 @@ export const calculateDainikDasha = (
       dainik: dainik.name,
       days: Math.round(actualDays * 100) / 100,
       from: formatDate(fromDate),
-      to: formatDate(toDate),
-      planetNumber: getPlanetNumberFromName(dainik.name)
+      to: formatDate(toDate)
     });
 
     currentDate = new Date(toDate);

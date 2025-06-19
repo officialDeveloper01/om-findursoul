@@ -20,26 +20,23 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Driver Number */}
           <div className="text-center p-6 bg-amber-50 rounded-lg border border-amber-200">
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Driver Number</h3>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">MULAANK</h3>
             <div className="text-4xl font-bold text-amber-600">{numerologyData.driver || 0}</div>
           </div>
 
-          {/* Conductor Details */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <h4 className="text-md font-medium text-gray-700 mb-2">Conductor Number</h4>
+              <h4 className="text-md font-medium text-gray-700 mb-2">BHAGYAANK</h4>
               <div className="text-2xl font-bold text-gray-800">{numerologyData.conductor || 0}</div>
             </div>
             
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <h4 className="text-md font-medium text-gray-700 mb-2">Conductor Base</h4>
+              <h4 className="text-md font-medium text-gray-700 mb-2">BHAGYAANK Base</h4>
               <div className="text-2xl font-bold text-gray-800">{numerologyData.conductorBase || 0}</div>
             </div>
           </div>
 
-          {/* Chaldean Numbers - Removed Personality Number */}
           {numerologyData.chaldeanNumbers && (
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-700 text-center">Chaldean Name Numerology</h4>
@@ -55,8 +52,6 @@ export const NumerologyDisplay = ({ numerologyData, userData }) => {
               </div>
             </div>
           )}
-
-          {/* Conductor Series with Responsive Layout */}
         </CardContent>
       </Card>
     </div>

@@ -6,7 +6,7 @@ import { calculateAntarDasha, calculatePreBirthAntarDasha, planetMap } from '@/u
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);
-  const [tableEndDates, setTableEndDates] = useState<Record<number, string>>({}); // Track end dates by age index
+  const [tableEndDates, setTableEndDates] = useState<Record<number, string>>({});
 
   const hiddenMap = {
     11: 2,
@@ -103,7 +103,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
 
   const dashes = calculateDashes();
 
-  // Get numerology data
   const numerologyData = userData.numerologyData || {};
   const conductorSeries = numerologyData.conductorSeries || [];
   const bottomValues = numerologyData.bottomValues || [];
@@ -121,7 +120,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
       let tableTitle;
 
       if (ageIndex === 0) {
-        // Pre-birth Antar Dasha for index 0
         antarDashaData = calculatePreBirthAntarDasha(
           userData.dateOfBirth,
           conductorNumber,
@@ -129,19 +127,17 @@ export const LoshoGrid = ({ gridData, userData }) => {
         );
         tableTitle = `0 – ${startAge}`;
       } else {
-        // For subsequent tables, use the end date from the previous table if available
         const previousEndDate = tableEndDates[ageIndex - 1];
         
         antarDashaData = calculateAntarDasha(
           userData.dateOfBirth,
           startAge,
           conductorNumber,
-          previousEndDate // Pass the end date from previous table
+          previousEndDate
         );
         tableTitle = planetName;
       }
       
-      // Store the end date of this table for the next one
       if (antarDashaData.length > 0) {
         const lastRow = antarDashaData[antarDashaData.length - 1];
         setTableEndDates(prev => ({
@@ -154,12 +150,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
         data: antarDashaData,
         planet: ageIndex === 0 ? tableTitle : planetName,
         startAge: ageIndex === 0 ? 0 : startAge,
-        isPreBirth: ageIndex === 0
+        isPreBirth: ageIndex === 0,
+        userData: userData
       });
     } catch (error) {
       console.error('Error calculating Antar Dasha:', error);
     }
-  }, [conductorSeries, userData.dateOfBirth, tableEndDates]);
+  }, [conductorSeries, userData.dateOfBirth, tableEndDates, userData]);
 
   const renderGridCell = (digit: number) => {
     const count = frequencies[digit] || 0;
@@ -204,10 +201,8 @@ export const LoshoGrid = ({ gridData, userData }) => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Compact Numerology Row */}
           <CompactNumerologyRow numerologyData={numerologyData} userData={userData} />
 
-          {/* Lo Shu Grid */}
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
               {gridNumbers.flat().map((digit, index) => (
@@ -216,15 +211,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
             </div>
           </div>
 
-          {/* Conductor Series - Clickable for Antar Dasha */}
           {conductorSeries.length > 0 && bottomValues.length > 0 && (
             <div className="space-y-3">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-700">Conductor Series (Maha Dasha)</h3>
+                <h3 className="text-lg font-semibold text-gray-700">BHAGYAANK Series (Maha Dasha)</h3>
                 <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>
               </div>
               
-              {/* Ages Row */}
               <div className="grid grid-cols-11 gap-1 mb-2">
                 {conductorSeries.map((age, index) => (
                   <div key={`age-${age}-${index}`} className="text-center text-xs font-medium text-gray-600 py-1">
@@ -233,7 +226,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
                 ))}
               </div>
               
-              {/* Conductor Numbers Row - Clickable */}
               <div className="grid grid-cols-11 gap-1">
                 {bottomValues.map((number, index) => (
                   <button
@@ -251,13 +243,14 @@ export const LoshoGrid = ({ gridData, userData }) => {
         </CardContent>
       </Card>
 
-      {/* Antar Dasha Table */}
       {selectedAntarDasha && (
         <AntarDashaTable
           data={selectedAntarDasha.data}
           planet={selectedAntarDasha.planet}
           startAge={selectedAntarDasha.startAge}
           onClose={() => setSelectedAntarDasha(null)}
+          isPreBirth={selectedAntarDasha.isPreBirth}
+          userData={selectedAntarDasha.userData}
         />
       )}
     </div>

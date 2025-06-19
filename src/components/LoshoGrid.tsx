@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
@@ -184,8 +185,81 @@ export const LoshoGrid = ({ gridData, userData }) => {
     );
   };
 
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    
+    const [hours, minutes] = timeStr.split(':');
+    const hour24 = parseInt(hours);
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const ampm = hour24 >= 12 ? 'PM' : 'AM';
+    
+    return `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const calculateAge = (dob: string) => {
+    if (!dob) return 0;
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* User Profile Header */}
+      <Card className="shadow-lg border border-amber-200 mb-6">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600">Name:</span>
+                <span className="font-bold text-gray-800">{userData.fullName}</span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600">DOB & Time:</span>
+                <span className="font-bold text-gray-800">
+                  {formatDate(userData.dateOfBirth)} {formatTime(userData.timeOfBirth)}
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600 font-semibold">MULAANK:</span>
+                <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600">Name Number:</span>
+                <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600">Age:</span>
+                <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-sm text-gray-600 font-semibold">BHAGYAANK:</span>
+                <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">

@@ -44,40 +44,6 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
     );
   };
 
-  const formatTime = (timeStr: string) => {
-    if (!timeStr) return '';
-    
-    const [hours, minutes] = timeStr.split(':');
-    const hour24 = parseInt(hours);
-    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-    const ampm = hour24 >= 12 ? 'PM' : 'AM';
-    
-    return `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
-  };
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  const calculateAge = (dob: string) => {
-    if (!dob) return 0;
-    const today = new Date();
-    const birthDate = new Date(dob);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age;
-  };
-
   const handleRowClick = async (index: number, row: AntarDashaRow) => {
     if (expandedRow === index) {
       setExpandedRow(null);
@@ -134,8 +100,6 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
     return `${planet} Maha Dasha (Age ${startAge - 9} - ${startAge})`;
   };
 
-  const numerologyData = userData?.numerologyData || {};
-
   return (
     <Card className="mt-6 shadow-lg border border-amber-200">
       <CardHeader className="pb-4">
@@ -144,42 +108,6 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
             <CardTitle className="text-xl text-amber-700 mb-4">
               {getTableTitle()}
             </CardTitle>
-            
-            {userData && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                <div className="space-y-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm text-gray-600">Name:</span>
-                    <span className="font-bold text-gray-800">{userData.fullName}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm text-gray-600">DOB & Time:</span>
-                    <span className="font-bold text-gray-800">
-                      {formatDate(userData.dateOfBirth)} {formatTime(userData.timeOfBirth)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm text-gray-600 font-semibold">MULAANK:</span>
-                    <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm text-gray-600">Name Number:</span>
-                    <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm text-gray-600">Age:</span>
-                    <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm text-gray-600 font-semibold">BHAGYAANK:</span>
-                    <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
           
           <Button onClick={onClose} variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 ml-4">

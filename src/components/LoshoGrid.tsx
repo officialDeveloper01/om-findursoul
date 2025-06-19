@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
@@ -120,15 +121,13 @@ export const LoshoGrid = ({ gridData, userData }) => {
       let tableTitle;
 
       if (ageIndex === 0) {
-        // Pre-birth Antar Dasha for index 0 - pass the first conductor age series value
         antarDashaData = calculatePreBirthAntarDasha(
           userData.dateOfBirth,
           conductorNumber,
-          startAge // Use startAge (conductor series value) instead of conductorNumber
+          startAge
         );
         tableTitle = `0 – ${startAge}`;
       } else {
-        // Regular post-birth Antar Dasha for other indexes
         antarDashaData = calculateAntarDasha(
           userData.dateOfBirth,
           startAge,
@@ -156,12 +155,12 @@ export const LoshoGrid = ({ gridData, userData }) => {
     return (
       <div className="relative aspect-square bg-white border border-gray-300 rounded-lg flex items-center justify-center text-center p-2">
         {count > 0 && (
-          <div className="text-2xl md:text-3xl font-semibold text-gray-800 flex flex-wrap justify-center">
+          <div className="text-2xl md:text-3xl font-bold text-gray-800 flex flex-wrap justify-center">
             {String(digit).repeat(count)}
           </div>
         )}
         {hiddenCount > 0 && (
-          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center text-sm font-bold">
+          <div className="absolute top-1 right-1 px-2 py-0.5 rounded-full border-2 border-green-600 text-green-600 text-xl flex items-center justify-center font-bold">
             {String(digit).repeat(hiddenCount)}
           </div>
         )}
@@ -174,20 +173,65 @@ export const LoshoGrid = ({ gridData, userData }) => {
     );
   };
 
+  // Helper function to calculate age
+  const calculateAge = (dateOfBirth: string) => {
+    const today = new Date();
+    const birth = new Date(dateOfBirth);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Helper function to format time with AM/PM
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '';
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      return `${hour12}:${minutes} ${ampm}`;
+    } catch {
+      return timeString;
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 font-calibri">
+      {/* User Info Table - Moved to top */}
+      <Card className="shadow-xl border border-gray-200 bg-white rounded-xl mb-8">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-w-2xl mx-auto">
+            <div className="font-bold text-blue-800">{userData.fullName}</div>
+            <div className="font-bold text-blue-800">Name Number: {numerologyData.chaldeanNumbers?.nameNumber || 0}</div>
+            
+            <div className="font-bold text-gray-700">
+              {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')}
+            </div>
+            <div className="font-bold text-amber-700">MULAANK: {numerologyData.driver || 0}</div>
+            
+            <div className="font-bold text-gray-700">
+              {formatTime(userData.timeOfBirth)}
+            </div>
+            <div className="font-bold text-blue-700">BHAGYAANK: {numerologyData.conductor || 0}</div>
+            
+            <div className="font-bold text-gray-700">
+              Age: {calculateAge(userData.dateOfBirth)} years
+            </div>
+            <div className="font-bold text-green-700">SOUL NUMBER: {numerologyData.chaldeanNumbers?.soulUrgeNumber || 0}</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Grid Card */}
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
         <CardHeader className="text-center pb-4">
-          <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
+          <CardTitle className="text-3xl md:text-4xl font-bold text-blue-800">
             Complete Numerology Analysis
           </CardTitle>
-          <div className="space-y-1 text-gray-600 mt-2">
-            <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>
-            <p className="text-sm md:text-base">
-              Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}
-            </p>
-            <p className="text-sm md:text-base">{userData.placeOfBirth}</p>
-          </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -207,14 +251,14 @@ export const LoshoGrid = ({ gridData, userData }) => {
           {conductorSeries.length > 0 && bottomValues.length > 0 && (
             <div className="space-y-3">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-700">Conductor Series (Maha Dasha)</h3>
-                <p className="text-sm text-gray-500">Click on any number below to view Antar Dasha table</p>
+                <h3 className="font-bold text-gray-700">Conductor Series (Maha Dasha)</h3>
+                <p className="font-bold text-gray-500">Click on any number below to view Antar Dasha table</p>
               </div>
               
               {/* Ages Row */}
               <div className="grid grid-cols-11 gap-1 mb-2">
                 {conductorSeries.map((age, index) => (
-                  <div key={`age-${age}-${index}`} className="text-center text-xs font-medium text-gray-600 py-1">
+                  <div key={`age-${age}-${index}`} className="text-center font-bold text-gray-600 py-1">
                     {age}
                   </div>
                 ))}
@@ -226,7 +270,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
                   <button
                     key={`conductor-${number}-${index}`}
                     onClick={() => handleConductorClick(number, index)}
-                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center text-sm md:text-lg font-bold text-amber-800 transition-colors cursor-pointer"
+                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center font-bold text-amber-800 transition-colors cursor-pointer"
                     title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
                   >
                     {number}
@@ -245,6 +289,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
           planet={selectedAntarDasha.planet}
           startAge={selectedAntarDasha.startAge}
           onClose={() => setSelectedAntarDasha(null)}
+          isPreBirth={selectedAntarDasha.isPreBirth}
         />
       )}
     </div>

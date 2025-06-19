@@ -233,8 +233,8 @@ export const LoshoGrid = ({ gridData, userData }) => {
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600 font-semibold">MULAANK:</span>
-                <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
+                <span className="text-sm text-gray-600">Age:</span>
+                <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
               </div>
             </div>
             
@@ -243,9 +243,10 @@ export const LoshoGrid = ({ gridData, userData }) => {
                 <span className="text-sm text-gray-600">Name Number:</span>
                 <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
               </div>
+              
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-sm text-gray-600">Age:</span>
-                <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
+                <span className="text-sm text-gray-600 font-semibold">MULAANK:</span>
+                <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                 <span className="text-sm text-gray-600 font-semibold">BHAGYAANK:</span>
@@ -257,22 +258,7 @@ export const LoshoGrid = ({ gridData, userData }) => {
       </Card>
 
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-3xl md:text-4xl font-light text-blue-800">
-            Complete Numerology Analysis
-          </CardTitle>
-          <div className="space-y-1 text-gray-600 mt-2">
-            <p className="font-medium text-lg md:text-xl">{userData.fullName}</p>
-            <p className="text-sm md:text-base">
-              Born: {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')} at {userData.timeOfBirth}
-            </p>
-            <p className="text-sm md:text-base">{userData.placeOfBirth}</p>
-          </div>
-        </CardHeader>
-
         <CardContent className="space-y-6">
-          <CompactNumerologyRow numerologyData={numerologyData} userData={userData} />
-
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
               {gridNumbers.flat().map((digit, index) => (

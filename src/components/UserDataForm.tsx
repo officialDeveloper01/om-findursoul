@@ -188,6 +188,20 @@ export const UserDataForm = ({ onSubmit }) => {
       </Card>
 
       {/* Add Family Member Button - Only show if main form is valid */}
+      
+
+      {/* Relatives Forms */}
+      {relatives.map((relative, index) => (
+        <div key={index} className="max-w-2xl mx-auto">
+          <RelativeForm
+            onUpdate={updateRelative}
+            onRemove={removeRelative}
+            index={index}
+            initialData={relative}
+          />
+        </div>
+      ))}
+
       {isMainFormValid && (
         <div className="text-center">
           <Button
@@ -202,19 +216,7 @@ export const UserDataForm = ({ onSubmit }) => {
           </Button>
         </div>
       )}
-
-      {/* Relatives Forms */}
-      {relatives.map((relative, index) => (
-        <div key={index} className="max-w-2xl mx-auto">
-          <RelativeForm
-            onUpdate={updateRelative}
-            onRemove={removeRelative}
-            index={index}
-            initialData={relative}
-          />
-        </div>
-      ))}
-
+      
       {/* Submit Button */}
       {isMainFormValid && (
         <div className="max-w-2xl mx-auto">
@@ -232,6 +234,7 @@ export const UserDataForm = ({ onSubmit }) => {
                   Including {validRelativesCount} family member{validRelativesCount > 1 ? 's' : ''}
                 </p>
               )}
+              
             </CardContent>
           </Card>
         </div>

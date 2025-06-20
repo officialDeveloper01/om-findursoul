@@ -1,3 +1,6 @@
+import fixedPratyantarDays from './fixed_pratyantar_days.json';
+import fixedDainikDays from './fixed_dainik_days.json';
+
 interface PlanetData {
   name: string;
   days: number;
@@ -14,6 +17,12 @@ const planetMap: Record<number, PlanetData> = {
   8: { name: 'SHANI', days: 520 },
   9: { name: 'MANGAL', days: 192 }
 };
+
+// Fixed day constants for Pratyantar Dasha calculations
+const pratyantarFixedDays: Record<string, Record<string, number>> = fixedPratyantarDays;
+
+// Fixed day constants for Dainik Dasha calculations  
+const dainikFixedDays: Record<string, Record<string, Record<string, number>>> = fixedDainikDays;
 
 const fixedSequence = [1, 2, 9, 4, 3, 8, 5, 7, 6];
 
@@ -68,7 +77,6 @@ const formatISTDate = (date: Date): string => {
     .split('/');
   return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
 };
-
 
 export const calculateAntarDasha = (
   dateOfBirth: string,
@@ -279,7 +287,6 @@ export const calculatePreBirthDainikDasha = (
   return dainikData.reverse();
 };
 
-
 export const calculatePratyantarDasha = (
   fromDateStr: string,
   toDateStr: string,
@@ -369,4 +376,4 @@ export const calculateDainikDasha = (
   return dainikData;
 };
 
-export { planetMap };
+export { planetMap, pratyantarFixedDays, dainikFixedDays };

@@ -141,19 +141,50 @@ export const calculateBottomValues = (dateOfBirth, conductorSeries) => {
   const dayMonthReduced = reduceToSingle(sumDigits(day + month));
   const dayReduced = reduceToSingle(sumDigits(day));
   const monthYearReduced = reduceToSingle(sumDigits(month + year));
-  const dayYearReduced = reduceToSingle(sumDigits(day + year)); // ✅ NEW LINE
-  const fifthValue = reduceToSingle(dayMonthReduced + dayYearReduced); // ✅ correct formula
+  const dayYearReduced = reduceToSingle(sumDigits(day + year));
+  const fifthValue = reduceToSingle(dayMonthReduced + dayYearReduced);
 
-  const bottomValues = [
-    dayMonthReduced, dayMonthReduced, dayMonthReduced, dayMonthReduced,
-    dayYearReduced, // ✅ CHANGED THIS LINE
-    fifthValue,
-    monthYearReduced, monthYearReduced, monthYearReduced, monthYearReduced, monthYearReduced
-  ];
+  const bhagyaank = reduceToSingle(
+    (dateOfBirth.match(/\d/g) || []).map(Number).reduce((a, b) => a + b, 0)
+  );
+
+  const bottomValues = [];
+
+  // Apply shifting logic if bhagyaank is 9
+  if (bhagyaank === 9) {
+    bottomValues.push(
+      dayMonthReduced,
+      dayMonthReduced,
+      dayMonthReduced,
+      dayYearReduced, // Shifted to 4th
+      fifthValue,     // Shifted to 5th
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced
+    );
+  } else {
+    bottomValues.push(
+      dayMonthReduced,
+      dayMonthReduced,
+      dayMonthReduced,
+      dayMonthReduced,
+      dayYearReduced,
+      fifthValue,
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced,
+      monthYearReduced
+    );
+  }
 
   console.log('Bottom values calculated:', bottomValues);
   return bottomValues;
 };
+
 
 
 // Format date to DD/MM/YYYY

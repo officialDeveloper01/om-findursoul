@@ -1,0 +1,101 @@
+{
+  "SURYA": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "CHANDRA": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "MANGAL": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "RAHU": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "GURU": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "SHANI": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "BUDH": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "KETU": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  },
+  "SHUKRA": {
+    "SURYA": 164,
+    "CHANDRA": 274,
+    "MANGAL": 192,
+    "RAHU": 493,
+    "GURU": 438,
+    "SHANI": 520,
+    "BUDH": 465,
+    "KETU": 192,
+    "SHUKRA": 547
+  }
+}

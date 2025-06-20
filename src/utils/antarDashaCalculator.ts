@@ -1,6 +1,3 @@
-import fixedPratyantarDays from './fixed_pratyantar_days.json';
-import fixedDainikDays from './fixed_dainik_days.json';
-
 interface PlanetData {
   name: string;
   days: number;
@@ -17,12 +14,6 @@ const planetMap: Record<number, PlanetData> = {
   8: { name: 'SHANI', days: 520 },
   9: { name: 'MANGAL', days: 192 }
 };
-
-// Fixed day constants for Pratyantar Dasha calculations
-const pratyantarFixedDays: Record<string, Record<string, number>> = fixedPratyantarDays;
-
-// Fixed day constants for Dainik Dasha calculations  
-const dainikFixedDays: Record<string, Record<string, Record<string, number>>> = fixedDainikDays;
 
 const fixedSequence = [1, 2, 9, 4, 3, 8, 5, 7, 6];
 
@@ -77,6 +68,7 @@ const formatISTDate = (date: Date): string => {
     .split('/');
   return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
 };
+
 
 export const calculateAntarDasha = (
   dateOfBirth: string,
@@ -187,105 +179,7 @@ export const calculatePreBirthAntarDasha = (
   return antarDashaData.reverse();
 };
 
-export const calculatePreBirthPratyantarDasha = (
-  fromDateStr: string,
-  toDateStr: string,
-  startPlanetNumber: number,
-  mainPlanetName: string
-) => {
-  const endDate = parseDateDDMMYYYY(toDateStr); // DOB
-  const startDate = parseDateDDMMYYYY(fromDateStr);
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const sequence = getPlanetSequence(startPlanetNumber).reverse();
-  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
 
-  const pratyantarData = [];
-  let currentDate = new Date(endDate);
-  let accumulated = 0;
-
-  for (let i = 0; i < sequence.length; i++) {
-    const pratyantar = sequence[i];
-    const originalDays = Math.floor((pratyantar.days / totalPlanetDays) * totalDays);
-
-    if (accumulated + originalDays >= totalDays) {
-      const adjustedDays = totalDays - accumulated;
-      const fromDate = subtractDays(currentDate, adjustedDays);
-      pratyantarData.push({
-        title: `${mainPlanetName} – ${pratyantar.name}`,
-        pratyantar: pratyantar.name,
-        days: adjustedDays,
-        from: formatDate(fromDate),
-        to: formatDate(currentDate),
-        planetNumber: getPlanetNumberFromName(pratyantar.name)
-      });
-      break;
-    } else {
-      const fromDate = subtractDays(currentDate, originalDays);
-      pratyantarData.push({
-        title: `${mainPlanetName} – ${pratyantar.name}`,
-        pratyantar: pratyantar.name,
-        days: originalDays,
-        from: formatDate(fromDate),
-        to: formatDate(currentDate),
-        planetNumber: getPlanetNumberFromName(pratyantar.name)
-      });
-      currentDate = fromDate;
-      accumulated += originalDays;
-    }
-  }
-
-  return pratyantarData.reverse();
-};
-
-export const calculatePreBirthDainikDasha = (
-  fromDateStr: string,
-  toDateStr: string,
-  startPlanetNumber: number,
-  mainPlanetName: string,
-  antarPlanetName: string,
-  pratyantarPlanetName: string
-) => {
-  const endDate = parseDateDDMMYYYY(toDateStr); // DOB
-  const startDate = parseDateDDMMYYYY(fromDateStr);
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const sequence = getPlanetSequence(startPlanetNumber).reverse();
-  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
-
-  const dainikData = [];
-  let currentDate = new Date(endDate);
-  let accumulated = 0;
-
-  for (let i = 0; i < sequence.length; i++) {
-    const dainik = sequence[i];
-    const originalDays = Math.floor((dainik.days / totalPlanetDays) * totalDays);
-
-    if (accumulated + originalDays >= totalDays) {
-      const adjustedDays = totalDays - accumulated;
-      const fromDate = subtractDays(currentDate, adjustedDays);
-      dainikData.push({
-        title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
-        dainik: dainik.name,
-        days: adjustedDays,
-        from: formatDate(fromDate),
-        to: formatDate(currentDate)
-      });
-      break;
-    } else {
-      const fromDate = subtractDays(currentDate, originalDays);
-      dainikData.push({
-        title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
-        dainik: dainik.name,
-        days: originalDays,
-        from: formatDate(fromDate),
-        to: formatDate(currentDate)
-      });
-      currentDate = fromDate;
-      accumulated += originalDays;
-    }
-  }
-
-  return dainikData.reverse();
-};
 
 export const calculatePratyantarDasha = (
   fromDateStr: string,
@@ -376,4 +270,4 @@ export const calculateDainikDasha = (
   return dainikData;
 };
 
-export { planetMap, pratyantarFixedDays, dainikFixedDays };
+export { planetMap };

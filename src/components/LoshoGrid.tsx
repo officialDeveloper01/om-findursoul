@@ -259,13 +259,11 @@ export const LoshoGrid = ({ gridData, userData }) => {
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-3xl md:text-4xl font-bold text-blue-800">
-            Complete Numerology Analysis
+            Analysis
           </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Compact Numerology Row */}
-          <CompactNumerologyRow numerologyData={numerologyData} userData={userData} />
 
           {/* Lo Shu Grid */}
           <div className="flex justify-center items-center">

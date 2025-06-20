@@ -270,4 +270,147 @@ export const calculateDainikDasha = (
   return dainikData;
 };
 
+import pratyantarFixedDays from './fixed_pratyantar_days.json';
+
+export const calculatePreBirthPratyantarDasha = (
+  fromDateStr: string,
+  toDateStr: string,
+  startPlanetNumber: number,
+  mainPlanetName: string
+) => {
+  const startDate = parseDateDDMMYYYY(fromDateStr);
+  const endDate = parseDateDDMMYYYY(toDateStr);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Get the sequence starting from the given planet
+  const sequence = getPlanetSequence(startPlanetNumber);
+  
+  // Get fixed days for this main-antar combination
+  const mainPlanetKey = Object.values(planetMap).find(p => p.name === mainPlanetName)?.name;
+  const antarPlanetKey = planetMap[startPlanetNumber]?.name;
+  
+  if (!mainPlanetKey || !antarPlanetKey) {
+    console.error('Planet not found:', { mainPlanetName, startPlanetNumber });
+    return [];
+  }
+
+  // Use fixed days from pratyantarFixedDays
+  const fixedDaysForCombination = pratyantarFixedDays[mainPlanetKey]?.[antarPlanetKey];
+  if (!fixedDaysForCombination) {
+    console.error('Fixed days not found for combination:', mainPlanetKey, antarPlanetKey);
+    return [];
+  }
+
+  // Calculate proportional days based on totalDays available
+  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+  const pratyantarData = [];
+  
+  // Work backwards from the end date
+  let currentEndDate = new Date(endDate);
+  let remainingDays = totalDays;
+  let validPeriodsFound = false;
+
+  // Process sequence in reverse to find which periods fit
+  for (let i = sequence.length - 1; i >= 0; i--) {
+    const pratyantar = sequence[i];
+    const proportionalDays = Math.round((pratyantar.days / totalPlanetDays) * totalDays);
+    
+    if (remainingDays >= proportionalDays && remainingDays > 0) {
+      // This period fits within our available timeframe
+      const fromDate = subtractDays(currentEndDate, proportionalDays);
+      
+      pratyantarData.unshift({
+        title: `${mainPlanetName} – ${pratyantar.name}`,
+        pratyantar: pratyantar.name,
+        days: proportionalDays,
+        from: formatDate(fromDate),
+        to: formatDate(currentEndDate),
+        planetNumber: getPlanetNumberFromName(pratyantar.name)
+      });
+      
+      currentEndDate = new Date(fromDate);
+      remainingDays -= proportionalDays;
+      validPeriodsFound = true;
+    } else {
+      // This period doesn't fit - show dashes
+      pratyantarData.unshift({
+        title: `${mainPlanetName} – ${pratyantar.name}`,
+        pratyantar: pratyantar.name,
+        days: 0,
+        from: '–',
+        to: '–',
+        planetNumber: getPlanetNumberFromName(pratyantar.name)
+      });
+    }
+  }
+
+  return pratyantarData;
+};
+
+export const calculatePreBirthDainikDasha = (
+  fromDateStr: string,
+  toDateStr: string,
+  startPlanetNumber: number,
+  mainPlanetName: string,
+  antarPlanetName: string,
+  pratyantarPlanetName: string
+) => {
+  const startDate = parseDateDDMMYYYY(fromDateStr);
+  const endDate = parseDateDDMMYYYY(toDateStr);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // If no days available (dash period), return all dashes
+  if (totalDays <= 0 || fromDateStr === '–' || toDateStr === '–') {
+    const sequence = getPlanetSequence(startPlanetNumber);
+    return sequence.map((dainik) => ({
+      title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+      dainik: dainik.name,
+      days: 0,
+      from: '–',
+      to: '–'
+    }));
+  }
+
+  const sequence = getPlanetSequence(startPlanetNumber);
+  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+  const dainikData = [];
+  
+  // Work backwards from the end date
+  let currentEndDate = new Date(endDate);
+  let remainingDays = totalDays;
+
+  // Process sequence in reverse to find which periods fit
+  for (let i = sequence.length - 1; i >= 0; i--) {
+    const dainik = sequence[i];
+    const proportionalDays = Math.round((dainik.days / totalPlanetDays) * totalDays);
+    
+    if (remainingDays >= proportionalDays && remainingDays > 0) {
+      // This period fits within our available timeframe
+      const fromDate = subtractDays(currentEndDate, proportionalDays);
+      
+      dainikData.unshift({
+        title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+        dainik: dainik.name,
+        days: Math.round(proportionalDays * 100) / 100,
+        from: formatDate(fromDate),
+        to: formatDate(currentEndDate)
+      });
+      
+      currentEndDate = new Date(fromDate);
+      remainingDays -= proportionalDays;
+    } else {
+      // This period doesn't fit - show dashes
+      dainikData.unshift({
+        title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+        dainik: dainik.name,
+        days: 0,
+        from: '–',
+        to: '–'
+      });
+    }
+  }
+
+  return dainikData;
+};
+
 export { planetMap };

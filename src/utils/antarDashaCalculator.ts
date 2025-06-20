@@ -17,6 +17,35 @@ const planetMap: Record<number, PlanetData> = {
 
 const fixedSequence = [1, 2, 9, 4, 3, 8, 5, 7, 6];
 
+// Fixed days for Pratyantar Dasha combinations - aligned with Lo Shu sequence [1,2,9,4,3,8,5,7,6]
+export const pratyantarFixedDays: Record<string, number[]> = {
+  SURYA: [16, 27, 19, 24, 27, 21, 23, 19, 18],
+  CHANDRA: [27, 45, 32, 41, 45, 36, 38, 32, 31],
+  MANGAL: [19, 32, 23, 29, 32, 25, 27, 23, 22],
+  RAHU: [24, 41, 29, 37, 41, 32, 34, 29, 28],
+  GURU: [22, 37, 27, 33, 37, 29, 31, 26, 25],
+  SHANI: [26, 44, 31, 40, 44, 35, 37, 31, 30],
+  BUDH: [23, 39, 28, 35, 39, 31, 33, 28, 27],
+  KETU: [19, 32, 23, 29, 32, 25, 27, 23, 22],
+  SHUKRA: [27, 46, 33, 42, 46, 37, 39, 33, 32]
+};
+
+// Fixed days for Dainik Dasha combinations
+export const dainikFixedDays: Record<string, Record<string, number[]>> = {
+  GURU: {
+    GURU: [4, 6, 4, 5, 6, 5, 5, 4, 4],
+    CHANDRA: [6, 10, 7, 9, 10, 8, 8, 7, 7],
+    MANGAL: [4, 7, 5, 6, 7, 5, 6, 5, 5],
+    RAHU: [5, 9, 6, 8, 9, 7, 7, 6, 6],
+    BUDH: [5, 8, 6, 7, 8, 6, 7, 6, 6],
+    SHUKRA: [6, 10, 7, 9, 10, 8, 8, 7, 7],
+    KETU: [4, 7, 5, 6, 7, 5, 6, 5, 5],
+    SHANI: [6, 10, 7, 9, 10, 8, 8, 7, 7],
+    SURYA: [4, 6, 4, 5, 6, 5, 5, 4, 4]
+  },
+  // ... keep existing code for other planets (would need to be added based on your data)
+};
+
 const getPlanetSequence = (startPlanetNumber: number): PlanetData[] => {
   const startIndex = fixedSequence.indexOf(startPlanetNumber);
   const rotatedSequence = [
@@ -68,7 +97,6 @@ const formatISTDate = (date: Date): string => {
     .split('/');
   return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
 };
-
 
 export const calculateAntarDasha = (
   dateOfBirth: string,
@@ -179,8 +207,6 @@ export const calculatePreBirthAntarDasha = (
   return antarDashaData.reverse();
 };
 
-
-
 export const calculatePratyantarDasha = (
   fromDateStr: string,
   toDateStr: string,
@@ -270,57 +296,89 @@ export const calculateDainikDasha = (
   return dainikData;
 };
 
-import pratyantarFixedDays from './fixed_pratyantar_days.json';
 export const calculatePreBirthPratyantarDasha = (
   fromDateStr: string,
   toDateStr: string,
   startPlanetNumber: number,
   mainPlanetName: string
 ) => {
+  // Handle dash periods - return all dashes if invalid dates
+  if (fromDateStr === '–' || toDateStr === '–') {
+    const sequence = getPlanetSequence(startPlanetNumber);
+    return sequence.map((pratyantar) => ({
+      title: `${mainPlanetName} – ${pratyantar.name}`,
+      pratyantar: pratyantar.name,
+      days: 0,
+      from: '–',
+      to: '–',
+      planetNumber: getPlanetNumberFromName(pratyantar.name)
+    }));
+  }
+
   const startDate = parseDateDDMMYYYY(fromDateStr);
   const endDate = parseDateDDMMYYYY(toDateStr);
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  const sequence = getPlanetSequence(startPlanetNumber);
-  const antarPlanet = planetMap[startPlanetNumber]?.name;
-  const mainPlanet = mainPlanetName;
-
-  const fixedDaysForCombo = pratyantarFixedDays[mainPlanet]?.[antarPlanet];
-
-  if (!Array.isArray(fixedDaysForCombo)) {
-    console.error('Missing or invalid fixed days array for:', mainPlanet, antarPlanet);
-    return [];
+  if (totalDays <= 0) {
+    const sequence = getPlanetSequence(startPlanetNumber);
+    return sequence.map((pratyantar) => ({
+      title: `${mainPlanetName} – ${pratyantar.name}`,
+      pratyantar: pratyantar.name,
+      days: 0,
+      from: '–',
+      to: '–',
+      planetNumber: getPlanetNumberFromName(pratyantar.name)
+    }));
   }
 
-  const sumFixed = fixedDaysForCombo.reduce((a, b) => a + b, 0);
-  const scaleFactor = totalDays / sumFixed;
+  const sequence = getPlanetSequence(startPlanetNumber);
+  const fixedDaysForMainPlanet = pratyantarFixedDays[mainPlanetName];
+
+  if (!Array.isArray(fixedDaysForMainPlanet) || fixedDaysForMainPlanet.length !== 9) {
+    console.error('Missing or invalid fixed days array for:', mainPlanetName);
+    return sequence.map((pratyantar) => ({
+      title: `${mainPlanetName} – ${pratyantar.name}`,
+      pratyantar: pratyantar.name,
+      days: 0,
+      from: '–',
+      to: '–',
+      planetNumber: getPlanetNumberFromName(pratyantar.name)
+    }));
+  }
+
+  // Calculate scaling factor
+  const totalFixedDays = fixedDaysForMainPlanet.reduce((sum, days) => sum + days, 0);
+  const scaleFactor = totalDays / totalFixedDays;
 
   const pratyantarData = [];
   let currentEndDate = new Date(endDate);
   let remainingDays = totalDays;
 
+  // Process sequence in reverse order
   for (let i = sequence.length - 1; i >= 0; i--) {
     const pratyantar = sequence[i];
-    const fixed = fixedDaysForCombo[i] || 0;
-    const proportionalDays = Math.round(fixed * scaleFactor);
+    const fixedDays = fixedDaysForMainPlanet[i] || 0;
+    const scaledDays = Math.round(fixedDays * scaleFactor);
 
-    if (remainingDays >= proportionalDays && remainingDays > 0) {
-      const fromDate = subtractDays(currentEndDate, proportionalDays);
-
+    if (remainingDays >= scaledDays && remainingDays > 0) {
+      // This period fits within our available timeframe
+      const fromDate = subtractDays(currentEndDate, scaledDays);
+      
       pratyantarData.unshift({
-        title: `${mainPlanet} – ${pratyantar.name}`,
+        title: `${mainPlanetName} – ${pratyantar.name}`,
         pratyantar: pratyantar.name,
-        days: proportionalDays,
+        days: scaledDays,
         from: formatDate(fromDate),
         to: formatDate(currentEndDate),
         planetNumber: getPlanetNumberFromName(pratyantar.name)
       });
-
+      
       currentEndDate = new Date(fromDate);
-      remainingDays -= proportionalDays;
+      remainingDays -= scaledDays;
     } else {
+      // This period doesn't fit - show dashes
       pratyantarData.unshift({
-        title: `${mainPlanet} – ${pratyantar.name}`,
+        title: `${mainPlanetName} – ${pratyantar.name}`,
         pratyantar: pratyantar.name,
         days: 0,
         from: '–',
@@ -330,9 +388,8 @@ export const calculatePreBirthPratyantarDasha = (
     }
   }
 
-  return pratyantarData.reverse();
+  return pratyantarData;
 };
-
 
 export const calculatePreBirthDainikDasha = (
   fromDateStr: string,
@@ -342,13 +399,10 @@ export const calculatePreBirthDainikDasha = (
   antarPlanetName: string,
   pratyantarPlanetName: string
 ) => {
-  const startDate = parseDateDDMMYYYY(fromDateStr);
-  const endDate = parseDateDDMMYYYY(toDateStr);
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const sequence = getPlanetSequence(startPlanetNumber);
   
-  // If no days available (dash period), return all dashes
-  if (totalDays <= 0 || fromDateStr === '–' || toDateStr === '–') {
-    const sequence = getPlanetSequence(startPlanetNumber);
+  // Handle dash periods or invalid dates
+  if (fromDateStr === '–' || toDateStr === '–') {
     return sequence.map((dainik) => ({
       title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
       dainik: dainik.name,
@@ -358,35 +412,88 @@ export const calculatePreBirthDainikDasha = (
     }));
   }
 
-  const sequence = getPlanetSequence(startPlanetNumber);
-  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
-  const dainikData = [];
+  const startDate = parseDateDDMMYYYY(fromDateStr);
+  const endDate = parseDateDDMMYYYY(toDateStr);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   
-  // Work backwards from the end date
+  if (totalDays <= 0) {
+    return sequence.map((dainik) => ({
+      title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+      dainik: dainik.name,
+      days: 0,
+      from: '–',
+      to: '–'
+    }));
+  }
+
+  // Get fixed days for this combination
+  const fixedDaysForCombo = dainikFixedDays[mainPlanetName]?.[antarPlanetName];
+  
+  if (!Array.isArray(fixedDaysForCombo) || fixedDaysForCombo.length !== 9) {
+    // Fallback to proportional calculation if fixed days not available
+    const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+    const dainikData = [];
+    let currentEndDate = new Date(endDate);
+    let remainingDays = totalDays;
+
+    for (let i = sequence.length - 1; i >= 0; i--) {
+      const dainik = sequence[i];
+      const proportionalDays = Math.round((dainik.days / totalPlanetDays) * totalDays);
+      
+      if (remainingDays >= proportionalDays && remainingDays > 0) {
+        const fromDate = subtractDays(currentEndDate, proportionalDays);
+        
+        dainikData.unshift({
+          title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+          dainik: dainik.name,
+          days: Math.round(proportionalDays * 100) / 100,
+          from: formatDate(fromDate),
+          to: formatDate(currentEndDate)
+        });
+        
+        currentEndDate = new Date(fromDate);
+        remainingDays -= proportionalDays;
+      } else {
+        dainikData.unshift({
+          title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+          dainik: dainik.name,
+          days: 0,
+          from: '–',
+          to: '–'
+        });
+      }
+    }
+
+    return dainikData;
+  }
+
+  // Use fixed days calculation
+  const totalFixedDays = fixedDaysForCombo.reduce((sum, days) => sum + days, 0);
+  const scaleFactor = totalDays / totalFixedDays;
+
+  const dainikData = [];
   let currentEndDate = new Date(endDate);
   let remainingDays = totalDays;
 
-  // Process sequence in reverse to find which periods fit
   for (let i = sequence.length - 1; i >= 0; i--) {
     const dainik = sequence[i];
-    const proportionalDays = Math.round((dainik.days / totalPlanetDays) * totalDays);
+    const fixedDays = fixedDaysForCombo[i] || 0;
+    const scaledDays = Math.round(fixedDays * scaleFactor * 100) / 100;
     
-    if (remainingDays >= proportionalDays && remainingDays > 0) {
-      // This period fits within our available timeframe
-      const fromDate = subtractDays(currentEndDate, proportionalDays);
+    if (remainingDays >= scaledDays && remainingDays > 0) {
+      const fromDate = subtractDays(currentEndDate, Math.round(scaledDays));
       
       dainikData.unshift({
         title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
         dainik: dainik.name,
-        days: Math.round(proportionalDays * 100) / 100,
+        days: scaledDays,
         from: formatDate(fromDate),
         to: formatDate(currentEndDate)
       });
       
       currentEndDate = new Date(fromDate);
-      remainingDays -= proportionalDays;
+      remainingDays -= scaledDays;
     } else {
-      // This period doesn't fit - show dashes
       dainikData.unshift({
         title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
         dainik: dainik.name,
@@ -397,7 +504,7 @@ export const calculatePreBirthDainikDasha = (
     }
   }
 
-  return dainikData.reverse();
+  return dainikData;
 };
 
 export { planetMap };

@@ -40,19 +40,34 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
 
   const formatDateCell = (date: string) => {
     return (
-      <div className="date-cell whitespace-nowrap font-bold">
+      <div className="date-cell whitespace-nowrap font-bold min-w-fit">
         {date}
       </div>
     );
   };
 
+  const canExpandRow = (row: AntarDashaRow) => {
+    // Don't allow expansion if no valid data (days = 0 or from/to = "–")
+    return row.days > 0 && row.from !== '–' && row.to !== '–';
+  };
+
+  const canExpandPratyantarRow = (pratyRow: any) => {
+    // Don't allow expansion if no valid data
+    return pratyRow.days > 0 && pratyRow.from !== '–' && pratyRow.to !== '–';
+  };
+
   const handleRowClick = async (index: number, row: AntarDashaRow) => {
     console.log('Antar row clicked:', index, row);
+    
+    // Don't expand if row has no valid data
+    if (!canExpandRow(row)) {
+      return;
+    }
     
     if (expandedRow === index) {
       setExpandedRow(null);
       setPratyantarData([]);
-      setExpandedPratyantarRow(null); // Reset pratyantar expansion
+      setExpandedPratyantarRow(null);
       setDainikData([]);
       return;
     }
@@ -70,17 +85,23 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
       
       setPratyantarData(Array.isArray(pratyantar) ? pratyantar : []);
       setExpandedRow(index);
-      setExpandedPratyantarRow(null); // Reset pratyantar expansion
+      setExpandedPratyantarRow(null);
       setDainikData([]);
     } catch (error) {
       console.error('Error calculating Pratyantar Dasha:', error);
       setPratyantarData([]);
+      setExpandedRow(null);
     }
   };
 
   const handlePratyantarRowClick = async (pratyantarIndex: number, pratyantarRow: any, antarRow: AntarDashaRow) => {
     const rowKey = `${expandedRow}-${pratyantarIndex}`;
     console.log('Pratyantar row clicked:', rowKey, pratyantarRow);
+
+    // Don't expand if row has no valid data
+    if (!canExpandPratyantarRow(pratyantarRow)) {
+      return;
+    }
 
     if (expandedPratyantarRow === rowKey) {
       setExpandedPratyantarRow(null);
@@ -118,6 +139,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
     } catch (error) {
       console.error('Error calculating Dainik Dasha:', error);
       setDainikData([]);
+      setExpandedPratyantarRow(null);
     }
   };
 
@@ -141,14 +163,14 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
-        <Table className="compressed-table border border-gray-300">
+        <Table className="compressed-table border border-gray-300 min-w-full">
           <TableHeader>
             <TableRow className="bg-amber-50">
               <TableHead className="w-6 px-1 py-1 font-bold text-amber-800 border-r border-gray-300"></TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap border-r border-gray-300">ANTAR</TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap border-r border-gray-300">DAYS</TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap border-r border-gray-300">FROM</TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap">TO</TableHead>
+              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap border-r border-gray-300 min-w-fit">ANTAR</TableHead>
+              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap border-r border-gray-300 min-w-fit">DAYS</TableHead>
+              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap border-r border-gray-300 min-w-fit">FROM</TableHead>
+              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap min-w-fit">TO</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -157,20 +179,22 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
               <>
                 <TableRow
                   key={`antar-${index}`}
-                  className="hover:bg-amber-25 cursor-pointer transition-colors border-b border-gray-300"
+                  className={`hover:bg-amber-25 transition-colors border-b border-gray-300 ${canExpandRow(row) ? 'cursor-pointer' : 'cursor-default'}`}
                   onClick={() => handleRowClick(index, row)}
                 >
                   <TableCell className="text-center px-1 py-1 border-r border-gray-300">
-                    {expandedRow === index ? (
-                      <ChevronDown size={16} className="text-amber-600" />
-                    ) : (
-                      <ChevronRight size={16} className="text-amber-600" />
+                    {canExpandRow(row) && (
+                      expandedRow === index ? (
+                        <ChevronDown size={16} className="text-amber-600" />
+                      ) : (
+                        <ChevronRight size={16} className="text-amber-600" />
+                      )
                     )}
                   </TableCell>
-                  <TableCell className="text-gray-800 font-bold px-1 py-1 border-r border-gray-300">{row.antar}</TableCell>
-                  <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300">{row.days}</TableCell>
-                  <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300">{formatDateCell(row.from)}</TableCell>
-                  <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(row.to)}</TableCell>
+                  <TableCell className="text-gray-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap">{row.antar}</TableCell>
+                  <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap">{row.days}</TableCell>
+                  <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300 whitespace-nowrap">{formatDateCell(row.from)}</TableCell>
+                  <TableCell className="text-gray-600 px-1 py-1 whitespace-nowrap">{formatDateCell(row.to)}</TableCell>
                 </TableRow>
 
                 {expandedRow === index && pratyantarData.length > 0 && (
@@ -181,14 +205,14 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                           <h4 className="font-bold text-orange-700 mb-3">
                             Pratyantar Dasha – {planet} – {row.antar}
                           </h4>
-                          <Table className="compressed-table border border-gray-300">
+                          <Table className="compressed-table border border-gray-300 min-w-full">
                             <TableHeader>
                               <TableRow className="bg-orange-50">
                                 <TableHead className="w-6 text-orange-800 font-bold px-1 py-1 border-r border-gray-300"></TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1 border-r border-gray-300">PRATYANTAR</TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1 border-r border-gray-300">DAYS</TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1 border-r border-gray-300">FROM</TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1">TO</TableHead>
+                                <TableHead className="text-orange-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap min-w-fit">PRATYANTAR</TableHead>
+                                <TableHead className="text-orange-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap min-w-fit">DAYS</TableHead>
+                                <TableHead className="text-orange-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap min-w-fit">FROM</TableHead>
+                                <TableHead className="text-orange-800 font-bold px-1 py-1 whitespace-nowrap min-w-fit">TO</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -196,20 +220,22 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                                 <>
                                   <TableRow
                                     key={`pratyantar-${index}-${pratyIndex}`}
-                                    className="hover:bg-orange-100 cursor-pointer border-b border-gray-300"
+                                    className={`hover:bg-orange-100 transition-colors border-b border-gray-300 ${canExpandPratyantarRow(pratyRow) ? 'cursor-pointer' : 'cursor-default'}`}
                                     onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
                                   >
                                     <TableCell className="text-center px-1 py-1 border-r border-gray-300">
-                                      {expandedPratyantarRow === `${index}-${pratyIndex}` ? (
-                                        <ChevronDown size={14} className="text-orange-600" />
-                                      ) : (
-                                        <ChevronRight size={14} className="text-orange-600" />
+                                      {canExpandPratyantarRow(pratyRow) && (
+                                        expandedPratyantarRow === `${index}-${pratyIndex}` ? (
+                                          <ChevronDown size={14} className="text-orange-600" />
+                                        ) : (
+                                          <ChevronRight size={14} className="text-orange-600" />
+                                        )
                                       )}
                                     </TableCell>
-                                    <TableCell className="text-gray-700 font-bold px-1 py-1 border-r border-gray-300">{pratyRow.pratyantar}</TableCell>
-                                    <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300">{pratyRow.days}</TableCell>
-                                    <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300">{formatDateCell(pratyRow.from)}</TableCell>
-                                    <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(pratyRow.to)}</TableCell>
+                                    <TableCell className="text-gray-700 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap">{pratyRow.pratyantar}</TableCell>
+                                    <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap">{pratyRow.days}</TableCell>
+                                    <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300 whitespace-nowrap">{formatDateCell(pratyRow.from)}</TableCell>
+                                    <TableCell className="text-gray-600 px-1 py-1 whitespace-nowrap">{formatDateCell(pratyRow.to)}</TableCell>
                                   </TableRow>
 
                                   {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
@@ -220,22 +246,22 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                                             <h5 className="font-bold text-red-700 mb-2">
                                               Dainik Dasha – {planet} – {row.antar} – {pratyRow.pratyantar}
                                             </h5>
-                                            <Table className="compressed-table border border-gray-300">
+                                            <Table className="compressed-table border border-gray-300 min-w-full">
                                               <TableHeader>
                                                 <TableRow className="bg-red-50">
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1 border-r border-gray-300">DAINIK</TableHead>
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1 border-r border-gray-300">DAYS</TableHead>
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1 border-r border-gray-300">FROM</TableHead>
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1">TO</TableHead>
+                                                  <TableHead className="text-red-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap min-w-fit">DAINIK</TableHead>
+                                                  <TableHead className="text-red-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap min-w-fit">DAYS</TableHead>
+                                                  <TableHead className="text-red-800 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap min-w-fit">FROM</TableHead>
+                                                  <TableHead className="text-red-800 font-bold px-1 py-1 whitespace-nowrap min-w-fit">TO</TableHead>
                                                 </TableRow>
                                               </TableHeader>
                                               <TableBody>
                                                 {dainikData.map((dainikRow, dainikIndex) => (
                                                   <TableRow key={`dainik-${index}-${pratyIndex}-${dainikIndex}`} className="border-b border-gray-300">
-                                                    <TableCell className="text-gray-700 font-bold px-1 py-1 border-r border-gray-300">{dainikRow.dainik}</TableCell>
-                                                    <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300">{dainikRow.days}</TableCell>
-                                                    <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300">{formatDateCell(dainikRow.from)}</TableCell>
-                                                    <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(dainikRow.to)}</TableCell>
+                                                    <TableCell className="text-gray-700 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap">{dainikRow.dainik}</TableCell>
+                                                    <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300 whitespace-nowrap">{dainikRow.days}</TableCell>
+                                                    <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300 whitespace-nowrap">{formatDateCell(dainikRow.from)}</TableCell>
+                                                    <TableCell className="text-gray-600 px-1 py-1 whitespace-nowrap">{formatDateCell(dainikRow.to)}</TableCell>
                                                   </TableRow>
                                                 ))}
                                               </TableBody>

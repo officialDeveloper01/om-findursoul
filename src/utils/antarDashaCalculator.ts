@@ -118,9 +118,6 @@ export const calculateAntarDasha = (
   return antarDashaData;
 };
 
-
-
-
 export const calculatePreBirthAntarDasha = (
   dateOfBirth: string,
   planetNumber: number,
@@ -180,6 +177,106 @@ export const calculatePreBirthAntarDasha = (
   }
 
   return antarDashaData.reverse();
+};
+
+export const calculatePreBirthPratyantarDasha = (
+  fromDateStr: string,
+  toDateStr: string,
+  startPlanetNumber: number,
+  mainPlanetName: string
+) => {
+  const endDate = parseDateDDMMYYYY(toDateStr); // DOB
+  const startDate = parseDateDDMMYYYY(fromDateStr);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const sequence = getPlanetSequence(startPlanetNumber).reverse();
+  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+
+  const pratyantarData = [];
+  let currentDate = new Date(endDate);
+  let accumulated = 0;
+
+  for (let i = 0; i < sequence.length; i++) {
+    const pratyantar = sequence[i];
+    const originalDays = Math.floor((pratyantar.days / totalPlanetDays) * totalDays);
+
+    if (accumulated + originalDays >= totalDays) {
+      const adjustedDays = totalDays - accumulated;
+      const fromDate = subtractDays(currentDate, adjustedDays);
+      pratyantarData.push({
+        title: `${mainPlanetName} – ${pratyantar.name}`,
+        pratyantar: pratyantar.name,
+        days: adjustedDays,
+        from: formatDate(fromDate),
+        to: formatDate(currentDate),
+        planetNumber: getPlanetNumberFromName(pratyantar.name)
+      });
+      break;
+    } else {
+      const fromDate = subtractDays(currentDate, originalDays);
+      pratyantarData.push({
+        title: `${mainPlanetName} – ${pratyantar.name}`,
+        pratyantar: pratyantar.name,
+        days: originalDays,
+        from: formatDate(fromDate),
+        to: formatDate(currentDate),
+        planetNumber: getPlanetNumberFromName(pratyantar.name)
+      });
+      currentDate = fromDate;
+      accumulated += originalDays;
+    }
+  }
+
+  return pratyantarData.reverse();
+};
+
+export const calculatePreBirthDainikDasha = (
+  fromDateStr: string,
+  toDateStr: string,
+  startPlanetNumber: number,
+  mainPlanetName: string,
+  antarPlanetName: string,
+  pratyantarPlanetName: string
+) => {
+  const endDate = parseDateDDMMYYYY(toDateStr); // DOB
+  const startDate = parseDateDDMMYYYY(fromDateStr);
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const sequence = getPlanetSequence(startPlanetNumber).reverse();
+  const totalPlanetDays = sequence.reduce((sum, p) => sum + p.days, 0);
+
+  const dainikData = [];
+  let currentDate = new Date(endDate);
+  let accumulated = 0;
+
+  for (let i = 0; i < sequence.length; i++) {
+    const dainik = sequence[i];
+    const originalDays = Math.floor((dainik.days / totalPlanetDays) * totalDays);
+
+    if (accumulated + originalDays >= totalDays) {
+      const adjustedDays = totalDays - accumulated;
+      const fromDate = subtractDays(currentDate, adjustedDays);
+      dainikData.push({
+        title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+        dainik: dainik.name,
+        days: adjustedDays,
+        from: formatDate(fromDate),
+        to: formatDate(currentDate)
+      });
+      break;
+    } else {
+      const fromDate = subtractDays(currentDate, originalDays);
+      dainikData.push({
+        title: `${mainPlanetName} – ${antarPlanetName} – ${pratyantarPlanetName} – ${dainik.name}`,
+        dainik: dainik.name,
+        days: originalDays,
+        from: formatDate(fromDate),
+        to: formatDate(currentDate)
+      });
+      currentDate = fromDate;
+      accumulated += originalDays;
+    }
+  }
+
+  return dainikData.reverse();
 };
 
 

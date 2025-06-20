@@ -302,11 +302,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
           {/* Conductor Series - Clickable for Antar Dasha */}
           {conductorSeries.length > 0 && bottomValues.length > 0 && (
             <div className="space-y-3">
-              <div className="text-center">
-                <h3 className="font-bold text-gray-700">Conductor Series (Maha Dasha)</h3>
-                <p className="font-bold text-gray-500">Click on any number below to view Antar Dasha table</p>
-              </div>
-              
               {/* Ages Row - Clean bordered table design */}
               <div className="border border-gray-300 rounded-lg overflow-hidden">
                 <div className="grid grid-cols-11 bg-gray-100 border-b border-gray-300">

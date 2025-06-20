@@ -1,11 +1,14 @@
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { AntarDashaTable } from './AntarDashaTable';
+import { PlaneAnalysis } from './PlaneAnalysis';
 import { CompactNumerologyRow } from './CompactNumerologyRow';
 import { calculateAntarDasha, calculatePreBirthAntarDasha, planetMap } from '@/utils/antarDashaCalculator';
 
 export const LoshoGrid = ({ gridData, userData }) => {
   const [selectedAntarDasha, setSelectedAntarDasha] = useState(null);
+  const [showPlaneAnalysis, setShowPlaneAnalysis] = useState(false);
 
   const hiddenMap = {
     11: 2,
@@ -207,6 +210,18 @@ export const LoshoGrid = ({ gridData, userData }) => {
     return `${day}/${month}/${year}`;
   };
 
+  // If showing Plane Analysis, render it instead
+  if (showPlaneAnalysis) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8 font-calibri">
+        <PlaneAnalysis 
+          frequencies={frequencies}
+          onBack={() => setShowPlaneAnalysis(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 font-calibri">
       {/* User Info Table - Clean 2-column layout */}
@@ -272,6 +287,16 @@ export const LoshoGrid = ({ gridData, userData }) => {
                 <div key={`grid-cell-${digit}-${index}`}>{renderGridCell(digit)}</div>
               ))}
             </div>
+          </div>
+
+          {/* Plane Analysis Button */}
+          <div className="text-center">
+            <Button 
+              onClick={() => setShowPlaneAnalysis(true)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-2"
+            >
+              Plane Analysis
+            </Button>
           </div>
 
           {/* Conductor Series - Clickable for Antar Dasha */}

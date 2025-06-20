@@ -1,6 +1,6 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { calculatePratyantarDasha, calculateDainikDasha } from '@/utils/antarDashaCalculator';
@@ -82,12 +82,11 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
   };
 
   const getTableTitle = () => {
-  if (isPreBirth) {
-    return `Birth Maha Dasha (Age ${planet})`;
-  }
-  return `${planet} Maha Dasha (Age ${startAge - 9} - ${startAge})`;
-};
-
+    if (isPreBirth) {
+      return `Birth Maha Dasha (Age ${planet})`;
+    }
+    return `${planet} Maha Dasha (Age ${startAge - 9} - ${startAge})`;
+  };
 
   return (
     <Card className="mt-6 shadow-lg border border-amber-200 font-calibri">
@@ -102,123 +101,120 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
-        <Table className="compressed-table">
-          <TableHeader>
-            <TableRow className="bg-amber-50">
-              <TableHead className="w-6 px-1 py-1 font-bold text-amber-800"></TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap">ANTAR</TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap">DAYS</TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap">FROM</TableHead>
-              <TableHead className="px-1 py-1 font-bold text-amber-800 whitespace-nowrap">TO</TableHead>
-            </TableRow>
-          </TableHeader>
+        {/* Main Antar Dasha Table with Clean Borders */}
+        <div className="border border-gray-300 rounded-lg overflow-hidden">
+          {/* Table Header */}
+          <div className="grid grid-cols-5 bg-gray-100 border-b border-gray-300">
+            <div className="font-bold text-gray-800 py-2 px-2 border-r border-gray-300 text-center"></div>
+            <div className="font-bold text-gray-800 py-2 px-2 border-r border-gray-300">ANTAR</div>
+            <div className="font-bold text-gray-800 py-2 px-2 border-r border-gray-300">DAYS</div>
+            <div className="font-bold text-gray-800 py-2 px-2 border-r border-gray-300">FROM</div>
+            <div className="font-bold text-gray-800 py-2 px-2">TO</div>
+          </div>
 
-          <TableBody>
+          {/* Table Body */}
+          <div>
             {data.map((row, index) => (
-              <>
-                <TableRow
-                  key={index}
-                  className="hover:bg-amber-25 cursor-pointer transition-colors"
+              <div key={index}>
+                {/* Main Antar Row */}
+                <div
+                  className="grid grid-cols-5 hover:bg-amber-25 cursor-pointer transition-colors border-b border-gray-200 last:border-b-0"
                   onClick={() => handleRowClick(index, row)}
                 >
-                  <TableCell className="text-center px-1 py-1">
+                  <div className="text-center py-2 px-2 border-r border-gray-300">
                     {expandedRow === index ? (
-                      <ChevronDown size={16} className="text-amber-600" />
+                      <ChevronDown size={16} className="text-amber-600 mx-auto" />
                     ) : (
-                      <ChevronRight size={16} className="text-amber-600" />
+                      <ChevronRight size={16} className="text-amber-600 mx-auto" />
                     )}
-                  </TableCell>
-                  <TableCell className="text-gray-800 font-bold px-1 py-1">{row.antar}</TableCell>
-                  <TableCell className="text-gray-600 font-bold px-1 py-1">{row.days}</TableCell>
-                  <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(row.from)}</TableCell>
-                  <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(row.to)}</TableCell>
-                </TableRow>
+                  </div>
+                  <div className="text-gray-800 font-bold py-2 px-2 border-r border-gray-300">{row.antar}</div>
+                  <div className="text-gray-600 font-bold py-2 px-2 border-r border-gray-300">{row.days}</div>
+                  <div className="text-gray-600 py-2 px-2 border-r border-gray-300">{formatDateCell(row.from)}</div>
+                  <div className="text-gray-600 py-2 px-2">{formatDateCell(row.to)}</div>
+                </div>
 
+                {/* Expanded Pratyantar Content */}
                 {expandedRow === index && pratyantarData.length > 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="p-0">
-                      <div className="bg-orange-25 border-l-4 border-orange-300 ml-4 mr-2 my-2">
-                        <div className="p-4">
-                          <h4 className="font-bold text-orange-700 mb-3">
-                            Pratyantar Dasha – {planet} – {row.antar}
-                          </h4>
-                          <Table className="compressed-table">
-                            <TableHeader>
-                              <TableRow className="bg-orange-50">
-                                <TableHead className="w-6 text-orange-800 font-bold px-1 py-1"></TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1">PRATYANTAR</TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1">DAYS</TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1">FROM</TableHead>
-                                <TableHead className="text-orange-800 font-bold px-1 py-1">TO</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {pratyantarData.map((pratyRow, pratyIndex) => (
-                                <>
-                                  <TableRow
-                                    key={pratyIndex}
-                                    className="hover:bg-orange-100 cursor-pointer"
-                                    onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
-                                  >
-                                    <TableCell className="text-center px-1 py-1">
-                                      {expandedPratyantarRow === `${index}-${pratyIndex}` ? (
-                                        <ChevronDown size={14} className="text-orange-600" />
-                                      ) : (
-                                        <ChevronRight size={14} className="text-orange-600" />
-                                      )}
-                                    </TableCell>
-                                    <TableCell className="text-gray-700 font-bold px-1 py-1">{pratyRow.pratyantar}</TableCell>
-                                    <TableCell className="text-gray-600 font-bold px-1 py-1">{pratyRow.days}</TableCell>
-                                    <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(pratyRow.from)}</TableCell>
-                                    <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(pratyRow.to)}</TableCell>
-                                  </TableRow>
-
-                                  {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
-                                    <TableRow>
-                                      <TableCell colSpan={5} className="p-0">
-                                        <div className="bg-red-25 border-l-4 border-red-300 ml-6 mr-2 my-2">
-                                          <div className="p-3">
-                                            <h5 className="font-bold text-red-700 mb-2">
-                                              Dainik Dasha – {planet} – {row.antar} – {pratyRow.pratyantar}
-                                            </h5>
-                                            <Table className="compressed-table">
-                                              <TableHeader>
-                                                <TableRow className="bg-red-50">
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1">DAINIK</TableHead>
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1">DAYS</TableHead>
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1">FROM</TableHead>
-                                                  <TableHead className="text-red-800 font-bold px-1 py-1">TO</TableHead>
-                                                </TableRow>
-                                              </TableHeader>
-                                              <TableBody>
-                                                {dainikData.map((dainikRow, dainikIndex) => (
-                                                  <TableRow key={dainikIndex}>
-                                                    <TableCell className="text-gray-700 font-bold px-1 py-1">{dainikRow.dainik}</TableCell>
-                                                    <TableCell className="text-gray-600 font-bold px-1 py-1">{dainikRow.days}</TableCell>
-                                                    <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(dainikRow.from)}</TableCell>
-                                                    <TableCell className="text-gray-600 px-1 py-1">{formatDateCell(dainikRow.to)}</TableCell>
-                                                  </TableRow>
-                                                ))}
-                                              </TableBody>
-                                            </Table>
-                                          </div>
-                                        </div>
-                                      </TableCell>
-                                    </TableRow>
+                  <div className="bg-orange-25 border-t border-orange-300">
+                    <div className="p-4">
+                      <h4 className="font-bold text-orange-700 mb-3">
+                        Pratyantar Dasha – {planet} – {row.antar}
+                      </h4>
+                      <div className="border border-orange-300 rounded-lg overflow-hidden">
+                        {/* Pratyantar Header */}
+                        <div className="grid grid-cols-5 bg-orange-50 border-b border-orange-300">
+                          <div className="font-bold text-orange-800 py-2 px-2 border-r border-orange-300 text-center"></div>
+                          <div className="font-bold text-orange-800 py-2 px-2 border-r border-orange-300">PRATYANTAR</div>
+                          <div className="font-bold text-orange-800 py-2 px-2 border-r border-orange-300">DAYS</div>
+                          <div className="font-bold text-orange-800 py-2 px-2 border-r border-orange-300">FROM</div>
+                          <div className="font-bold text-orange-800 py-2 px-2">TO</div>
+                        </div>
+                        
+                        {/* Pratyantar Body */}
+                        <div>
+                          {pratyantarData.map((pratyRow, pratyIndex) => (
+                            <div key={pratyIndex}>
+                              {/* Pratyantar Row */}
+                              <div
+                                className="grid grid-cols-5 hover:bg-orange-100 cursor-pointer border-b border-orange-200 last:border-b-0"
+                                onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
+                              >
+                                <div className="text-center py-2 px-2 border-r border-orange-300">
+                                  {expandedPratyantarRow === `${index}-${pratyIndex}` ? (
+                                    <ChevronDown size={14} className="text-orange-600 mx-auto" />
+                                  ) : (
+                                    <ChevronRight size={14} className="text-orange-600 mx-auto" />
                                   )}
-                                </>
-                              ))}
-                            </TableBody>
-                          </Table>
+                                </div>
+                                <div className="text-gray-700 font-bold py-2 px-2 border-r border-orange-300">{pratyRow.pratyantar}</div>
+                                <div className="text-gray-600 font-bold py-2 px-2 border-r border-orange-300">{pratyRow.days}</div>
+                                <div className="text-gray-600 py-2 px-2 border-r border-orange-300">{formatDateCell(pratyRow.from)}</div>
+                                <div className="text-gray-600 py-2 px-2">{formatDateCell(pratyRow.to)}</div>
+                              </div>
+
+                              {/* Expanded Dainik Content */}
+                              {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
+                                <div className="bg-red-25 border-t border-red-300">
+                                  <div className="p-3">
+                                    <h5 className="font-bold text-red-700 mb-2">
+                                      Dainik Dasha – {planet} – {row.antar} – {pratyRow.pratyantar}
+                                    </h5>
+                                    <div className="border border-red-300 rounded-lg overflow-hidden">
+                                      {/* Dainik Header */}
+                                      <div className="grid grid-cols-4 bg-red-50 border-b border-red-300">
+                                        <div className="font-bold text-red-800 py-2 px-2 border-r border-red-300">DAINIK</div>
+                                        <div className="font-bold text-red-800 py-2 px-2 border-r border-red-300">DAYS</div>
+                                        <div className="font-bold text-red-800 py-2 px-2 border-r border-red-300">FROM</div>
+                                        <div className="font-bold text-red-800 py-2 px-2">TO</div>
+                                      </div>
+                                      
+                                      {/* Dainik Body */}
+                                      <div>
+                                        {dainikData.map((dainikRow, dainikIndex) => (
+                                          <div key={dainikIndex} className="grid grid-cols-4 border-b border-red-200 last:border-b-0">
+                                            <div className="text-gray-700 font-bold py-2 px-2 border-r border-red-300">{dainikRow.dainik}</div>
+                                            <div className="text-gray-600 font-bold py-2 px-2 border-r border-red-300">{dainikRow.days}</div>
+                                            <div className="text-gray-600 py-2 px-2 border-r border-red-300">{formatDateCell(dainikRow.from)}</div>
+                                            <div className="text-gray-600 py-2 px-2">{formatDateCell(dainikRow.to)}</div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 )}
-              </>
+              </div>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

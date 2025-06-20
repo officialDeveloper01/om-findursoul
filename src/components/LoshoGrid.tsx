@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AntarDashaTable } from './AntarDashaTable';
@@ -199,61 +198,63 @@ export const LoshoGrid = ({ gridData, userData }) => {
     }
   };
 
+  // Helper function to format date as DD/MM/YYYY
+  const formatDateDDMMYYYY = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 font-calibri">
-      {/* User Info Table - Moved to top */}
+      {/* User Info Table - Clean 2-column layout */}
       <Card className="shadow-xl border border-amber-200 bg-white rounded-xl mb-8">
-  <CardContent className="p-6">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12 max-w-4xl mx-auto">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 gap-y-3 gap-x-8">
+            {/* Row 1 */}
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">Name:</span>
+              <span className="font-bold text-gray-800">{userData.fullName}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">Age:</span>
+              <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
+            </div>
 
-      {/* Row 1 */}
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">Name:</span>
-        <span className="font-bold text-gray-800">{userData.fullName}</span>
-      </div>
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">Age:</span>
-        <span className="font-bold text-gray-800">{calculateAge(userData.dateOfBirth)} years</span>
-      </div>
+            {/* Row 2 */}
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">Name Number:</span>
+              <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">MULAANK:</span>
+              <span className="font-bold text-amber-700">{numerologyData.driver || 0}</span>
+            </div>
 
-      {/* Row 2 */}
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">Name Number:</span>
-        <span className="font-bold text-gray-800">{numerologyData.chaldeanNumbers?.nameNumber || 0}</span>
-      </div>
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">MULAANK:</span>
-        <span className="font-bold text-amber-700 text-lg">{numerologyData.driver || 0}</span>
-      </div>
+            {/* Row 3 */}
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">DOB:</span>
+              <span className="font-bold text-gray-800">{formatDateDDMMYYYY(userData.dateOfBirth)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">BHAGYAANK:</span>
+              <span className="font-bold text-blue-700">{numerologyData.conductor || 0}</span>
+            </div>
 
-      {/* Row 3 */}
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">DOB:</span>
-        <span className="font-bold text-gray-800">
-          {new Date(userData.dateOfBirth).toLocaleDateString('en-IN')}
-        </span>
-      </div>
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">BHAGYAANK:</span>
-        <span className="font-bold text-blue-700 text-lg">{numerologyData.conductor || 0}</span>
-      </div>
-
-      {/* Row 4 */}
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">Time:</span>
-        <span className="font-bold text-gray-800">{formatTime(userData.timeOfBirth)}</span>
-      </div>
-      <div className="flex gap-2">
-        <span className="text-gray-600 font-bold w-32">SOUL NUMBER:</span>
-        <span className="font-bold text-green-700 text-lg">{numerologyData.chaldeanNumbers?.soulUrgeNumber || 0}</span>
-      </div>
-
-    </div>
-  </CardContent>
-</Card>
-
-
-
+            {/* Row 4 */}
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">Time:</span>
+              <span className="font-bold text-gray-800 whitespace-nowrap">{formatTime(userData.timeOfBirth)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-bold">PERSONALITY NO:</span>
+              <span className="font-bold text-green-700">{numerologyData.chaldeanNumbers?.soulUrgeNumber || 0}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Grid Card */}
       <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
@@ -264,7 +265,6 @@ export const LoshoGrid = ({ gridData, userData }) => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-
           {/* Lo Shu Grid */}
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-3 gap-4 w-full max-w-md mx-auto">
@@ -282,27 +282,29 @@ export const LoshoGrid = ({ gridData, userData }) => {
                 <p className="font-bold text-gray-500">Click on any number below to view Antar Dasha table</p>
               </div>
               
-              {/* Ages Row */}
-              <div className="grid grid-cols-11 gap-1 mb-2">
-                {conductorSeries.map((age, index) => (
-                  <div key={`age-${age}-${index}`} className="text-center font-bold text-gray-600 py-1">
-                    {age}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Conductor Numbers Row - Clickable */}
-              <div className="grid grid-cols-11 gap-1">
-                {bottomValues.map((number, index) => (
-                  <button
-                    key={`conductor-${number}-${index}`}
-                    onClick={() => handleConductorClick(number, index)}
-                    className="bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg py-2 text-center font-bold text-amber-800 transition-colors cursor-pointer"
-                    title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
-                  >
-                    {number}
-                  </button>
-                ))}
+              {/* Ages Row - Clean bordered table design */}
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-11 bg-gray-100 border-b border-gray-300">
+                  {conductorSeries.map((age, index) => (
+                    <div key={`age-${age}-${index}`} className="text-center font-bold text-gray-700 py-2 px-2 border-r border-gray-300 last:border-r-0">
+                      {age}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Conductor Numbers Row - Clickable with borders */}
+                <div className="grid grid-cols-11">
+                  {bottomValues.map((number, index) => (
+                    <button
+                      key={`conductor-${number}-${index}`}
+                      onClick={() => handleConductorClick(number, index)}
+                      className="bg-amber-50 hover:bg-amber-100 py-2 px-2 text-center font-bold text-amber-800 transition-colors cursor-pointer border-r border-gray-300 last:border-r-0"
+                      title={`Click to view ${planetMap[number]?.name || 'Unknown'} Maha Dasha`}
+                    >
+                      {number}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}

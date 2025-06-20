@@ -47,9 +47,13 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
   };
 
   const handleRowClick = async (index: number, row: AntarDashaRow) => {
+    console.log('Antar row clicked:', index, row);
+    
     if (expandedRow === index) {
       setExpandedRow(null);
       setPratyantarData([]);
+      setExpandedPratyantarRow(null); // Reset pratyantar expansion
+      setDainikData([]);
       return;
     }
 
@@ -57,22 +61,26 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
       let pratyantar;
       
       if (isPreBirth) {
-        // Use pre-birth calculation for backward-counting periods
         pratyantar = calculatePreBirthPratyantarDasha(row.from, row.to, row.planetNumber, planet);
       } else {
-        // Use regular forward calculation
         pratyantar = calculatePratyantarDasha(row.from, row.to, row.planetNumber, planet);
       }
       
-      setPratyantarData(pratyantar);
+      console.log('Calculated pratyantar data:', pratyantar);
+      
+      setPratyantarData(Array.isArray(pratyantar) ? pratyantar : []);
       setExpandedRow(index);
+      setExpandedPratyantarRow(null); // Reset pratyantar expansion
+      setDainikData([]);
     } catch (error) {
       console.error('Error calculating Pratyantar Dasha:', error);
+      setPratyantarData([]);
     }
   };
 
   const handlePratyantarRowClick = async (pratyantarIndex: number, pratyantarRow: any, antarRow: AntarDashaRow) => {
     const rowKey = `${expandedRow}-${pratyantarIndex}`;
+    console.log('Pratyantar row clicked:', rowKey, pratyantarRow);
 
     if (expandedPratyantarRow === rowKey) {
       setExpandedPratyantarRow(null);
@@ -84,7 +92,6 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
       let dainik;
       
       if (isPreBirth) {
-        // Use pre-birth calculation for backward-counting periods
         dainik = calculatePreBirthDainikDasha(
           pratyantarRow.from,
           pratyantarRow.to,
@@ -94,7 +101,6 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
           pratyantarRow.pratyantar
         );
       } else {
-        // Use regular forward calculation
         dainik = calculateDainikDasha(
           pratyantarRow.from,
           pratyantarRow.to,
@@ -105,10 +111,13 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
         );
       }
       
-      setDainikData(dainik);
+      console.log('Calculated dainik data:', dainik);
+      
+      setDainikData(Array.isArray(dainik) ? dainik : []);
       setExpandedPratyantarRow(rowKey);
     } catch (error) {
       console.error('Error calculating Dainik Dasha:', error);
+      setDainikData([]);
     }
   };
 
@@ -147,7 +156,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
             {data.map((row, index) => (
               <>
                 <TableRow
-                  key={index}
+                  key={`antar-${index}`}
                   className="hover:bg-amber-25 cursor-pointer transition-colors border-b border-gray-300"
                   onClick={() => handleRowClick(index, row)}
                 >
@@ -165,7 +174,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                 </TableRow>
 
                 {expandedRow === index && pratyantarData.length > 0 && (
-                  <TableRow>
+                  <TableRow key={`pratyantar-container-${index}`}>
                     <TableCell colSpan={5} className="p-0">
                       <div className="bg-orange-25 border-l-4 border-orange-300 ml-4 mr-2 my-2">
                         <div className="p-4">
@@ -186,7 +195,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                               {pratyantarData.map((pratyRow, pratyIndex) => (
                                 <>
                                   <TableRow
-                                    key={pratyIndex}
+                                    key={`pratyantar-${index}-${pratyIndex}`}
                                     className="hover:bg-orange-100 cursor-pointer border-b border-gray-300"
                                     onClick={() => handlePratyantarRowClick(pratyIndex, pratyRow, row)}
                                   >
@@ -204,7 +213,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                                   </TableRow>
 
                                   {expandedPratyantarRow === `${index}-${pratyIndex}` && dainikData.length > 0 && (
-                                    <TableRow>
+                                    <TableRow key={`dainik-container-${index}-${pratyIndex}`}>
                                       <TableCell colSpan={5} className="p-0">
                                         <div className="bg-red-25 border-l-4 border-red-300 ml-6 mr-2 my-2">
                                           <div className="p-3">
@@ -222,7 +231,7 @@ export const AntarDashaTable = ({ data, planet, startAge, onClose, isPreBirth = 
                                               </TableHeader>
                                               <TableBody>
                                                 {dainikData.map((dainikRow, dainikIndex) => (
-                                                  <TableRow key={dainikIndex} className="border-b border-gray-300">
+                                                  <TableRow key={`dainik-${index}-${pratyIndex}-${dainikIndex}`} className="border-b border-gray-300">
                                                     <TableCell className="text-gray-700 font-bold px-1 py-1 border-r border-gray-300">{dainikRow.dainik}</TableCell>
                                                     <TableCell className="text-gray-600 font-bold px-1 py-1 border-r border-gray-300">{dainikRow.days}</TableCell>
                                                     <TableCell className="text-gray-600 px-1 py-1 border-r border-gray-300">{formatDateCell(dainikRow.from)}</TableCell>

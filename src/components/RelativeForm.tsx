@@ -18,7 +18,8 @@ const RELATION_OPTIONS = [
   { value: 'GRANDMOTHER', label: 'Grandmother' },
   { value: 'SPOUSE', label: 'Spouse' },
   { value: 'SON', label: 'Son' },
-  { value: 'DAUGHTER', label: 'Daughter' }
+  { value: 'DAUGHTER', label: 'Daughter' },
+  { value: 'OTHER', label: 'Other' }
 ];
 
 interface RelativeData {

@@ -19,12 +19,17 @@ interface UserManagementModalProps {
 }
 
 const RELATION_OPTIONS = [
+  { value: 'FATHER', label: 'Father' },
+  { value: 'MOTHER', label: 'Mother' },
+  { value: 'BROTHER', label: 'Brother' },
+  { value: 'SISTER', label: 'Sister' },
+  { value: 'UNCLE', label: 'Uncle' },
+  { value: 'AUNT', label: 'Aunt' },
+  { value: 'GRANDFATHER', label: 'Grandfather' },
+  { value: 'GRANDMOTHER', label: 'Grandmother' },
   { value: 'SPOUSE', label: 'Spouse' },
-  { value: 'CHILD', label: 'Child' },
-  { value: 'PARENT', label: 'Parent' },
-  { value: 'SIBLING', label: 'Sibling' },
-  { value: 'GRANDPARENT', label: 'Grandparent' },
-  { value: 'GRANDCHILD', label: 'Grandchild' },
+  { value: 'SON', label: 'Son' },
+  { value: 'DAUGHTER', label: 'Daughter' },
   { value: 'OTHER', label: 'Other' }
 ];
 

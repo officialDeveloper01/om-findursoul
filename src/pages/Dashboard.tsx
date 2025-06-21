@@ -23,6 +23,8 @@ const Dashboard = () => {
   const [currentView, setCurrentView] = useState('form');
   const [isLoading, setIsLoading] = useState(false);
   const [allResults, setAllResults] = useState([]);
+  const [currentPhoneNumber, setCurrentPhoneNumber] = useState('');
+  const [currentTimestamp, setCurrentTimestamp] = useState('');
   const [managementModal, setManagementModal] = useState({
     isOpen: false,
     mode: 'add' as 'add' | 'edit',
@@ -80,6 +82,10 @@ const Dashboard = () => {
       
       console.log('Data saved to Firebase with timestamp:', timestamp);
       
+      // Store current phone number and timestamp for future updates
+      setCurrentPhoneNumber(data.phoneNumber);
+      setCurrentTimestamp(timestamp.toString());
+      
       // iOS-safe state update with error handling
       if (typeof window !== 'undefined') {
         try {
@@ -114,6 +120,8 @@ const Dashboard = () => {
           setGridData(null);
           setNumerologyData(null);
           setAllResults([]);
+          setCurrentPhoneNumber('');
+          setCurrentTimestamp('');
           setCurrentView('form');
         });
       } catch (error) {
@@ -124,6 +132,8 @@ const Dashboard = () => {
           setGridData(null);
           setNumerologyData(null);
           setAllResults([]);
+          setCurrentPhoneNumber('');
+          setCurrentTimestamp('');
           setCurrentView('form');
         }, 100);
       }
@@ -181,20 +191,17 @@ const Dashboard = () => {
         };
       }
 
-      // Update Firebase (assuming we have phone number from first entry)
-      if (updatedResults.length > 0 && user?.uid) {
-        const timestamp = Date.now();
-        const phoneNumber = allResults[0]?.phoneNumber || updatedResults[0]?.phoneNumber;
-        
-        if (phoneNumber) {
-          const entriesRef = ref(database, `users/${phoneNumber}/entries/${timestamp}`);
-          await set(entriesRef, {
-            entries: updatedResults,
-            phoneNumber: phoneNumber,
-            createdAt: new Date().toISOString(),
-            userId: user.uid
-          });
-        }
+      // Update Firebase - Use existing timestamp to update the same record
+      if (updatedResults.length > 0 && user?.uid && currentPhoneNumber && currentTimestamp) {
+        const entriesRef = ref(database, `users/${currentPhoneNumber}/entries/${currentTimestamp}`);
+        await set(entriesRef, {
+          entries: updatedResults,
+          phoneNumber: currentPhoneNumber,
+          createdAt: new Date().toISOString(),
+          userId: user.uid
+        });
+
+        console.log('Updated existing record:', currentTimestamp);
       }
 
       setAllResults(updatedResults);
@@ -208,20 +215,17 @@ const Dashboard = () => {
     try {
       const updatedResults = allResults.filter((_, index) => index !== managementModal.userIndex);
       
-      // Update Firebase
-      if (updatedResults.length > 0 && user?.uid) {
-        const timestamp = Date.now();
-        const phoneNumber = allResults[0]?.phoneNumber || updatedResults[0]?.phoneNumber;
-        
-        if (phoneNumber) {
-          const entriesRef = ref(database, `users/${phoneNumber}/entries/${timestamp}`);
-          await set(entriesRef, {
-            entries: updatedResults,
-            phoneNumber: phoneNumber,
-            createdAt: new Date().toISOString(),
-            userId: user.uid
-          });
-        }
+      // Update Firebase - Use existing timestamp to update the same record
+      if (user?.uid && currentPhoneNumber && currentTimestamp) {
+        const entriesRef = ref(database, `users/${currentPhoneNumber}/entries/${currentTimestamp}`);
+        await set(entriesRef, {
+          entries: updatedResults,
+          phoneNumber: currentPhoneNumber,
+          createdAt: new Date().toISOString(),
+          userId: user.uid
+        });
+
+        console.log('Updated existing record after deletion:', currentTimestamp);
       }
 
       setAllResults(updatedResults);

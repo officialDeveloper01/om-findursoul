@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ref, get, set } from 'firebase/database';
+import { ref, get, set, remove } from 'firebase/database';
 import { database } from '@/config/firebase';
 import { Phone, Calendar, MapPin, Clock, Edit, Plus, Trash2 } from 'lucide-react';
 import { LoshoGrid } from './LoshoGrid';
@@ -18,6 +18,7 @@ export const SearchTables = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [selectedResults, setSelectedResults] = useState([]);
+  const [currentGroupId, setCurrentGroupId] = useState('');
   const [managementModal, setManagementModal] = useState({
     isOpen: false,
     mode: 'add' as 'add' | 'edit',
@@ -87,6 +88,9 @@ export const SearchTables = () => {
       numerologyData: result.numerologyData
     }));
     
+    // Store the current group ID for updates
+    setCurrentGroupId(groupId);
+    
     // iOS-safe state update
     requestAnimationFrame(() => {
       setSelectedResults(formattedResults);
@@ -97,6 +101,7 @@ export const SearchTables = () => {
     // iOS-safe state update
     requestAnimationFrame(() => {
       setSelectedResults([]);
+      setCurrentGroupId('');
     });
   }, []);
 
@@ -153,19 +158,21 @@ export const SearchTables = () => {
         };
       }
 
-      // Update Firebase
+      // Update Firebase - Update existing group instead of creating new one
       if (updatedResults.length > 0 && user?.uid) {
-        const timestamp = Date.now();
         const phoneNumber = selectedResults[0]?.phoneNumber || mobileNumber;
         
-        if (phoneNumber) {
-          const entriesRef = ref(database, `users/${phoneNumber}/entries/${timestamp}`);
+        if (phoneNumber && currentGroupId) {
+          // Update the existing group entry
+          const entriesRef = ref(database, `users/${phoneNumber}/entries/${currentGroupId}`);
           await set(entriesRef, {
             entries: updatedResults,
             phoneNumber: phoneNumber,
             createdAt: new Date().toISOString(),
             userId: user.uid
           });
+
+          console.log('Updated existing group:', currentGroupId);
         }
       }
 
@@ -180,19 +187,38 @@ export const SearchTables = () => {
     try {
       const updatedResults = selectedResults.filter((_, index) => index !== managementModal.userIndex);
       
-      // Update Firebase
-      if (updatedResults.length > 0 && user?.uid) {
-        const timestamp = Date.now();
+      // Update Firebase - Update existing group instead of creating new one
+      if (user?.uid) {
         const phoneNumber = selectedResults[0]?.phoneNumber || mobileNumber;
         
-        if (phoneNumber) {
-          const entriesRef = ref(database, `users/${phoneNumber}/entries/${timestamp}`);
-          await set(entriesRef, {
-            entries: updatedResults,
-            phoneNumber: phoneNumber,
-            createdAt: new Date().toISOString(),
-            userId: user.uid
-          });
+        if (phoneNumber && currentGroupId) {
+          if (updatedResults.length > 0) {
+            // Update the existing group entry
+            const entriesRef = ref(database, `users/${phoneNumber}/entries/${currentGroupId}`);
+            await set(entriesRef, {
+              entries: updatedResults,
+              phoneNumber: phoneNumber,
+              createdAt: new Date().toISOString(),
+              userId: user.uid
+            });
+          } else {
+            // If no users left, remove the entire group
+            const entriesRef = ref(database, `users/${phoneNumber}/entries/${currentGroupId}`);
+            await remove(entriesRef);
+            
+            // Check if this was the last group for this phone number
+            const phoneRef = ref(database, `users/${phoneNumber}`);
+            const snapshot = await get(phoneRef);
+            if (snapshot.exists()) {
+              const phoneData = snapshot.val();
+              if (!phoneData.entries || Object.keys(phoneData.entries).length === 0) {
+                // Remove the entire phone number entry if no groups left
+                await remove(phoneRef);
+              }
+            }
+          }
+
+          console.log('Updated existing group after deletion:', currentGroupId);
         }
       }
 

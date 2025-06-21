@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ref, get } from 'firebase/database';
+import { ref, get, set } from 'firebase/database';
 import { database } from '@/config/firebase';
-import { Phone, Calendar, MapPin, Clock } from 'lucide-react';
+import { Phone, Calendar, MapPin, Clock, Edit, Plus, Trash2 } from 'lucide-react';
 import { LoshoGrid } from './LoshoGrid';
+import { UserManagementModal } from './UserManagementModal';
+import { useAuth } from '@/hooks/useAuth';
+import { calculateAllNumerology } from '@/utils/numerologyCalculator';
 
 export const SearchTables = () => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -15,6 +18,13 @@ export const SearchTables = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [selectedResults, setSelectedResults] = useState([]);
+  const [managementModal, setManagementModal] = useState({
+    isOpen: false,
+    mode: 'add' as 'add' | 'edit',
+    userData: null,
+    userIndex: -1
+  });
+  const { user } = useAuth();
 
   const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +51,7 @@ export const SearchTables = () => {
                 results.push({
                   id: `${entryId}-${index}`,
                   groupId: entryId,
+                  phoneNumber: mobileNumber,
                   ...entry,
                   createdAt: entryGroup.createdAt
                 });
@@ -71,6 +82,7 @@ export const SearchTables = () => {
       timeOfBirth: result.timeOfBirth,
       placeOfBirth: result.placeOfBirth,
       relation: result.relation,
+      phoneNumber: result.phoneNumber,
       gridData: result.gridData,
       numerologyData: result.numerologyData
     }));
@@ -88,7 +100,110 @@ export const SearchTables = () => {
     });
   }, []);
 
-  // If showing results, display them in responsive grid
+  // CRUD Operations
+  const openUserModal = (mode: 'add' | 'edit', userData: any = null, userIndex: number = -1) => {
+    setManagementModal({
+      isOpen: true,
+      mode,
+      userData,
+      userIndex
+    });
+  };
+
+  const closeUserModal = () => {
+    setManagementModal({
+      isOpen: false,
+      mode: 'add',
+      userData: null,
+      userIndex: -1
+    });
+  };
+
+  const handleUserSave = async (userData: any) => {
+    try {
+      let updatedResults = [...selectedResults];
+      
+      if (managementModal.mode === 'add') {
+        // Add new family member
+        const calculatedNumerology = calculateAllNumerology(userData.dateOfBirth, userData.fullName);
+        const newUser = {
+          fullName: userData.fullName,
+          dateOfBirth: userData.dateOfBirth,
+          timeOfBirth: userData.timeOfBirth,
+          placeOfBirth: userData.placeOfBirth,
+          relation: userData.relation,
+          phoneNumber: selectedResults[0]?.phoneNumber || mobileNumber,
+          gridData: calculatedNumerology.loshuGrid,
+          numerologyData: calculatedNumerology,
+          createdAt: new Date().toISOString()
+        };
+        updatedResults.push(newUser);
+      } else {
+        // Edit existing user
+        const calculatedNumerology = calculateAllNumerology(userData.dateOfBirth, userData.fullName);
+        updatedResults[managementModal.userIndex] = {
+          ...updatedResults[managementModal.userIndex],
+          fullName: userData.fullName,
+          dateOfBirth: userData.dateOfBirth,
+          timeOfBirth: userData.timeOfBirth,
+          placeOfBirth: userData.placeOfBirth,
+          relation: userData.relation || updatedResults[managementModal.userIndex].relation,
+          gridData: calculatedNumerology.loshuGrid,
+          numerologyData: calculatedNumerology
+        };
+      }
+
+      // Update Firebase
+      if (updatedResults.length > 0 && user?.uid) {
+        const timestamp = Date.now();
+        const phoneNumber = selectedResults[0]?.phoneNumber || mobileNumber;
+        
+        if (phoneNumber) {
+          const entriesRef = ref(database, `users/${phoneNumber}/entries/${timestamp}`);
+          await set(entriesRef, {
+            entries: updatedResults,
+            phoneNumber: phoneNumber,
+            createdAt: new Date().toISOString(),
+            userId: user.uid
+          });
+        }
+      }
+
+      setSelectedResults(updatedResults);
+    } catch (error) {
+      console.error('Error saving user:', error);
+      throw error;
+    }
+  };
+
+  const handleUserDelete = async () => {
+    try {
+      const updatedResults = selectedResults.filter((_, index) => index !== managementModal.userIndex);
+      
+      // Update Firebase
+      if (updatedResults.length > 0 && user?.uid) {
+        const timestamp = Date.now();
+        const phoneNumber = selectedResults[0]?.phoneNumber || mobileNumber;
+        
+        if (phoneNumber) {
+          const entriesRef = ref(database, `users/${phoneNumber}/entries/${timestamp}`);
+          await set(entriesRef, {
+            entries: updatedResults,
+            phoneNumber: phoneNumber,
+            createdAt: new Date().toISOString(),
+            userId: user.uid
+          });
+        }
+      }
+
+      setSelectedResults(updatedResults);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  };
+
+  // If showing results, display them in responsive grid with CRUD functionality
   if (selectedResults.length > 0) {
     return (
       <div className="max-w-6xl mx-auto space-y-6">
@@ -109,26 +224,34 @@ export const SearchTables = () => {
           <p className="text-amber-400">
             {selectedResults.length} member{selectedResults.length > 1 ? 's' : ''} found
           </p>
+          <div className="flex justify-center gap-4 mt-4">
+            <Button 
+              onClick={() => openUserModal('add')}
+              className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add Family Member
+            </Button>
+          </div>
         </div>
 
-        {/* Display Results - Single card for one person, grid for multiple */}
+        {/* Display Results with CRUD buttons */}
         {selectedResults.length === 1 ? (
           // Single person - full width card
           <div className="max-w-5xl mx-auto">
-            <Card className="shadow-xl border border-gray-200 bg-white rounded-xl">
+            <Card className="shadow-xl border border-gray-200 bg-white rounded-xl relative">
+              <div className="absolute top-4 right-4 z-10">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openUserModal('edit', selectedResults[0], 0)}
+                  className="flex items-center gap-2"
+                >
+                  <Edit size={14} />
+                  Edit
+                </Button>
+              </div>
               <div className="p-6">
-                <div className="text-center mb-6">
-                  <h4 className="text-2xl font-semibold text-blue-800 mb-3">
-                    {selectedResults[0].fullName}
-                  </h4>
-                  <Badge 
-                    variant="outline" 
-                    className="bg-amber-100 text-amber-700 border-amber-300 px-3 py-1 text-sm font-medium rounded-full"
-                  >
-                    Search Result
-                  </Badge>
-                </div>
-                
                 <LoshoGrid 
                   gridData={{
                     frequencies: selectedResults[0].gridData,
@@ -151,8 +274,38 @@ export const SearchTables = () => {
           // Multiple people - grid layout
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {selectedResults.map((result, index) => (
-              <div key={index}>
-                <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full">
+              <div key={`search-result-${index}-${result.fullName}`}>
+                <Card className="shadow-xl border border-gray-200 bg-white rounded-xl h-full relative">
+                  {/* CRUD Buttons */}
+                  <div className="absolute top-4 right-4 z-10 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openUserModal('edit', result, index)}
+                      className="flex items-center gap-1"
+                    >
+                      <Edit size={12} />
+                    </Button>
+                    {result.relation !== 'SELF' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setManagementModal({
+                            isOpen: true,
+                            mode: 'edit',
+                            userData: result,
+                            userIndex: index
+                          });
+                          handleUserDelete();
+                        }}
+                        className="flex items-center gap-1 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 size={12} />
+                      </Button>
+                    )}
+                  </div>
+
                   <div className="p-6">
                     <div className="text-center mb-6">
                       <h4 className="text-xl font-semibold text-blue-800 mb-3">
@@ -193,6 +346,17 @@ export const SearchTables = () => {
             ))}
           </div>
         )}
+
+        {/* User Management Modal */}
+        <UserManagementModal
+          isOpen={managementModal.isOpen}
+          onClose={closeUserModal}
+          onSave={handleUserSave}
+          onDelete={managementModal.mode === 'edit' && managementModal.userData?.relation !== 'SELF' ? handleUserDelete : undefined}
+          userData={managementModal.userData}
+          mode={managementModal.mode}
+          isMainUser={managementModal.userData?.relation === 'SELF'}
+        />
       </div>
     );
   }

@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 interface PlaneAnalysisProps {
   frequencies: Record<number, number>;
@@ -55,6 +56,10 @@ export const PlaneAnalysis = ({ frequencies, onBack }: PlaneAnalysisProps) => {
     plane.numbers.every(num => (frequencies[num] || 0) > 0)
   );
 
+  const missingPlanes = PLANE_DEFINITIONS.filter(plane =>
+    !plane.numbers.every(num => (frequencies[num] || 0) > 0)
+  );
+
   return (
     <Card className="shadow-xl border border-amber-200 bg-white rounded-xl font-calibri">
       <CardHeader className="pb-4">
@@ -63,28 +68,71 @@ export const PlaneAnalysis = ({ frequencies, onBack }: PlaneAnalysisProps) => {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        {formedPlanes.length === 0 ? (
-          <div className="text-center p-8">
-            <p className="text-lg font-bold text-gray-600">No planes are formed.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {formedPlanes.map((plane, index) => (
-              <div 
-                key={index} 
-                className="border border-gray-300 rounded-lg p-4 shadow-sm bg-white"
-              >
-                <div className="font-bold text-lg text-amber-800 mb-2">
-                  {plane.name}
+      <CardContent className="space-y-6">
+        {/* Positive/Formed Planes Section */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-green-700 flex items-center gap-2">
+            <CheckCircle size={20} />
+            Positive Planes
+          </h3>
+          
+          {formedPlanes.length === 0 ? (
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <p className="text-lg font-bold text-gray-600">No positive planes found.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {formedPlanes.map((plane, index) => (
+                <div 
+                  key={`formed-${index}`} 
+                  className="border border-green-300 rounded-lg p-4 shadow-sm bg-green-50"
+                >
+                  <div className="font-bold text-lg text-green-800 mb-2 flex items-center gap-2">
+                    <CheckCircle size={16} className="text-green-600" />
+                    {plane.name}
+                  </div>
+                  <div className="text-gray-700 font-bold text-left">
+                    {plane.description}
+                  </div>
                 </div>
-                <div className="text-gray-700 font-bold text-left">
-                  {plane.description}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Missing/Negative Planes Section */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-red-700 flex items-center gap-2">
+            <XCircle size={20} />
+            Missing Planes
+          </h3>
+          
+          {missingPlanes.length === 0 ? (
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <p className="text-lg font-bold text-green-600">All planes are formed! Excellent numerological balance.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {missingPlanes.map((plane, index) => (
+                <div 
+                  key={`missing-${index}`} 
+                  className="border border-red-300 rounded-lg p-4 shadow-sm bg-red-50"
+                >
+                  <div className="font-bold text-lg text-red-800 mb-2 flex items-center gap-2">
+                    <XCircle size={16} className="text-red-600" />
+                    {plane.name}
+                  </div>
+                  <div className="text-gray-600 font-bold text-left">
+                    Missing: {plane.description}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    Required numbers: {plane.numbers.join(', ')}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
         
         <div className="text-center pt-4">
           <Button 
